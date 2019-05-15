@@ -48,6 +48,18 @@ The whole pipeline included in KnowSeq has been designed carefully with the purp
 The first process is focused on the RNA-seq RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO [@ncbi], ArrayExpress [@arrayexpress] and GDC-Portal). The second one comprises the Differential Expressed Genes (DEGs) identification and extraction, and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). The last process, once the DEGs were assessed, is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the related diseases to the DEGs.
 With the pipeline designed and addressed by KnowSeq, researchers can convert the RAW data of RNA-seq into real knowledge on the identification of possible gene signatures about the studied diseases.
 
+The package includes a complete example that can be executed or edited with the following code:
+```r 
+dir <- system.file("example", package="KnowSeq")
+
+# Code to execute the example script
+source(paste(dir,"/KnowSeqExample.R",sep=""))
+
+# Code to edit the example script
+file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+
+```
+
 
 # RNA-seq RAW data processing <a name="RNARaw"></a>
 ## Aligners preparation <a name="aligners"></a>

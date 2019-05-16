@@ -18,12 +18,14 @@
 limmaDEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1,number = Inf, svaCorrection = FALSE, svaMod){
 
       if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
-      if(!is.factor(labels)){stop("The labels argument must be factors.")}
+      if(!is.character(labels)  && !is.factor(labels)){stop("The class of the labels parameter must be character vector or factor.")}
       if(!is.logical(svaCorrection)){stop("svaCorrection parameter can only takes the values TRUE or FALSE.")}
       if(!is.numeric(pvalue)){stop("The class of pvalue parameter must be numeric.")}
       if(!is.numeric(lfc)){stop("The class of lfc parameter must be numeric.")}
       if(!is.numeric(cov)){stop("The class of cov parameter must be numeric.")}
       if(!is.numeric(number)){stop("The class of number parameter must be numeric.")}
+
+      if(is.character(labels)){ labels <- as.factor(labels) }
 
       if(length(levels(labels)) == 2){
 

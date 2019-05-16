@@ -25,11 +25,13 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
     stop("The length of the rows of the argument train must be the same than the length of the lablesTrain. Please, ensures that the rows are the samples and the columns are the variables.")
 
   }
-  if(!is.factor(labelsTrain)){
 
-    stop("The labelsTrain argument must be factors.")
+  if(!is.character(labelsTrain)  && !is.factor(labelsTrain)){stop("The class of the labelsTrain parameter must be character vector or factor.")}
+  if(is.character(labelsTrain)){ labelsTrain <- as.factor(labelsTrain) }
 
-  }
+  if(!is.character(labelsTest)  && !is.factor(labelsTest)){stop("The class of the labelsTest parameter must be character vector or factor.")}
+  if(is.character(labelsTest)){ labelsTest <- as.factor(labelsTest) }
+
   if(!is.data.frame(test) && !is.matrix(test)){
 
     stop("The test argument must be a dataframe or a matrix.")
@@ -39,11 +41,6 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   if(dim(test)[1] != length(labelsTest)){
 
     stop("The length of the rows of the argument test must be the same than the length of the lablesTest. Please, ensures that the rows are the samples and the columns are the variables.")
-
-  }
-  if(!is.factor(labelsTrain)){
-
-    stop("The labelsTest argument must be factors.")
 
   }
 

@@ -39,6 +39,8 @@ batchEffectRemoval <- function(expressionMatrix,labels,method = "combat", cluste
 
     cat("Calculating sva model to batch effect correction...\n")
 
+    if(is.character(labels)){ labels <- as.factor(labels) }
+
     mod = model.matrix(~labels)
     mod0 = model.matrix(~1, data = labels)
     n.sv = num.sv(expressionMatrix,mod,method="leek")

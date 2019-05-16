@@ -23,11 +23,10 @@ knn_CV<-function(data,labels,vars_selected,numFold=10){
     stop("The length of the rows of the argument data must be the same than the length of the lables. Please, ensures that the rows are the samples and the columns are the variables.")
 
   }
-  if(!is.factor(labels)){
 
-    stop("The labels argument must be factors.")
+  if(!is.character(labels)  && !is.factor(labels)){stop("The class of the labels parameter must be character vector or factor.")}
+  if(is.character(labels)){ labels <- as.factor(labels) }
 
-  }
   if(numFold%%1!=0 || numFold == 0){
 
     stop("The numFold argument must be integer and greater than 0.")

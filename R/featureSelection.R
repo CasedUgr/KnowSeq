@@ -22,11 +22,9 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr"){
     stop("The length of the rows of the argument data must be the same than the length of the labels. Please, ensures that the rows are the samples and the columns are the variables.")
 
   }
-  if(!is.factor(labels)){
 
-    stop("The labels argument must be factors.")
-
-  }
+  if(!is.character(labels)  && !is.factor(labels)){stop("The class of the labels parameter must be character vector or factor.")}
+  if(is.character(labels)){ labels <- as.factor(labels) }
 
   if(length(vars_selected)[1] == 0 || is.null(vars_selected)){
 

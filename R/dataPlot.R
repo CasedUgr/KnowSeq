@@ -29,7 +29,7 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
   if(!is.logical(toPNG)){stop("toPNG parameter can only take the values TRUE or FALSE.")}
   if(!is.logical(toPDF)){stop("toPDF parameter can only take the values TRUE or FALSE.")}
 
-  dev.new()
+  # dev.new()
 
   if(mode == "boxplot"){
 

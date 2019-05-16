@@ -2,7 +2,7 @@
 subtitle: "KnowSeq: R/Bioconductor package"
 title: "From RAW to Knowledge: The KnowSeq user guide"
 author: "Daniel Castillo, Juan Manuel Galvez, Luis Javier Herrera and Ignacio Rojas"
-date: "may, 15 of 2019"
+date: "may, 16 of 2019"
 output:
   pdf_document: 
     toc: true
@@ -28,7 +28,7 @@ vignette: "%\\VignetteIndexEntry{The KnowSeq users guide} %\\VignetteEngine{knit
 ---
 
 ```{r setup, cache = F, echo = FALSE}
-knitr::opts_chunk$set(error = TRUE)
+knitr::opts_chunk$set(error = TRUE,warning = FALSE)
 ```
 
 \pagebreak
@@ -47,18 +47,6 @@ The whole pipeline included in KnowSeq has been designed carefully with the purp
 
 The first process is focused on the RNA-seq RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO [@ncbi], ArrayExpress [@arrayexpress] and GDC-Portal). The second one comprises the Differential Expressed Genes (DEGs) identification and extraction, and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). The last process, once the DEGs were assessed, is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the related diseases to the DEGs.
 With the pipeline designed and addressed by KnowSeq, researchers can convert the RAW data of RNA-seq into real knowledge on the identification of possible gene signatures about the studied diseases.
-
-The package includes a complete example that can be executed or edited with the following code:
-```r 
-dir <- system.file("example", package="KnowSeq")
-
-# Code to execute the example script
-source(paste(dir,"/KnowSeqExample.R",sep=""))
-
-# Code to edit the example script
-file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
-
-```
 
 
 # RNA-seq RAW data processing <a name="RNARaw"></a>
@@ -81,15 +69,6 @@ In order to avoid version incompatibilities with the aligners and the installati
 The *rawAlignment* function allows running different aligners, chosen by the user. The function takes as single input a CSV from GEO or ArrayExpress loaded in R. There is the possibility to process data from GDC-portal, but a previous authorization (token file) from this platform is required. Then, the user has to select with the parameter seq which aligner he wants to use, by default this parameter runs tophat2. Furthermore, there is a set of logical parameters to edit the default pipeline followed for the function. With the parameters the user can select if the BAM/SAM/Count files are created. The user can choose if wants to download the reference genome, the GTF, and which version. Even if the user has custom FASTA and GTF files, this can be specified by setting the parameter *referenceGenome* to *"custom"* and using the parameters *customFA* and *customGTF* to indicates the paths to the custom files. Other functionality is the possibility to process BAM files from the GDC Portal database by setting to *TRUE* the parameter *fromGDC*. Then the function will download the specific genome reference of GDC and process the BAM files to Count files. Furthermore, if the user has access to the controlled data, with the token and the manifest acquired from GDC Portal web platform, the samples can be downloaded automatically. An example to run the function with hisat2 aligner is showed below:
 
 ```r 
-# Downloading one series from NCBI/GEO and one series from ArrayExpress
-
-downloadPublicSeries(c("GSE74251","E-MTAB-5104"))
-
-# Using read.csv for NCBI/GEO files and read.csv2 for ArrayExpress files
-
-x <- read.csv("ReferenceFiles/GSE74251.csv")
-y <- read.csv2("ReferenceFiles/E-MTAB-5104")
-
 # Performing the alignment of the samples by using hisat2 aligner 
 
 rawAlignment(x,seq="hisat2",downloadRef=TRUE,downloadSamples=TRUE,BAMfiles = TRUE,
@@ -166,6 +145,58 @@ rawAlignment(x, downloadRef=TRUE, downloadSamples=TRUE, fromGDC = TRUE,
 tokenPath = "~/pathToToken", manifestPath = "~/pathToManifest")
 ```
 
+## Preparing the count files
+From now on, the data that will be used for the documentation are real count files, but with a limited number of genes (around 1000). Furthermore, to reduce the computational cost of this example, only 5 samples from each of the two selected series will be taken into account. With the next code, two RNA-seq series from NCBI/GEO are downloaded automatically and the existing count files prepared to be merged in one matrix with the purpose of preparing the data for further steps:
+
+```{r Preparing_data}
+suppressMessages(library(KnowSeq))
+
+# Downloading one series from NCBI/GEO and one series from ArrayExpress
+
+downloadPublicSeries(c("GSE74251","GSE81593"))
+
+# Using read.csv for NCBI/GEO files and read.csv2 for ArrayExpress files
+
+GSE74251 <- read.csv("ReferenceFiles/GSE74251.csv")
+GSE81593 <- read.csv("ReferenceFiles/GSE81593.csv")
+
+GSE74251 <- GSE74251[1:5,]
+GSE81593 <- GSE81593[8:12,]
+
+dir <- system.file("extdata", package="KnowSeq")
+
+# Creating the csv file with the information about the counts files location and the labels
+Run <- GSE74251$Run
+Path <- paste(dir,"/countFiles/",GSE74251$Run,sep = "")
+Class <- rep("Tumor", length(GSE74251$Run))
+GSE74251CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+
+Run <- GSE81593$Run
+Path <- paste(dir,"/countFiles/",GSE81593$Run,sep = "")
+Class <- rep("Control", length(GSE81593$Run))
+GSE81593CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+
+mergedCountsInfo <- rbind(GSE74251CountsInfo, GSE81593CountsInfo)
+
+write.csv(mergedCountsInfo, file = "ReferenceFiles/mergedCountsInfo.csv")
+
+
+```
+
+
+However, the user can run a complete example by coding the following code:
+
+```r 
+dir <- system.file("example", package="KnowSeq")
+
+# Code to execute the example script
+source(paste(dir,"/KnowSeqExample.R",sep=""))
+
+# Code to edit the example script
+file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+
+```
+
 ## Processing count files <a name="counts"></a>
 
 After the raw alignment step, a list of count files of the samples is available at *ReferenceFiles/Samples/RNAseq/CountFiles*. The next step in the pipeline implemented in this package is the processing of those count files in order to obtain a gene expression matrix by merging all of them.
@@ -183,10 +214,10 @@ After the alignment, there has to be as many count files as samples in the CSV u
 
 The column Run is the name of the sample without .count, the column Path is the Path to the count file and the Class column is the labels of the samples. Furthermore, an example of this function is shown below:
 
-```r 
+```{r Merging_files} 
 # Merging in one matrix all the count files indicated inside the CSV file
 
-countsInformation <- countsToMatrix("example.csv")
+countsInformation <- countsToMatrix("ReferenceFiles/mergedCountsInfo.csv")
 
 # Exporting to independent variables the counts matrix and the labels
 
@@ -200,20 +231,20 @@ The function returns a list that contains the matrix with the merged counts and 
 
 This step is only required if the user wants to get the gene names and the annotation is retrieved with ensembl biomaRt package [@biomart]. Normally, the counts matrix has the Ensembl Ids as gene identifier, but with this step, the Ensembl Ids are change by the gene names. However, the user can decide to keep its own annotation or the Ensembl Ids. For example, to achieve the gene names the function needs the current Ensembl Ids and the number of the reference genome to use for the annotation (37 or 38). If the user wants a different annotation than the human annotation, the parameter *notHSapiens* has to be set to *TRUE* and the desired specie dataset from ensembl indicated in the parameter *notHumandataset* (i.e. “mmusculus_gene_ensembl”). An example can be seen below:
 
-```r 
+```{r Downloading_annotation} 
 # Downloading human annotation
-myAnnotation <- getAnnotationFromEnsembl(rownames(countMatrix),referenceGenome=37)
+myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
 
 # Downloading mus musculus annotation
-myAnnotation <- getAnnotationFromEnsembl(rownames(countMatrix), notHSapiens = TRUE,
-notHumandataset = "mmusculus_gene_ensembl")
+myAnnotationMusMusculus <- getAnnotationFromEnsembl(rownames(countsMatrix), 
+notHSapiens = TRUE,notHumandataset = "mmusculus_gene_ensembl")
 
 ```
 ### Converting to gene expression matrix
 
 Finally, once both the countsMatrix and the annotation are ready, it is time to convert those counts into gene expression values. For that, the function *calculateGeneExpressionValues* uses the cqn package to calculates the equivalent gene expression [@cqn]. This function performs a conversion of counts into gene expression values, and changes the Ensembl Ids by the gene names if the parameter geneNames is equal to *TRUE*. An example of the use of this function is showed next:
 
-```r 
+```{r Calculating_gene_expression} 
 # Calculating gene expression values matrix using the counts matrix
 
 expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation,
@@ -222,21 +253,19 @@ genesNames = T)
 
 At this time of the pipeline, there is a function that plots the expression data and allows verifying if the data is well normalized. This function has the purpose of join all the important graphical representation of the pipeline in the same function and is called *dataPlot*. It is very easy to use because as only by changing the parameter method many different representations can be achieved. In this case, in order to see the expression boxplot of each sample, the function has to be called with the parameter method equal to *"boxplot"*. The labels are necessary to colour the different samples depending on the class of the samples. These colours can be selected by the user, by introducing in the parameter colours a vector with the name of the desired colours. The function also allows exporting the plots as PNG and PDF files.
 
-```r 
+```{r Plotting_boxplot} 
 # Plotting the boxplot of the expression of each samples for all the genes
 
-dataPlot(expressionMatrix,labels,mode = "boxplot", colours = c("blue", "red"), toPNG = T,
+dataPlot(expressionMatrix,labels,mode = "boxplot", toPNG = T,
 toPDF = T)
 ```
-
-![](img/boxplot.png)
 
 # Biomarkers identification & assessment <a name="biomarkersIDAS"></a>
 ## Quality analysis and batch effect removal <a name="QABatch"></a>
 
 Before the DEGs extraction process, it is important to detect and removes any possible outlier that can be present in the samples. The outliers are samples numerically different with respect to the rest of samples, introducing noise in the study. In order to achieve that, the function *RNAseqQA* performs different statistical test by using arrayQualityMetrics bioc package. This package was designed for microarrays but it has been adapted in our function to allow RNA-seq data as input. The output of this function is the same as the output of the *arrayQualityMetrics* package [@arrayqualitymetrics], creating a new folder with an index.html file including a report about the results of the different statistical tests and the possible outliers detected by each of them.
 
-```r 
+```{r Performing_quality_analysis} 
 # Performing the quality analysis of the samples
 
 RNAseqQA(expressionMatrix)
@@ -245,21 +274,21 @@ RNAseqQA(expressionMatrix)
 The other important step in this section is the batch effect treatment. It is widely known that this is a crucial step in the omics data processing due to the intrinsic deviations that the data can present due to its origin, sequencing design, etc… Besides, when working with public data it is very difficult to know if exists a real batch effect among the selected datasets. This package provides a way of detecting possible clusters implying possible batch effect groups and correcting them [@gohBatch]. If there are batch effects in the data, it will present clusters formed because of the batch effect influence. For that, first, the function *dataPlot* with the parameter method equal to *"optimalClusters"* has to be run with the purpose of detecting the optimal number of clusters existing in the samples. Furthermore, this clusters can be represented graphically by calling the function dataPlot again but this time with the parameter method equal to *"knnClustering"*. Once the optimal number of clusters is calculated, the second and final step to remove the batch effect is by calling the function *batchEffectRemoval*, that makes use of sva package [@sva], with the parameter method equal to *"combat"* and the parameter clusters equal to the optimal number of clusters calculated before. This step allows obtaining an expression matrix with the batch effect treated by combat method. An example to do this is below:
 
 
-```r 
+```{r Removing_batch_effect_combat} 
 # Calculating the optimal number of clusters presented in the samples in order to 
 # try to identificate the batch effect groups to remove it by combat method
 
 dataPlot(expressionMatrix,labels,mode = "optimalClusters",toPNG = T,toPDF = T)
 
-dataPlot(expressionMatrix,labels,mode = "knnClustering", clusters = 4,toPNG = T,toPDF = T)
+dataPlot(t(expressionMatrix),labels,mode = "knnClustering", clusters = 7,toPNG = T,toPDF = T)
 
-expressionMatrixCorrected <- batchEffectRemoval(expressionMatrix, labels, clusters = 4,
+expressionMatrixCorrected <- batchEffectRemoval(expressionMatrix, labels, clusters = 7,
 method = "combat")
 ```
 
 There is another method in the function that removes the batch effect and it is by using surrogate variable analysis or sva. To use this method, it is not necessary to calculates the optimal number of clusters, the only requirement to use it is to set the parameter method equal to *"sva"*. This method does not return a matrix with the batch effect corrected, instead of this, the function returns a model that has to be used as single input parameter of the function *limmaDEGsExtraction*.
 
-```r
+```{r Removing_batch_effect_sva}
 # Calculating the surrogate variable analysis to remove batch effect
 
 svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
@@ -269,10 +298,10 @@ svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 
 There is a long way between the raw data and the DEGs extraction, for that in this step the samples have to have had a strong pre-processing step applied. At this point of the pipeline the DEGs existing among two or more classes will be extracted using the most extended library for that called limma. The function *limmaDEGsExtraction* receives an expression matrix, the labels of the samples and the restriction imposed for considering a gene as differential expressed gene. The function returns a list containing the table with statistical values of each DEGs and the expression matrix of the DEGs instead all of the genes. The well-known limma package is used internally to perform the DEGs extraction [@limma]. The call to the function is listed below:
 
-```r
+```{r Extracting_DEGs_combat}
 # Extracting DEGs that pass the imposed restrictions
 
-DEGsInformation <- limmaDEGsExtraction(expressionMatrixNoBatch, labels,
+DEGsInformation <- limmaDEGsExtraction(expressionMatrixCorrected, labels,
 lfc = 1.0, pvalue = 0.01, number = 100)
 
 topTable <- DEGsInformation$Table
@@ -282,12 +311,12 @@ DEGsMatrix <- DEGsInformation$DEGsMatrix
 
 Furthermore, if in the batch effect step the method used was sva, this function has two parameters to indicate that the model of limma would take into account the sva model calculated previously for the expression matrix. To achieve this, *svaCorrection* parameter has to be set to *TRUE* and the sva model has to be passed in the parameter *svaMod*. An example of this is the following:
 
-```r
+```{r Extracting_DEGs_sva}
 # Extracting DEGs that pass the imposed restrictions but using sva model
 # calculated before to remove batch effect
 
-DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 1.0,
-pvalue = 0.01, number = 100, svaCorrection = TRUE, svaMod = svaMod)
+DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
+pvalue = 0.01, number = Inf, svaCorrection = TRUE, svaMod = svaMod)
 
 topTable <- DEGsInformation$Table
 
@@ -300,33 +329,27 @@ DEGs are genes that have a truly different expression among the studied classes,
 
 *dataPlot* function also allows representing an ordered boxplot that internally orders the samples by class and plots a boxplot for each samples and for the first top 12 DEGs in this example. With this plot, the difference at gene expression level between the classes can be seen graphically. The code to reproduce this plot is the following:
 
-```r
+```{r Plotting_orderded_boxplot}
 # Plotting the expression of the first 12 DEGs for each of the samples in an ordered way
 
 dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = F,toPDF = F)
 ```
 
-![](img/orderedBoxplot.png)
-
 In the previous boxplot the expression of a set of DEGs for each sample its showed, however it is interesting to see the differentiation at gene expression level for each of the top 12 genes used before separately. It is recommendable to use this function with a low number of genes, because with a larger number the plot it is difficult to distinguish the information provided and R would not have enough memory to calculate the plot. For that, the function *dataPlot* with the mode *genesBoxplot* allows to do that by executing the next code:
 
-```r
+```{r Plotting_genes_boxplot}
 # Plotting the expression of the first 12 DEGs separatelly for all the samples
 
 dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = F,toPDF = F)
 ```
 
-![](img/genesBoxplot.png)
-
 Finally, it is possible to plot one of the most widespread visualization methods in the literature, the heatmap. By setting the parameter method to *heatmap*, the function calculates the heatmap for the given samples and classes. The code to do this is the same than for the previous boxplot but changing the method parameter:
 
-```r
+```{r Plotting_heatmap}
 # Plotting the heatmap of the first 12 DEGs separatelly for all the samples
 
 dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = F,toPDF = F)
 ```
-
-![](img/heatmap.png)
 
 ## Performing the machine learning processing: classifier design and assessment and gene selection. <a name="machineLearning"></a>
 
@@ -334,78 +357,89 @@ Normally, in the literature, the last step in the pipeline for differential gene
 
 To invoke these functions, it is necessary an expression matrix with the samples in the rows and the genes in the columns and the labels of the samples, the genes that will be assessed and the number of fold in the case of the cross-validation function. In the case of the test functions, it is necessary the matrix and the labels for both the training and the test datasets:
 
-```r
+```{r Assessing_machine_learning_step}
+DEGsMatrixML <- t(DEGsMatrix)
+
 # Feature selection process with mRMR and RF 
-mrmrRanking <- featureSelection(DEGsMatrix,labels,rownames(DEGsMatrix), mode = "mrmr")
-rfRanking <- featureSelection(DEGsMatrix,labels,rownames(DEGsMatrix), mode = "rf")
+mrmrRanking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML), mode = "mrmr")
+rfRanking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML), mode = "rf")
 
 # CV functions with k-NN, SVM and RF
-results_cv_knn <- knn_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix)[1:10],5)
+results_cv_knn <- knn_CV(DEGsMatrixML,labels,colnames(DEGsMatrixML)[1:10],5)
 
-results_cv_svm <- svm_CV(t(DEGsMatrix),labels,rfRanking,5)
+results_cv_svm <- svm_CV(DEGsMatrixML,labels,rfRanking[1:10],5)
 
-results_cv_rf <- rf_CV(t(DEGsMatrix),labels,mrmrRanking,5)
+results_cv_rf <- rf_CV(DEGsMatrixML,labels,names(mrmrRanking)[1:10],5)
 
 ```
 
 It is important to show graphically the results of the classifiers and for that purpose, the function *dataPlot* implements some methods. Concretely, to plot the accuracy, the sensitivity or the specificity reached by the classifiers, the function *dataPlot* has to be run with the parameter method equal to *classResults*. This method generated as many random colours as folds or simulations in the rows of the matrix passed to the function but, through the parameter colours a vector of desired colours can be specified. For the legend, the function uses the rownames of the input matrix but these names can be changed with the parameter legend. An example of this method is showed below:
 
-```r
+```{r Plotting_ML_acc}
 # Plotting the accuracy of all the folds evaluated in the CV process
 
 dataPlot(results_cv_knn$accMatrix,mode = "classResults",
-main = "Accuracy for each fold", xlab = "Genes", ylab = "Accuracy")
+main = "Accuracy for each fold with k-NN", xlab = "Genes", ylab = "Accuracy")
 ```
 
-![](img/accuracy.png)
-
-```r
+```{r Plotting_ML_sens}
 # Plotting the sensitivity of all the folds evaluated in the CV process
 
 dataPlot(results_cv_knn$sensMatrix,mode = "classResults",
-main = "Sensitivity for each fold", xlab = "Genes", ylab = "Sensitivity")
+main = "Sensitivity for each fold with k-NN", xlab = "Genes", ylab = "Sensitivity")
 ```
-![](img/sensitivity.png)
 
-```r
+```{r Plotting_ML_spec}
 # Plotting the specificity of all the folds evaluated in the CV process
 
 dataPlot(results_cv_knn$specMatrix,mode = "classResults",
-main = "Specificity for each fold", xlab = "Genes", ylab = "Specificity")
+main = "Specificity for each fold with k-NN", xlab = "Genes", ylab = "Specificity")
 ```
-![](img/specificity.png)
-
 
 Furthermore, the function *dataPlot* counts with another similar mode to the previous but this time to represents confusion matrices. This mode is called *confusionMatrix* and allows creating graphically a confusion matrix with the most important statistical measures. The following code allows doing this:
 
-```r
+```{r Plotting_ML_confs}
 # Plotting the confusion matrix with the sum of the confusion matrices 
 # of each folds evaluated in the CV process
 
 allCfMats <- results_cv_knn$cfMats[[1]]$table + results_cv_knn$cfMats[[2]]$table + 
 results_cv_knn$cfMats[[3]]$table + results_cv_knn$cfMats[[4]]$table + 
-results_cv_knn$cfMats[[5]]$table + results_cv_knn$cfMats[[6]]$table + 
-results_cv_knn$cfMats[[7]]$table + results_cv_knn$cfMats[[8]]$table + 
-results_cv_knn$cfMats[[9]]$table + results_cv_knn$cfMats[[10]]$table
+results_cv_knn$cfMats[[5]]$table
 
 dataPlot(allCfMats,labels,mode = "confusionMatrix")
 
 ``` 
 
-![](img/confMatrix.png)
 
-
-```r
+```{r Assessing_ML_test}
 # Test functions with k-NN, SVM and RF
+trainingMatrix <- DEGsMatrixML[c(1:4,6:9),]
+trainingLabels <- labels[c(1:4,6:9)]
+testMatrix <- DEGsMatrixML[c(5,10),]
+testLabels <- labels[c(5,10)]
+
 results_test_knn <- knn_test(trainingMatrix, trainingLabels, testMatrix,
-testLabels, mrmrRanking)
+testLabels, names(mrmrRanking)[1:10])
 
 results_test_svm <- svm_test(trainingMatrix, trainingLabels, testMatrix,
-testLabels, rownames(DEGsMatrix)[1:10])
+testLabels, rfRanking[1:10])
 
 results_test_rf <- rf_test(trainingMatrix, trainingLabels, testMatrix,
-testLabels, rownames(DEGsMatrix)[1:10])
+testLabels, colnames(DEGsMatrixML)[1:10])
 ``` 
+
+```{r Plotting_ML_acc}
+# Plotting the accuracy achieved in the test process
+
+dataPlot(results_test_knn$accVector,mode = "classResults",
+main = "Accuracy with k-NN", xlab = "Genes", ylab = "Accuracy")
+
+dataPlot(results_test_svm$accVector,mode = "classResults",
+main = "Accuracy with SVM", xlab = "Genes", ylab = "Accuracy")
+
+dataPlot(results_test_rf$accVector,mode = "classResults",
+main = "Accuracy with RF", xlab = "Genes", ylab = "Accuracy")
+```
 
 # DEGs enrichment methodology <a name="DEGsEnrichment"></a>
 The main goal of the previous pipeline is the extraction of biological relevant information from the DEGs. For that, this package provides a set of tools that allows doing it. The last step of the pipeline conformed by all the available tools in KnowSeq is the DEGs enrichment and this enrichment has three different points of view. The gene ontology information, the pathway visualization and the relationship between the DEGs and diseases related to the studied pathologies.
@@ -413,10 +447,10 @@ The main goal of the previous pipeline is the extraction of biological relevant 
 ## Gene Ontology <a name="GO"></a>
 Gene ontology (GO) provides information about the biological functions of the genes. In order to complete this pipeline, it is important to know if the DEGs have functions related with the studied pathologies. In this sense, this package brings the possibility to know the GOs from the three different ontologies (BP, MF and CC) by using the function *geneOntologyEnrichment* that internally used the packaged *topGO* [@topgo]. The only requirement is to put the label of first class to *1* and the label of the second class to *0*. Furthermore, with the parameter *nGOs*, the number of resultant GOs that are returned can be modified. The function returns a list that contains a matrix for each ontology and a matrix with the GOs of the three ontologies together. Moreover, the matrices have different statistical measures and the description of the functionality of each GO.
 
-```r
+```{r Retrieving_GOs}
 # Retrieving the GO information from the three different ontologies
 
-labelsGo <- gsub("Healthy",0,labels)
+labelsGo <- gsub("Control",0,labels)
 
 labelsGo <- gsub("Tumor",1,labelsGo)
 
@@ -431,18 +465,18 @@ For example, in this example, the top 10 GOs from the BP ontology for the extrac
 Another important step in the enrichment methodology in this pipeline is the pathway visualization. The function uses the DEGs to show graphically the expression of the samples in the pathways in which those genes appear. For that, the function makes use of a DEGsMatrix with the expression of the DEGs and the annotation of those DEGs in which appear the pathway or pathways of each DEGs. Internally, the function *DEGsPathwayVisualization* uses *pathview* package [@pathview] to retrieve and colour the pathways, but a maximum number of 24 samples can be used, for that, if the input matrix has more than 24 samples, only the first 24 will be used by the operation. Furthermore, the function needs the expression matrix with all the genes in order to use them to colour the rest of the elements in the pathways. It is important to retrieve the annotation from Ensembl for both the DEGsMatrix and the expressionMatrix because the entrezgene IDs and the KEGG enzyme of each gene are necessary.
 
 
-```r 
+```{r Downloading_pathways} 
 # Downloading and filling with expression the pathways of the DEGs
 
-myDEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),
-referenceGenome=38,attributes = c("external_gene_name","entrezgene",
-"gene_biotype","kegg_enzyme"), filters = "external_gene_name")
+myDEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix)[1:3],
+referenceGenome=38,attributes = c("external_gene_name","entrezgene"), 
+filters = "external_gene_name")
 
 allMyAnnotation <-  getAnnotationFromEnsembl(rownames(expressionMatrix),
-referenceGenome=38,attributes = c("external_gene_name","entrezgene","gene_biotype",
-"kegg_enzyme"), filters = "external_gene_name")
+referenceGenome=38,attributes = c("external_gene_name","entrezgene"), 
+filters = "external_gene_name")
 
-DEGsPathwayVisualization(DEGsMatrix, myDEGsAnnotation, expressionMatrix,
+DEGsPathwayVisualization(DEGsMatrix[1:3,], myDEGsAnnotation, expressionMatrix,
 allMyAnnotation, labels)
 ``` 
 
@@ -452,7 +486,7 @@ allMyAnnotation, labels)
 ## Related diseases <a name="diseases"></a>
 Finally, the last enrichment method implemented is the related diseases enrichment. In this step, the function *DEGsToDisease* searchs the diseases related to a list of genes or DEGs indicated as parameter. The function returns a list of diseases only for genes and also for group of genes with several statistical values to know the relation between the diseases and the gene or group of genes. This information is retrieved from the Gene Set to Diseases web platform [@fontaine2016gene].
 
-```r
+```{r Downloading_diseases}
 # Downloading the information about the DEGs related diseases
 
 diseases <- DEGsToDiseases(rownames(DEGsMatrix))

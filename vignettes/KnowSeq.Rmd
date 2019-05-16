@@ -428,7 +428,7 @@ results_test_rf <- rf_test(trainingMatrix, trainingLabels, testMatrix,
 testLabels, colnames(DEGsMatrixML)[1:10])
 ``` 
 
-```{r Plotting_ML_acc}
+```{r Plotting_ML_acc_test}
 # Plotting the accuracy achieved in the test process
 
 dataPlot(results_test_knn$accVector,mode = "classResults",

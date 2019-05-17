@@ -248,7 +248,7 @@ Finally, once both the countsMatrix and the annotation are ready, it is time to 
 # Calculating gene expression values matrix using the counts matrix
 
 expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation,
-genesNames = T)
+genesNames = TRUE)
 ```
 
 At this time of the pipeline, there is a function that plots the expression data and allows verifying if the data is well normalized. This function has the purpose of join all the important graphical representation of the pipeline in the same function and is called *dataPlot*. It is very easy to use because as only by changing the parameter method many different representations can be achieved. In this case, in order to see the expression boxplot of each sample, the function has to be called with the parameter method equal to *"boxplot"*. The labels are necessary to colour the different samples depending on the class of the samples. These colours can be selected by the user, by introducing in the parameter colours a vector with the name of the desired colours. The function also allows exporting the plots as PNG and PDF files.
@@ -256,8 +256,8 @@ At this time of the pipeline, there is a function that plots the expression data
 ```{r Plotting_boxplot} 
 # Plotting the boxplot of the expression of each samples for all the genes
 
-dataPlot(expressionMatrix,labels,mode = "boxplot", toPNG = T,
-toPDF = T)
+dataPlot(expressionMatrix,labels,mode = "boxplot", toPNG = TRUE,
+toPDF = TRUE)
 ```
 
 # Biomarkers identification & assessment <a name="biomarkersIDAS"></a>
@@ -278,9 +278,9 @@ The other important step in this section is the batch effect treatment. It is wi
 # Calculating the optimal number of clusters presented in the samples in order to 
 # try to identificate the batch effect groups to remove it by combat method
 
-dataPlot(expressionMatrix,labels,mode = "optimalClusters",toPNG = T,toPDF = T)
+dataPlot(expressionMatrix,labels,mode = "optimalClusters",toPNG = TRUE,toPDF = TRUE)
 
-dataPlot(t(expressionMatrix),labels,mode = "knnClustering", clusters = 7,toPNG = T,toPDF = T)
+dataPlot(t(expressionMatrix),labels,mode = "knnClustering", clusters = 7,toPNG = TRUE,toPDF = TRUE)
 
 expressionMatrixCorrected <- batchEffectRemoval(expressionMatrix, labels, clusters = 7,
 method = "combat")
@@ -332,7 +332,7 @@ DEGs are genes that have a truly different expression among the studied classes,
 ```{r Plotting_orderded_boxplot}
 # Plotting the expression of the first 12 DEGs for each of the samples in an ordered way
 
-dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = F,toPDF = F)
+dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = FALSE,toPDF = FALSE)
 ```
 
 In the previous boxplot the expression of a set of DEGs for each sample its showed, however it is interesting to see the differentiation at gene expression level for each of the top 12 genes used before separately. It is recommendable to use this function with a low number of genes, because with a larger number the plot it is difficult to distinguish the information provided and R would not have enough memory to calculate the plot. For that, the function *dataPlot* with the mode *genesBoxplot* allows to do that by executing the next code:
@@ -340,7 +340,7 @@ In the previous boxplot the expression of a set of DEGs for each sample its show
 ```{r Plotting_genes_boxplot}
 # Plotting the expression of the first 12 DEGs separatelly for all the samples
 
-dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = F,toPDF = F)
+dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = FALSE,toPDF = FALSE)
 ```
 
 Finally, it is possible to plot one of the most widespread visualization methods in the literature, the heatmap. By setting the parameter method to *heatmap*, the function calculates the heatmap for the given samples and classes. The code to do this is the same than for the previous boxplot but changing the method parameter:
@@ -348,7 +348,7 @@ Finally, it is possible to plot one of the most widespread visualization methods
 ```{r Plotting_heatmap}
 # Plotting the heatmap of the first 12 DEGs separatelly for all the samples
 
-dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = F,toPDF = F)
+dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = FALSE,toPDF = FALSE)
 ```
 
 ## Performing the machine learning processing: classifier design and assessment and gene selection. <a name="machineLearning"></a>

@@ -1,5 +1,5 @@
 import(stringr,sva, cqn, edgeR, reshape2, ggplot2, gplots, factoextra, RCurl, XML, praznik, randomForest, jsonlite, biomaRt,
-       R.utils, tximport, caret, limma, class, arrayQualityMetrics, e1071, tximportData, rhdf5)
+       R.utils, tximport, caret, limma, class, arrayQualityMetrics, e1071, tximportData, rhdf5, pathview, topGO, Biobase,multtest)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getAnnotationFromEnsembl,

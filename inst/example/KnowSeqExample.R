@@ -41,10 +41,10 @@ labels <- countsInformation$labels
 myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
 
 # Calculating gene expression values matrix using the counts matrix
-expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation,genesNames = T)
+expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation,genesNames = TRUE)
 
 # Plotting the boxplot of the expression of each samples for all the genes
-dataPlot(expressionMatrix,labels,mode = "boxplot", colours = c("blue", "red"),toPNG = T, toPDF = T)
+dataPlot(expressionMatrix,labels,mode = "boxplot", colours = c("blue", "red"),toPNG = TRUE, toPDF = TRUE)
 
 # Performing the quality analysis of the samples
 RNAseqQA(expressionMatrix)
@@ -59,13 +59,13 @@ topTable <- DEGsInformation$Table
 DEGsMatrix <- DEGsInformation$DEGsMatrix
 
 # Plotting the expression of the first 12 DEGs for each of the samples in an ordered way
-dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot", colours = c("blue", "red"),toPNG = T, toPDF = T)
+dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot", colours = c("blue", "red"),toPNG = TRUE, toPDF = TRUE)
 
 # Plotting the expression of the first 12 DEGs separatelly for all the samples
-dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = T, toPDF = T)
+dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = TRUE, toPDF = TRUE)
 
 # Plotting the heatmap of the first 12 DEGs separatelly for all the samples
-dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = T, toPDF = T)
+dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE, toPDF = TRUE)
 
 # Preparing matrix for Machine Learning process (ML)
 DEGsMatrixML <- t(DEGsMatrix)
@@ -77,13 +77,13 @@ mrmrRanking <- featureSelection(DEGsMatrixML,as.factor(labels),colnames(DEGsMatr
 results_cv_knn <- knn_CV(DEGsMatrixML,as.factor(labels),names(mrmrRanking),10)
 
 # Plotting the accuracy of all the folds evaluated in the CV process
-dataPlot(results_cv_knn$accMatrix,mode = "classResults", main = "Accuracy for each fold", xlab = "Genes", ylab = "Accuracy",toPNG = T, toPDF = T)
+dataPlot(results_cv_knn$accMatrix,mode = "classResults", main = "Accuracy for each fold", xlab = "Genes", ylab = "Accuracy",toPNG = TRUE, toPDF = TRUE)
 
 # Plotting the sensitivity of all the folds evaluated in the CV process
-dataPlot(results_cv_knn$sensMatrix,mode = "classResults", main = "Sensitivity for each fold", xlab = "Genes", ylab = "Sensitivity",toPNG = T, toPDF = T)
+dataPlot(results_cv_knn$sensMatrix,mode = "classResults", main = "Sensitivity for each fold", xlab = "Genes", ylab = "Sensitivity",toPNG = TRUE, toPDF = TRUE)
 
 # Plotting the specificity of all the folds evaluated in the CV process
-dataPlot(results_cv_knn$specMatrix,mode = "classResults", main = "Specificity for each fold", xlab = "Genes", ylab = "Specificity",toPNG = T, toPDF = T)
+dataPlot(results_cv_knn$specMatrix,mode = "classResults", main = "Specificity for each fold", xlab = "Genes", ylab = "Specificity",toPNG = TRUE, toPDF = TRUE)
 
 # Plotting the confusion matrix with the sum of the confusion matrices of each folds evaluated in the CV process
 allCfMats <- results_cv_knn$cfMats[[1]]$table + results_cv_knn$cfMats[[2]]$table +
@@ -92,10 +92,10 @@ allCfMats <- results_cv_knn$cfMats[[1]]$table + results_cv_knn$cfMats[[2]]$table
   results_cv_knn$cfMats[[7]]$table + results_cv_knn$cfMats[[8]]$table +
   results_cv_knn$cfMats[[9]]$table + results_cv_knn$cfMats[[10]]$table
 
-dataPlot(allCfMats,labels,mode = "confusionMatrix",toPNG = T, toPDF = T)
+dataPlot(allCfMats,labels,mode = "confusionMatrix",toPNG = TRUE, toPDF = TRUE)
 
 # Test function with SVM
-distribution <- sample(1:33, 33, replace=F)
+distribution <- sample(1:33, 33, replace=FALSE)
 trainingDataset <- DEGsMatrixML[distribution[1:25],]
 trainingLabels <- labels[distribution[1:25]]
 testDataset <- DEGsMatrixML[distribution[26:33],]
@@ -104,16 +104,16 @@ testLabels <- labels[distribution[26:33]]
 results_test_svm <- KnowSeq::svm_test(trainingDataset,as.factor(trainingLabels),testDataset,as.factor(testLabels),names(mrmrRanking))
 
 # Plotting the accuracy for all the genes evaluated
-dataPlot(results_test_svm$accVector,mode = "classResults", main = "Accuracy for all the genes evaluated", xlab = "Genes", ylab = "Accuracy",toPNG = T, toPDF = T)
+dataPlot(results_test_svm$accVector,mode = "classResults", main = "Accuracy for all the genes evaluated", xlab = "Genes", ylab = "Accuracy",toPNG = TRUE, toPDF = TRUE)
 
 # Plotting the sensitivity for all the genes evaluated
-dataPlot(results_test_svm$sensVector,mode = "classResults", main = "Sensitivity for all the genes evaluated", xlab = "Genes", ylab = "Sensitivity",toPNG = T, toPDF = T)
+dataPlot(results_test_svm$sensVector,mode = "classResults", main = "Sensitivity for all the genes evaluated", xlab = "Genes", ylab = "Sensitivity",toPNG = TRUE, toPDF =TRUE)
 
 # Plotting the specificity for all the genes evaluated
-dataPlot(results_test_svm$specVector,mode = "classResults", main = "Specificity for all the genes evaluated", xlab = "Genes", ylab = "Specificity",toPNG = T, toPDF = T)
+dataPlot(results_test_svm$specVector,mode = "classResults", main = "Specificity for all the genes evaluated", xlab = "Genes", ylab = "Specificity",toPNG = TRUE, toPDF = TRUE)
 
 # Plotting the confusion matrix by using 100 genes to classify and assess the model
-dataPlot(results_test_svm$cfMats[[100]]$table,testLabels,mode = "confusionMatrix",toPNG = T, toPDF = T)
+dataPlot(results_test_svm$cfMats[[100]]$table,testLabels,mode = "confusionMatrix",toPNG = TRUE, toPDF = TRUE)
 
 # Retrieving the GO information from the three different ontologies
 labelsGo <- gsub("Control",0,labels)

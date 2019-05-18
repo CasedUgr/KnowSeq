@@ -11,9 +11,45 @@
 #' @param svaMod The model calculated by \code{\link{batchEffectRemoval}} function by using sva method.
 #' @return A list that contains two objects. The table with statistics of the different DEGs and a reduced expression matrix which contains the DEGs and the samples.
 #' @examples
-#' limmaDEGsExtraction(expressionMatrix, labels, lfc = 1.0, pvalue = 0.01, number = 100)
-#' limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0, pvalue = 0.05, number = Inf)
-#' limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0, pvalue = 0.05, number = Inf, svaCorrection = TRUE, svaMod = svaMod)
+#' downloadPublicSeries(c("GSE74251","GSE81593"))
+#'
+#' GSE74251 <- read.csv("ReferenceFiles/GSE74251.csv")
+#' GSE81593 <- read.csv("ReferenceFiles/GSE81593.csv")
+#'
+#' GSE74251 <- GSE74251[1:5,]
+#' GSE81593 <- GSE81593[8:12,]
+#'
+#' dir <- system.file("extdata", package="KnowSeq")
+#'
+#' Run <- GSE74251$Run
+#' Path <- paste(dir,"/countFiles/",GSE74251$Run,sep = "")
+#' Class <- rep("Tumor", length(GSE74251$Run))
+#' GSE74251CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+#'
+#' Run <- GSE81593$Run
+#' Path <- paste(dir,"/countFiles/",GSE81593$Run,sep = "")
+#' Class <- rep("Control", length(GSE81593$Run))
+#' GSE81593CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+#'
+#' mergedCountsInfo <- rbind(GSE74251CountsInfo, GSE81593CountsInfo)
+#'
+#' write.csv(mergedCountsInfo, file = "ReferenceFiles/mergedCountsInfo.csv")
+#'
+#' countsInformation <- countsToMatrix("ReferenceFiles/mergedCountsInfo.csv")
+#'
+#' countsMatrix <- countsInformation$countsMatrix
+#' labels <- countsInformation$labels
+#'
+#' myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+#'
+#' expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
+#'
+#' DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
+#' pvalue = 0.01, number = Inf)
+#'
+#' topTable <- DEGsInformation$Table
+#'
+#' DEGsMatrix <- DEGsInformation$DEGsMatrix
 
 limmaDEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1,number = Inf, svaCorrection = FALSE, svaMod){
 

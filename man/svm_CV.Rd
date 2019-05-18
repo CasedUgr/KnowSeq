@@ -22,6 +22,23 @@ A list that contains four objects. The confusion matrix for each fold, the accur
 svm_CV allows assessing the final DEGs through a machine learning step by using svm in a cross validation process. This function applies a cross validation of n folds with representation of all classes in each fold. The 80\% of the data are used for training and the 20\% for test. An optimization of C and G hiperparameters is done at the start of the process.
 }
 \examples{
-svm_CV(DEGsMatrix,labels,rownames(DEGsMatrix),5)
-svm_CV(DEGsMatrix,labels,rownames(DEGsMatrix)[1:10],10)
+dir <- system.file("extdata", package="KnowSeq")
+
+countsInformation <- countsToMatrix(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
+
+countsMatrix <- countsInformation$countsMatrix
+labels <- countsInformation$labels
+
+myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+
+expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
+
+DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
+pvalue = 0.01, number = Inf)
+
+topTable <- DEGsInformation$Table
+
+DEGsMatrix <- DEGsInformation$DEGsMatrix
+
+svm_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),5)
 }

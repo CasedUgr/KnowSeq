@@ -13,8 +13,12 @@
 #' @param customGTF The path to the custom GTF file.
 #' @return Nothing to return.
 #' @examples
-#' tophatAlignment(GSE74251)
-#' tophatAlignment(GSE74251,downloadRef=FALSE,downloadSamples=TRUE)
+#' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
+#'
+#' dir <- system.file("example", package="KnowSeq")
+#'
+#  #Code to edit the example script
+#' file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
 
 
 tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = ""){

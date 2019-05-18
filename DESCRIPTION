@@ -12,4 +12,4 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 biocViews: GeneExpressionWorkflow
-Imports: stringr, factoextra, ggplot2, reshape2, gplots, caret, RCurl, XML, class, praznik, R.utils, e1071, randomForest, httr, jsonlite, sva (>= 3.30.1), cqn (>= 1.28.1), edgeR (>= 3.24.3), biomaRt (>= 2.38.0), limma (>= 3.38.3), arrayQualityMetrics (>= 3.38.0), tximport (>= 1.10.1), tximportData (>= 1.10.0), rhdf5 (>= 2.26.2)
+Imports: stringr, factoextra, kernlab, ggplot2, reshape2, gplots, caret, RCurl, XML, class, praznik, R.utils, e1071, randomForest, httr, jsonlite, sva (>= 3.30.1), cqn (>= 1.28.1), edgeR (>= 3.24.3), biomaRt (>= 2.38.0), limma (>= 3.38.3), arrayQualityMetrics (>= 3.38.0), tximport (>= 1.10.1), tximportData (>= 1.10.0), rhdf5 (>= 2.26.2)

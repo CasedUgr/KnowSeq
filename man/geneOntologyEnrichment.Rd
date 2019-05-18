@@ -27,5 +27,48 @@ A list that contains a matrix for each of the possible ontologies and a matrix w
 The function obtains the information about GO terms from the three differents ontologies that are related to the DEGs. The function also returns the description about each GO and a list of genes that are inside of each GO.
 }
 \examples{
+downloadPublicSeries(c("GSE74251","GSE81593"))
+
+GSE74251 <- read.csv("ReferenceFiles/GSE74251.csv")
+GSE81593 <- read.csv("ReferenceFiles/GSE81593.csv")
+
+GSE74251 <- GSE74251[1:5,]
+GSE81593 <- GSE81593[8:12,]
+
+dir <- system.file("extdata", package="KnowSeq")
+
+Run <- GSE74251$Run
+Path <- paste(dir,"/countFiles/",GSE74251$Run,sep = "")
+Class <- rep("Tumor", length(GSE74251$Run))
+GSE74251CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+
+Run <- GSE81593$Run
+Path <- paste(dir,"/countFiles/",GSE81593$Run,sep = "")
+Class <- rep("Control", length(GSE81593$Run))
+GSE81593CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+
+mergedCountsInfo <- rbind(GSE74251CountsInfo, GSE81593CountsInfo)
+
+write.csv(mergedCountsInfo, file = "ReferenceFiles/mergedCountsInfo.csv")
+
+countsInformation <- countsToMatrix("ReferenceFiles/mergedCountsInfo.csv")
+
+countsMatrix <- countsInformation$countsMatrix
+labels <- countsInformation$labels
+
+myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+
+expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
+
+DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
+pvalue = 0.01, number = Inf)
+
+topTable <- DEGsInformation$Table
+
+DEGsMatrix <- DEGsInformation$DEGsMatrix
+
+labelsGo <- gsub("Control",0,labels)
+labelsGo <- gsub("Tumor",1,labelsGo)
+
 GOsList <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20,pvalCutOff = 0.001)
 }

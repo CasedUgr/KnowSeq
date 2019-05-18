@@ -37,6 +37,9 @@ Nothing to return.
 This function allows downloading and processing the fastq samples in a CSV file by using hisat2 aligner. This funtion is used internally by \code{\link{rawAlignment}} but it can be used separatelly. Furthermore, the function can downloads the reference files required: FASTA Reference Genome and GTF file.
 }
 \examples{
-hisatAlignment(GSE74251)
-hisatAlignment(GSE74251,downloadRef=FALSE,downloadSamples=TRUE)
+# Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
+
+dir <- system.file("example", package="KnowSeq")
+
+file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
 }

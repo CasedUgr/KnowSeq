@@ -4,8 +4,6 @@
 #' @param manifestPath Path to the samples manifest
 #' @param data The matrix or data.frame with the information from the Samples Sheet downloaded from GDC Portal.
 #' @return Nothing to return.
-#' @examples
-#' gdcClientDownload("~/user/token.txt","~/user/manifest.txt", data)
 
 gdcClientDownload <- function(tokenPath, manifestPath, data) {
 

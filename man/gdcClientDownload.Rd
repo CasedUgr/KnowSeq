@@ -19,6 +19,3 @@ Nothing to return.
 \description{
 This function downloads a list of controlled files from GDC Portal with the user token and the manifest with the information about the desired controlled files.
 }
-\examples{
-gdcClientDownload("~/user/token.txt","~/user/manifest.txt", data)
-}

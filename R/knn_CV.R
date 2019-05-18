@@ -8,8 +8,25 @@
 #' @param numFold The number of folds to carry out in the cross validation process.
 #' @return A list that contains four objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes.
 #' @examples
-#' knn_CV(DEGsMatrix,labels,rownames(DEGsMatrix),5)
-#' knn_CV(DEGsMatrix,labels,rownames(DEGsMatrix)[1:10],10)
+#' dir <- system.file("extdata", package="KnowSeq")
+#'
+#' countsInformation <- countsToMatrix(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
+#'
+#' countsMatrix <- countsInformation$countsMatrix
+#' labels <- countsInformation$labels
+#'
+#' myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+#'
+#' expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
+#'
+#' DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
+#' pvalue = 0.01, number = Inf)
+#'
+#' topTable <- DEGsInformation$Table
+#'
+#' DEGsMatrix <- DEGsInformation$DEGsMatrix
+#'
+#' knn_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),5)
 
 knn_CV<-function(data,labels,vars_selected,numFold=10){
 

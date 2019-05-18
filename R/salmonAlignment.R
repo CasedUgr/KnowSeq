@@ -14,8 +14,12 @@
 #' @param tx2Counts A matrix with two columns that contains the conversion of transcripts IDs to genes IDs. There is more information in the function \code{\link{tximport}}.
 #' @return Nothing to return.
 #' @examples
-#' salmonAlignment(GSE74251)
-#' salmonAlignment(GSE74251,downloadRef=FALSE,downloadSamples=TRUE)
+#' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
+#'
+#' dir <- system.file("example", package="KnowSeq")
+#'
+#  #Code to edit the example script
+#' file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
 
 salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE,referenceGenome = 38,customFA = "", customGTF = "",tx2Counts = tx2Counts){
 

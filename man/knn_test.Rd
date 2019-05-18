@@ -24,6 +24,28 @@ A list that contains four objects. The confusion matrix, the accuracy, the sensi
 knn_test allows assessing the final DEGs through a machine learning step by using k-NN with a test dataset. An optimization of the k neighbours is done at the start of the process.
 }
 \examples{
-knn_test(DEGsMatrix,labelsTrain,test,labelsTest,rownames(DEGsMatrix)[1:10])
-knn_test(DEGsMatrix,labelsTrain,test,labelsTest,rownames(DEGsMatrix))
+dir <- system.file("extdata", package="KnowSeq")
+
+countsInformation <- countsToMatrix(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
+
+countsMatrix <- countsInformation$countsMatrix
+labels <- countsInformation$labels
+
+myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+
+expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
+
+DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
+pvalue = 0.01, number = Inf)
+
+topTable <- DEGsInformation$Table
+
+DEGsMatrix <- DEGsInformation$DEGsMatrix
+
+trainingMatrix <- t(DEGsMatrix)[c(1:4,6:9),]
+trainingLabels <- labels[c(1:4,6:9)]
+testMatrix <- t(DEGsMatrix)[c(5,10),]
+testLabels <- labels[c(5,10)]
+
+results_test_knn <- knn_test(trainingMatrix, trainingLabels, testMatrix, testLabels, rownames(DEGsMatrix)[1:10])
 }

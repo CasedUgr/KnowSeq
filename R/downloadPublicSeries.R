@@ -5,8 +5,7 @@
 #' @param samplesVector A vector which contains the different IDs of the wanted series. These IDs are the IDs of the series from NCBI/GEO or ArrayExpress.
 #' @return Nothing to return.
 #' @examples
-#' downloadPublicSeries("GSE74251")
-#' downloadPublicSeries(c("GSE74251","AE-MTAB-6004"))
+#' downloadPublicSeries(c("GSE74251","GSE81593"))
 
 downloadPublicSeries <- function(samplesVector) {
 

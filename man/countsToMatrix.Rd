@@ -18,5 +18,32 @@ A matrix with the ensembl ID in the rows and all the samples of each count files
 The function merges in a matrix the information in the count files. It can be used from 1 to N count files. These count files can be created by using the function \code{\link{rawAlignment}} with the raw files of RNA-seq.
 }
 \examples{
-countMatrix <- countsToMatrix("example.csv")
+downloadPublicSeries(c("GSE74251","GSE81593"))
+
+GSE74251 <- read.csv("ReferenceFiles/GSE74251.csv")
+GSE81593 <- read.csv("ReferenceFiles/GSE81593.csv")
+
+GSE74251 <- GSE74251[1:5,]
+GSE81593 <- GSE81593[8:12,]
+
+dir <- system.file("extdata", package="KnowSeq")
+
+Run <- GSE74251$Run
+Path <- paste(dir,"/countFiles/",GSE74251$Run,sep = "")
+Class <- rep("Tumor", length(GSE74251$Run))
+GSE74251CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+
+Run <- GSE81593$Run
+Path <- paste(dir,"/countFiles/",GSE81593$Run,sep = "")
+Class <- rep("Control", length(GSE81593$Run))
+GSE81593CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+
+mergedCountsInfo <- rbind(GSE74251CountsInfo, GSE81593CountsInfo)
+
+write.csv(mergedCountsInfo, file = "ReferenceFiles/mergedCountsInfo.csv")
+
+countsInformation <- countsToMatrix("ReferenceFiles/mergedCountsInfo.csv")
+
+countsMatrix <- countsInformation$countsMatrix
+labels <- countsInformation$labels
 }

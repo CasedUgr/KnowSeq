@@ -47,7 +47,3 @@ Nothing to return.
 \description{
 This function allows downloading and processing the fastq samples in a CSV file. Also, different alignment methods can be used such as Tophat2, Salmon, Hisat2 and Kallisto. Finally, the function can downloads the reference files required: FASTA Reference Genome and GTF file.
 }
-\examples{
-rawAlignment(GSE74251)
-rawAlignment(GSE74251,seq="hisat2",downloadRef=FALSE,downloadSamples=TRUE)
-}

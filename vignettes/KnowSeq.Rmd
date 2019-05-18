@@ -20,11 +20,16 @@ bibliography: bib/bibliography.bib
 biblio-style: alphadin
 header-includes:
   - \setcitestyle{square,sort,comma,numbers}
+  - \pdfminorversion=5
+  - \pdfcompresslevel=9
+  - \pdfobjcompresslevel=2
 link-citations: yes
 BiocStyle::html_vignette:
   md_extensions: -autolink_bare_uris
-vignette: "%\\VignetteIndexEntry{The KnowSeq users guide} %\\VignetteEngine{knitr::rmarkdown}
-  %\\VignetteEncoding{UTF-8} \n"
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{The KnowSeq users guide} 
+  \usepackage[UTF-8]{inputenc} 
 ---
 
 ```{r setup, cache = F, echo = FALSE}
@@ -280,9 +285,9 @@ The other important step in this section is the batch effect treatment. It is wi
 
 dataPlot(expressionMatrix,labels,mode = "optimalClusters",toPNG = TRUE,toPDF = TRUE)
 
-dataPlot(t(expressionMatrix),labels,mode = "knnClustering", clusters = 7,toPNG = TRUE,toPDF = TRUE)
+dataPlot(t(expressionMatrix),labels,mode = "knnClustering", clusters = 9,toPNG = TRUE,toPDF = TRUE)
 
-expressionMatrixCorrected <- batchEffectRemoval(expressionMatrix, labels, clusters = 7,
+expressionMatrixCorrected <- batchEffectRemoval(expressionMatrix, labels, clusters = 9,
 method = "combat")
 ```
 
@@ -298,7 +303,7 @@ svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 
 There is a long way between the raw data and the DEGs extraction, for that in this step the samples have to have had a strong pre-processing step applied. At this point of the pipeline the DEGs existing among two or more classes will be extracted using the most extended library for that called limma. The function *limmaDEGsExtraction* receives an expression matrix, the labels of the samples and the restriction imposed for considering a gene as differential expressed gene. The function returns a list containing the table with statistical values of each DEGs and the expression matrix of the DEGs instead all of the genes. The well-known limma package is used internally to perform the DEGs extraction [@limma]. The call to the function is listed below:
 
-```{r Extracting_DEGs_combat}
+```r
 # Extracting DEGs that pass the imposed restrictions
 
 DEGsInformation <- limmaDEGsExtraction(expressionMatrixCorrected, labels,

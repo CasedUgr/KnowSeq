@@ -9,8 +9,30 @@
 #' @param vars_selected The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.
 #' @return A list that contains four objects. The confusion matrix, the accuracy, the sensitibity and the specificity for each genes.
 #' @examples
-#' svm_test(DEGsMatrix,labelsTrain,test,labelsTest,rownames(DEGsMatrix)[1:10])
-#' svm_test(DEGsMatrix,labelsTrain,test,labelsTest,rownames(DEGsMatrix))
+#' dir <- system.file("extdata", package="KnowSeq")
+#'
+#' countsInformation <- countsToMatrix(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
+#'
+#' countsMatrix <- countsInformation$countsMatrix
+#' labels <- countsInformation$labels
+#'
+#' myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+#'
+#' expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
+#'
+#' DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
+#' pvalue = 0.01, number = Inf)
+#'
+#' topTable <- DEGsInformation$Table
+#'
+#' DEGsMatrix <- DEGsInformation$DEGsMatrix
+#'
+#' trainingMatrix <- t(DEGsMatrix)[c(1:4,6:9),]
+#' trainingLabels <- labels[c(1:4,6:9)]
+#' testMatrix <- t(DEGsMatrix)[c(5,10),]
+#' testLabels <- labels[c(5,10)]
+#'
+#' svm_test(trainingMatrix,trainingLabels,testMatrix,testLabels,rownames(DEGsMatrix)[1:10])
 
 svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
 

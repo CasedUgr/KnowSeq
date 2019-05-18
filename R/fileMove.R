@@ -4,7 +4,8 @@
 #' @param to The path to the new location of the file.
 #' @return nothing to return
 #' @examples
-#' fileMove("~/source", "~/newLocation")
+#' downloadPublicSeries("GSE74251")
+#' fileMove("ReferenceFiles/GSE74251.csv","ReferenceFiles/GSE74251Moved.csv")
 
 fileMove <- function(from, to) {
   todir <- dirname(to)

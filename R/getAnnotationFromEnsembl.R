@@ -9,9 +9,7 @@
 #' @param notHumandataset A dataset identification from biomaRt::listDatasets(useMart("ensembl")).
 #' @return A matrix that contains all the information asked to the attributes parameter.
 #' @examples
-#' myAnnotation <- getAnnotationFromEnsembl(rownames(counts))
-#' myAnnotation <- getAnnotationFromEnsembl(rownames(counts),referenceGenome=37)
-#' myAnnotation <- getAnnotationFromEnsembl(rownames(counts),attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content"),filters="external_gene_name",referenceGenome=38)
+#' myAnnotation <- getAnnotationFromEnsembl(c("ENSG00000210049","ENSG00000211459","ENSG00000210077"),referenceGenome=37)
 
 getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content","gene_biotype"), filters="ensembl_gene_id", referenceGenome = 38, notHSapiens = FALSE, notHumandataset = ""){
 

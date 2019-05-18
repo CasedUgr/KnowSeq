@@ -16,5 +16,6 @@ Nothing to return.
 The function plots a confusion matrix with some statistics. The function is used internally by \code{\link{dataPlot}} but it can be used separatelly.
 }
 \examples{
+data <- table(as.factor(c(1,2,4,2,4,5)),as.factor(c(1,2,5,4,5,2)))
 plotConfMatrix(data)
 }

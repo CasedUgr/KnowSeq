@@ -24,6 +24,28 @@ A list that contains four objects. The confusion matrix, the accuracy, the sensi
 rf_test allows assessing the final DEGs through a machine learning step by using Random Forest with a test dataset.
 }
 \examples{
-rf_test(DEGsMatrix,labelsTrain,test,labelsTest,rownames(DEGsMatrix)[1:10])
-rf_test(DEGsMatrix,labelsTrain,test,labelsTest,rownames(DEGsMatrix))
+dir <- system.file("extdata", package="KnowSeq")
+
+countsInformation <- countsToMatrix(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
+
+countsMatrix <- countsInformation$countsMatrix
+labels <- countsInformation$labels
+
+myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+
+expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
+
+DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
+pvalue = 0.01, number = Inf)
+
+topTable <- DEGsInformation$Table
+
+DEGsMatrix <- DEGsInformation$DEGsMatrix
+
+trainingMatrix <- t(DEGsMatrix)[c(1:4,6:9),]
+trainingLabels <- labels[c(1:4,6:9)]
+testMatrix <- t(DEGsMatrix)[c(5,10),]
+testLabels <- labels[c(5,10)]
+
+rf_test(trainingMatrix,trainingLabels,testMatrix,testLabels,rownames(DEGsMatrix)[1:10])
 }

@@ -18,5 +18,6 @@ nothing to return
 This function is used to move files to other locations.
 }
 \examples{
-fileMove("~/source", "~/newLocation")
+downloadPublicSeries("GSE74251")
+fileMove("ReferenceFiles/GSE74251.csv","ReferenceFiles/GSE74251Moved.csv")
 }

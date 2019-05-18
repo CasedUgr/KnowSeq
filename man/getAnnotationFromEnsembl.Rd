@@ -29,7 +29,5 @@ A matrix that contains all the information asked to the attributes parameter.
 The function returns the required information about a list of genes from Ensembl biomart. This list of genes can be Ensembl ID, gene names or either of the possible values admited by Ensembl biomart. Furthermore, the reference genome can be chosen depending on the necessity of the user.
 }
 \examples{
-myAnnotation <- getAnnotationFromEnsembl(rownames(counts))
-myAnnotation <- getAnnotationFromEnsembl(rownames(counts),referenceGenome=37)
-myAnnotation <- getAnnotationFromEnsembl(rownames(counts),attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content"),filters="external_gene_name",referenceGenome=38)
+myAnnotation <- getAnnotationFromEnsembl(c("ENSG00000210049","ENSG00000211459","ENSG00000210077"),referenceGenome=37)
 }

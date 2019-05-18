@@ -4,6 +4,7 @@
 #' @param data A table which contains a confusion matrix.
 #' @return Nothing to return.
 #' @examples
+#' data <- table(as.factor(c(1,2,4,2,4,5)),as.factor(c(1,2,5,4,5,2)))
 #' plotConfMatrix(data)
 
 plotConfMatrix <- function(data){

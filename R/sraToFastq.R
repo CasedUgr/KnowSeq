@@ -3,8 +3,6 @@
 #' This function downloads and converts the sra files to fastq files by using the URLs indicated through the urlsVector argument. The function admits both gz and sra formats. This function is used internally by \code{\link{rawAlignment}} but it can be used separatelly.
 #' @param urlsVector A vector that contains a list with the URLs requested.
 #' @return Nothing.
-#' @examples
-#' sraToFastq(urlsList)
 
 sraToFastq <- function(urlsVector){
 

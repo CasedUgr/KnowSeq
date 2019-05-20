@@ -15,10 +15,10 @@
 #' @examples
 #' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
 #'
-#' dir <- system.file("example", package="KnowSeq")
+#' dir <- system.file("examples", package="KnowSeq")
 #'
 #  #Code to edit the example script
-#' file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+#' #file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
 
 hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = ""){
 

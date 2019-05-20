@@ -43,6 +43,12 @@ rawAlignment(data, seq = "tophat2", downloadRef = FALSE,
 }
 \value{
 Nothing to return.
+#' @examples
+# Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
+
+dir <- system.file("examples", package="KnowSeq")
+
+#file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
 }
 \description{
 This function allows downloading and processing the fastq samples in a CSV file. Also, different alignment methods can be used such as Tophat2, Salmon, Hisat2 and Kallisto. Finally, the function can downloads the reference files required: FASTA Reference Genome and GTF file.

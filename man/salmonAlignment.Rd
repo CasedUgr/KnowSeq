@@ -41,7 +41,7 @@ This function allows downloading and processing the fastq samples in a CSV file 
 \examples{
 # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
 
-dir <- system.file("example", package="KnowSeq")
+dir <- system.file("examples", package="KnowSeq")
 
-file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+#file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
 }

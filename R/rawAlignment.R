@@ -17,6 +17,14 @@
 #' @param manifestPath The path to the manifest with the information required to downloads the controlled BAM files selected in GDC Portal.
 #' @param tx2Counts A matrix with two columns that contains the conversion of transcripts ID to genes ID. There is more information in the function \code{\link{tximport}}. This parameter is only required with salmon and kallisto.
 #' @return Nothing to return.
+#' #' @examples
+#' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
+#'
+#' dir <- system.file("examples", package="KnowSeq")
+#'
+#  #Code to edit the example script
+#' #file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+
 
 rawAlignment <- function(data,seq="tophat2",downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "",tx2Counts = ""){
 

@@ -8,34 +8,19 @@
 #' @param clusters The number of clusters intrinsic to the expression matrix data which could means different batches. The optimal number of clusters in the expression matrix can be calculated by calling the function \code{\link{dataPlot}}, with the parameter mode equal to "optimalClusters". This parameter is only required when the user selects the combat method.
 #' @return A matrix with the batch effect corrected for combat or a model for \code{\link{limmaDEGsExtraction}} function in the case of sva.
 #' @examples
-#' downloadPublicSeries(c("GSE74251","GSE81593"))
-#'
-#' GSE74251 <- read.csv("ReferenceFiles/GSE74251.csv")
-#' GSE81593 <- read.csv("ReferenceFiles/GSE81593.csv")
-#'
-#' GSE74251 <- GSE74251[1:5,]
-#' GSE81593 <- GSE81593[8:12,]
-#'
 #' dir <- system.file("extdata", package="KnowSeq")
+#' countsInfo <- read.csv(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
+#' 
+#' countsInfo$Path <- paste(dir,"/countFiles/",countsInfo$Run,sep = "")
+#' 
+#' write.csv(countsInfo, file = "countsInfo.csv")
 #'
-#' Run <- GSE74251$Run
-#' Path <- paste(dir,"/countFiles/",GSE74251$Run,sep = "")
-#' Class <- rep("Tumor", length(GSE74251$Run))
-#' GSE74251CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
-#'
-#' Run <- GSE81593$Run
-#' Path <- paste(dir,"/countFiles/",GSE81593$Run,sep = "")
-#' Class <- rep("Control", length(GSE81593$Run))
-#' GSE81593CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
-#'
-#' mergedCountsInfo <- rbind(GSE74251CountsInfo, GSE81593CountsInfo)
-#'
-#' write.csv(mergedCountsInfo, file = "ReferenceFiles/mergedCountsInfo.csv")
-#'
-#' countsInformation <- countsToMatrix("ReferenceFiles/mergedCountsInfo.csv")
+#' countsInformation <- countsToMatrix("countsInfo.csv")
 #'
 #' countsMatrix <- countsInformation$countsMatrix
 #' labels <- countsInformation$labels
+#'
+#' file.remove("countsInfo.csv")
 #'
 #' myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
 #'

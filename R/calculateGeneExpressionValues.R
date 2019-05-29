@@ -72,11 +72,18 @@ calculateGeneExpressionValues <- function(countsMatrix,annotation,genesNames=TRU
   mygenes <- intersect(rownames(countsMatrix),annotation$ensembl_gene_id)
 
   mylength <- setNames(geneLength[match(mygenes,geneLength$Gene_stable_ID), 2], nm = mygenes)
-  NaPos <- which(is.na(mylength) == TRUE)
-  mylength <- mylength[-NaPos]
+  
+  if(any(is.na(mylength))){
+    NaPos <- which(is.na(mylength) == TRUE)
+    mylength <- mylength[-NaPos]
 
-  mygenes <- mygenes[-NaPos]
-
+    mygenes <- mygenes[-NaPos]
+    rownames <- annotation$external_gene_name[which(annotation$ensembl_gene_id[-NaPos] == mygenes)]
+  }else{
+    
+    rownames <- annotation$external_gene_name[which(annotation$ensembl_gene_id == mygenes)]
+    
+  }
   myGCannot <- myGCannot[match(mygenes,names(myGCannot))]
 
   mycqn <- cqn(countsMatrix[mygenes,], lengths = mylength, x = myGCannot, sizeFactors = apply(countsMatrix, 2, sum), verbose = TRUE)
@@ -85,7 +92,7 @@ calculateGeneExpressionValues <- function(countsMatrix,annotation,genesNames=TRU
   expressionMatrix <- cqnValues - min(cqnValues) + 1
 
   if(genesNames){
-    rownames(expressionMatrix) <- annotation$external_gene_name[which(annotation$ensembl_gene_id[-NaPos] == mygenes)]
+    rownames(expressionMatrix) <- rownames
     expressionMatrix <- expressionMatrix[unique(rownames(expressionMatrix)),]
   }
 

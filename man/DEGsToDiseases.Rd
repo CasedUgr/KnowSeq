@@ -4,10 +4,12 @@
 \alias{DEGsToDiseases}
 \title{DEGsToDiseases obtains the information about what diseases are related to the DEGs indicated by parameter.}
 \usage{
-DEGsToDiseases(geneList)
+DEGsToDiseases(geneList, minCitation = 5)
 }
 \arguments{
 \item{geneList}{A list that contains the gene symbols or gene names of the DEGs.}
+
+\item{minCitation}{Minimum number of citations of each genes in a disease to consider the genes related with the disease.}
 }
 \value{
 A list which contains the information about the diseases associated to each genes and to a sets of genes.

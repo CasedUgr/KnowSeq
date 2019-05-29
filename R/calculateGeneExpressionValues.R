@@ -9,19 +9,34 @@
 #' @param notHumanGeneLengthCSV Path to the CSV file that contains the gene length of the specie to use.
 #' @return A matrix that contains the gene expression values. The rownames are the genes names or the Ensembl IDs and the colnames are the samples.
 #' @examples
-#' dir <- system.file("extdata", package="KnowSeq")
-#' countsInfo <- read.csv(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
-#' 
-#' countsInfo$Path <- paste(dir,"/countFiles/",countsInfo$Run,sep = "")
-#' 
-#' write.csv(countsInfo, file = "countsInfo.csv")
+#' downloadPublicSeries(c("GSE74251","GSE81593"))
 #'
-#' countsInformation <- countsToMatrix("countsInfo.csv")
+#' GSE74251 <- read.csv("ReferenceFiles/GSE74251.csv")
+#' GSE81593 <- read.csv("ReferenceFiles/GSE81593.csv")
+#'
+#' GSE74251 <- GSE74251[1:5,]
+#' GSE81593 <- GSE81593[8:12,]
+#'
+#' dir <- system.file("extdata", package="KnowSeq")
+#'
+#' Run <- GSE74251$Run
+#' Path <- paste(dir,"/countFiles/",GSE74251$Run,sep = "")
+#' Class <- rep("Tumor", length(GSE74251$Run))
+#' GSE74251CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+#'
+#' Run <- GSE81593$Run
+#' Path <- paste(dir,"/countFiles/",GSE81593$Run,sep = "")
+#' Class <- rep("Control", length(GSE81593$Run))
+#' GSE81593CountsInfo <-  data.frame(Run = Run, Path = Path, Class = Class)
+#'
+#' mergedCountsInfo <- rbind(GSE74251CountsInfo, GSE81593CountsInfo)
+#'
+#' write.csv(mergedCountsInfo, file = "ReferenceFiles/mergedCountsInfo.csv")
+#'
+#' countsInformation <- countsToMatrix("ReferenceFiles/mergedCountsInfo.csv")
 #'
 #' countsMatrix <- countsInformation$countsMatrix
 #' labels <- countsInformation$labels
-#'
-#' file.remove("countsInfo.csv")
 #'
 #' myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
 #'
@@ -57,6 +72,10 @@ calculateGeneExpressionValues <- function(countsMatrix,annotation,genesNames=TRU
   mygenes <- intersect(rownames(countsMatrix),annotation$ensembl_gene_id)
 
   mylength <- setNames(geneLength[match(mygenes,geneLength$Gene_stable_ID), 2], nm = mygenes)
+  NaPos <- which(is.na(mylength) == TRUE)
+  mylength <- mylength[-NaPos]
+
+  mygenes <- mygenes[-NaPos]
 
   myGCannot <- myGCannot[match(mygenes,names(myGCannot))]
 
@@ -66,7 +85,7 @@ calculateGeneExpressionValues <- function(countsMatrix,annotation,genesNames=TRU
   expressionMatrix <- cqnValues - min(cqnValues) + 1
 
   if(genesNames){
-    rownames(expressionMatrix) <- annotation$external_gene_name[which(annotation$ensembl_gene_id == mygenes)]
+    rownames(expressionMatrix) <- annotation$external_gene_name[which(annotation$ensembl_gene_id[-NaPos] == mygenes)]
     expressionMatrix <- expressionMatrix[unique(rownames(expressionMatrix)),]
   }
 

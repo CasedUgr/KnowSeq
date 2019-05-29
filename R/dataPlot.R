@@ -138,8 +138,14 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
 
       meltMatrix <- t(data)
       rownames(meltMatrix) <- labels
-
-      xx <- melt(meltMatrix[,seq_len(12)])
+      
+      if(ncol(meltMatrix) < 24){
+        col = ncol(meltMatrix)
+      }else{
+        col = 24
+      }
+      
+      xx <- melt(meltMatrix[,seq_len(col)])
       names(xx) <- c("Classes", "Gen", "Value")
 
       print(ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3))

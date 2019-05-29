@@ -76,12 +76,13 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr"){
     cat("Calculating the ranking of the most relevant genes by using Random Forest algorithm...\n")
 
     rfRanking <- randomForest(data[,vars_selected], labels, importance=TRUE,proximity=TRUE)
-
+    rfRanking <- rfRankingPrueba$importance[order(rfRankingPrueba$importance[,3],decreasing = TRUE),]
+    
     cat("Random Forest ranking: ")
-    cat(rownames(rfRanking$importance))
+    cat(rownames(rfRanking))
     cat("\n")
 
-    return(rownames(rfRanking$importance))
+    return(rownames(rfRanking))
 
   }else{
     stop("The mode is unrecognized, please use mrmr or rf.")

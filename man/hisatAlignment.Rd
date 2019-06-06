@@ -39,7 +39,10 @@ This function allows downloading and processing the fastq samples in a CSV file 
 \examples{
 # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
 
-dir <- system.file("examples", package="KnowSeq")
+# Downloading one series from NCBI/GEO and one series from ArrayExpress
+downloadPublicSeries(c("GSE74251"))
 
-#file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
+
+\dontrun{hisatAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "")}
 }

@@ -19,3 +19,7 @@ Nothing to return.
 \description{
 This function downloads a list of controlled files from GDC Portal with the user token and the manifest with the information about the desired controlled files.
 }
+\examples{
+# This function needs the download of the pre-compiled tools supplied by KnowSeq.
+\dontrun{gdcClientDownload("PathToTheToken", "PathToTheFileWithDownloadInfo", dataMatrix)}
+}

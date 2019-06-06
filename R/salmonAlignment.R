@@ -16,10 +16,14 @@
 #' @examples
 #' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
 #'
-#' dir <- system.file("examples", package="KnowSeq")
-#'
-#  #Code to edit the example script
-#' #file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+#' # Downloading one series from NCBI/GEO and one series from ArrayExpress
+#' downloadPublicSeries(c("GSE74251"))
+#' 
+#  Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
+#' GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
+#' 
+#' \dontrun{salmonAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "",tx2Counts = tx2Counts)}
+
 
 salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE,referenceGenome = 38,customFA = "", customGTF = "",tx2Counts = tx2Counts){
 
@@ -39,7 +43,7 @@ salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
     gtftargz = "Homo_sapiens.GRCh38.90.gtf.gz"
     gtf = "Homo_sapiens.GRCh38.90.gtf"
 
-    genomeIndexCommand = paste("unixUtils/salmon/bin/salmon index -t ReferenceFiles/", fa, " -i ReferenceFiles/salmon_Homo_sapiens.index", sep = "")
+    genomeIndexCommand = paste("index -t ReferenceFiles/", fa, " -i ReferenceFiles/salmon_Homo_sapiens.index", sep = "")
 
 
   }else if(referenceGenome == 37){
@@ -52,7 +56,7 @@ salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
     gtftargz = "Homo_sapiens.GRCh37.75.gtf.gz"
     gtf = "Homo_sapiens.GRCh37.75.gtf"
 
-    genomeIndexCommand = paste("unixUtils/salmon/bin/salmon index -t ReferenceFiles/", fa, " -i ReferenceFiles/salmon_Homo_sapiens.index", sep = "")
+    genomeIndexCommand = paste("index -t ReferenceFiles/", fa, " -i ReferenceFiles/salmon_Homo_sapiens.index", sep = "")
 
   }else if(referenceGenome == "custom"){
 
@@ -64,7 +68,7 @@ salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
     gtf = customGTF
     downloadRef = FALSE
 
-    genomeIndexCommand = paste("unixUtils/salmon/bin/salmon index -t ReferenceFiles/", fa, " -i ReferenceFiles/salmon_Homo_sapiens.index", sep = "")
+    genomeIndexCommand = paste("index -t ReferenceFiles/", fa, " -i ReferenceFiles/salmon_Homo_sapiens.index", sep = "")
     gtf <- gtf
     bowind <- fa
 
@@ -96,7 +100,7 @@ salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
       urls <- as.character(data$download_path)
       lapply(urls,sraToFastq)
       if(length(list.files(pattern = "*.fastq")) != 0){
-        system("mv *.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
+        system2("mv", args = c("*.fastq", "ReferenceFiles/Samples/RNAseq/FASTQFiles/"))
 
       }
 
@@ -127,7 +131,7 @@ salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
     if(createIndex){
 
       cat("Building index file for salmon...\n")
-      system(genomeIndexCommand)
+      system2("unixUtils/salmon/bin/salmon", args = genomeIndexCommand)
 
     }
 
@@ -141,11 +145,11 @@ salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
       fastq = paste(samples[i,]$fastq1, samples[i,]$fastq2)
       filePath = paste("ReferenceFiles/Samples/RNAseq/QuantFiles/", samples[i,]$Run, sep = "")
       if(samples[i,]$LibraryLayout == "PAIRED"){
-        salmonCommand = paste("unixUtils/salmon/bin/salmon quant -i ", indexName, " -l A -1 ", samples[i,]$fastq1 , " -2 ", samples[i,]$fastq2, " -p 8 -o ", filePath, " --geneMap ", gtf, " --gcBias ")
+        salmonCommand = paste("quant -i ", indexName, " -l A -1 ", samples[i,]$fastq1 , " -2 ", samples[i,]$fastq2, " -p 8 -o ", filePath, " --geneMap ", gtf, " --gcBias ")
       }else{
-        salmonCommand = paste("unixUtils/salmon/bin/salmon quant -i ", indexName, " -l A -r ", samples[i,]$fastq1," -p 8 -o ", filePath, " --geneMap ",gtf, " --gcBias ")
+        salmonCommand = paste("quant -i ", indexName, " -l A -r ", samples[i,]$fastq1," -p 8 -o ", filePath, " --geneMap ",gtf, " --gcBias ")
       }
-      system(salmonCommand)
+      system2("unixUtils/salmon/bin/salmon", args = salmonCommand)
 
       txi <- tximport(paste("ReferenceFiles/Samples/RNAseq/QuantFiles/", samples[i,]$Run,"/quant.sf",sep = ""), type = "salmon", tx2gene = tx2Counts, existenceOptional = TRUE)
 
@@ -181,7 +185,7 @@ salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
       urls <- as.character(levels(data$Comment.FASTQ_URI.)[as.integer(data$Comment.FASTQ_URI.)])
       lapply(urls,sraToFastq)
       if(length(list.files(pattern = "*.fastq")) != 0){
-        system("mv *.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
+        system2("mv", args = "*.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
 
       }
 
@@ -212,8 +216,8 @@ salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
 
       cat("Building index file for salmon...\n")
 
-      system(genomeIndexCommand)
-
+      system2("unixUtils/salmon/bin/salmon", args = genomeIndexCommand)
+      
     }
 
     indexName = "ReferenceFiles/salmon_Homo_sapiens.index"
@@ -226,12 +230,12 @@ salmonAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
       fastq = paste(samples[i,]$fastq1, samples[i,]$fastq2)
       filePath = paste("ReferenceFiles/Samples/RNAseq/QuantFiles/", samples[i,]$Comment.ENA_RUN., sep = "")
       if(samples[i,]$Comment.LIBRARY_LAYOUT. == "PAIRED"){
-        salmonCommand = paste("unixUtils/salmon/bin/salmon quant -i ", indexName, " -l A -1 ", samples[i,]$fastq1 , " -2 ", samples[i,]$fastq2, " -p 8 -o ", filePath, " --geneMap ", gtf, " --gcBias ")
+        salmonCommand = paste("quant -i ", indexName, " -l A -1 ", samples[i,]$fastq1 , " -2 ", samples[i,]$fastq2, " -p 8 -o ", filePath, " --geneMap ", gtf, " --gcBias ")
       }else{
-        salmonCommand = paste("unixUtils/salmon/bin/salmon quant -i ", indexName, " -l A -r ", samples[i,]$fastq1," -p 8 -o ", filePath, " --geneMap ", gtf, " --gcBias ")
+        salmonCommand = paste("quant -i ", indexName, " -l A -r ", samples[i,]$fastq1," -p 8 -o ", filePath, " --geneMap ", gtf, " --gcBias ")
       }
-      system(salmonCommand)
-
+      system2("unixUtils/salmon/bin/salmon", args = salmonCommand)
+      
       txi <- tximport(paste("ReferenceFiles/Samples/RNAseq/QuantFiles/", samples[i,]$Comment.ENA_RUN.,"/quant.sf",sep = ""), type = "salmon", tx2gene = tx2Counts, existenceOptional = TRUE)
 
       mkdirs(paste("ReferenceFiles/Samples/RNAseq/CountFiles/", samples[i,]$Comment.ENA_RUN.,"/",sep = ""))

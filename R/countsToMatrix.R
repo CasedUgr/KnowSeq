@@ -37,8 +37,7 @@ countsToMatrix <- function(csvFile,sep=','){
       countf[i] = paste(dir, "count", sep = ".")
       cat(paste("\n",countf[i],sep = ""))
     }
-
-
+    
     cat(paste("\nMerging ",dim(countsData)[1]," counts files...\n",sep = ""))
 
     counts = readDGE(countf)$counts

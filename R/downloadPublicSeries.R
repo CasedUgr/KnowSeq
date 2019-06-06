@@ -19,15 +19,15 @@ downloadPublicSeries <- function(samplesVector) {
 
   }else{
 
-    if(dir.exists("ReferenceFiles/")){}else{ system("mkdir ReferenceFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/")){}else{ system("mkdir ReferenceFiles/Samples/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/BAMFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/BAMFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/SAMFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/SAMFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/CountFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/CountFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/SRAFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/SRAFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/FASTQFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/FASTQFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/QuantFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/QuantFiles/")}
+    if(dir.exists("ReferenceFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/BAMFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/BAMFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/SAMFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/SAMFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/CountFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/CountFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/SRAFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/SRAFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/FASTQFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/FASTQFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/QuantFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/QuantFiles/")}
 
     for(serie in samplesVector){
       if(grepl("GSE",serie)){
@@ -54,19 +54,19 @@ downloadPublicSeries <- function(samplesVector) {
           if(url.exists(paste("ftp://ftp.ncbi.nlm.nih.gov/geo/series/",substring(serie,1,nchar(serie)-3),"nnn/",serie,"/suppl/",serie,"_RAW.tar",sep = ""))){
 
             cat("The RAW data have been found correctly...\n")
-            system(paste("wget ftp://ftp.ncbi.nlm.nih.gov/geo/series/",substring(serie,1,nchar(serie)-3),"nnn/",serie,"/suppl/",serie,"_RAW.tar",sep = ""))
+            system2("wget", args = paste("ftp://ftp.ncbi.nlm.nih.gov/geo/series/",substring(serie,1,nchar(serie)-3),"nnn/",serie,"/suppl/",serie,"_RAW.tar",sep = ""))
             cat(paste("Decompressing ", serie,"_RAW.tar...\n",sep=""))
 
-            if(dir.exists("ReferenceFiles/Samples")){}else{ system("mkdir ReferenceFiles/Samples/")}
-            if(dir.exists("ReferenceFiles/Samples/Microarray/")){}else{ system("mkdir ReferenceFiles/Samples/Microarray/")}
+            if(dir.exists("ReferenceFiles/Samples")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/")}
+            if(dir.exists("ReferenceFiles/Samples/Microarray/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/Microarray/")}
 
             fileMove(from = paste(serie,"_RAW.tar",sep = ""),
                       to =  paste("ReferenceFiles/Samples/Microarray/",serie,"_RAW.tar",sep = ""))
 
-            if(dir.exists(paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))){}else{ system(paste("mkdir ReferenceFiles/Samples/Microarray/",serie,sep=""))}
+            if(dir.exists(paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))){}else{ system2(paste("mkdir", args = "ReferenceFiles/Samples/Microarray/",serie,sep=""))}
 
-            system(paste("tar -xf ReferenceFiles/Samples/Microarray/", serie,"_RAW.tar -C ", "ReferenceFiles/Samples/Microarray/",serie,sep = ""))
-            system(paste("rm ReferenceFiles/Samples/Microarray/", serie,"_RAW.tar",sep = ""))
+            system2("tar", args = paste("-xf ReferenceFiles/Samples/Microarray/", serie,"_RAW.tar -C ", "ReferenceFiles/Samples/Microarray/",serie,sep = ""))
+            system2("rm", args = paste("ReferenceFiles/Samples/Microarray/", serie,"_RAW.tar",sep = ""))
 
             CELFiles <- list.files(paste("ReferenceFiles/Samples/Microarray/",serie,"/",sep=""))
 
@@ -76,7 +76,7 @@ downloadPublicSeries <- function(samplesVector) {
 
               cat(paste("Decompressing ", CEL, " file...\n",sep=""))
 
-              system(paste("gzip -d ", "ReferenceFiles/Samples/Microarray/",serie,"/",CEL,sep = ""))
+              system2("gzip", args = paste("-d ReferenceFiles/Samples/Microarray/",serie,"/",CEL,sep = ""))
 
             }
 
@@ -228,19 +228,19 @@ downloadPublicSeries <- function(samplesVector) {
 
             for(raw in regx){
 
-              system(paste("wget https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",raw,sep = ""))
+              system2("wget", args = paste("https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",raw,sep = ""))
               cat(paste("Decompressing ",raw,sep=""))
 
-              if(dir.exists("ReferenceFiles/Samples")){}else{ system("mkdir ReferenceFiles/Samples/")}
-              if(dir.exists("ReferenceFiles/Samples/Microarray/")){}else{ system("mkdir ReferenceFiles/Samples/Microarray/")}
+              if(dir.exists("ReferenceFiles/Samples")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/")}
+              if(dir.exists("ReferenceFiles/Samples/Microarray/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/Microarray/")}
 
               fileMove(from = paste(raw,sep = ""),
                         to =  paste("ReferenceFiles/Samples/Microarray/",raw,sep = ""))
 
-              if(dir.exists(paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))){}else{ system(paste("mkdir ReferenceFiles/Samples/Microarray/",serie,sep=""))}
+              if(dir.exists(paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))){}else{ system2(paste("mkdir", args = "ReferenceFiles/Samples/Microarray/",serie,sep=""))}
 
-              system(paste("unzip ReferenceFiles/Samples/Microarray/", raw," -d ", "ReferenceFiles/Samples/Microarray/",serie,sep = ""))
-              system(paste("rm ReferenceFiles/Samples/Microarray/", raw,sep = ""))
+              system2("unzip", args = paste("ReferenceFiles/Samples/Microarray/", raw," -d ", "ReferenceFiles/Samples/Microarray/",serie,sep = ""))
+              system2("rm", args = paste("ReferenceFiles/Samples/Microarray/", raw,sep = ""))
 
             }
 
@@ -259,14 +259,14 @@ downloadPublicSeries <- function(samplesVector) {
 
             cat("Downloading the sdrf.txt and converting to CSV...\n")
 
-            system(paste("wget https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",serie,".sdrf.txt",sep = ""))
+            system2("wget", args = paste("https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",serie,".sdrf.txt",sep = ""))
 
-            system(paste("tr -s \"[\t]\" < ", serie,".sdrf.txt | sed 's/[\t]/;/g' > ", serie,".csv",sep = ""))
+            system2("tr", args = paste("-s \"[\t]\" < ", serie,".sdrf.txt | sed 's/[\t]/;/g' > ", serie,".csv",sep = ""))
 
             fileMove(from = paste(serie,".csv",sep = ""),
                       to =  paste("ReferenceFiles/",serie,".csv",sep = ""))
 
-            system(paste("rm ", serie,".sdrf.txt",sep = ""))
+            system2("rm", args = paste(serie,".sdrf.txt",sep = ""))
 
           }else{
 
@@ -282,14 +282,14 @@ downloadPublicSeries <- function(samplesVector) {
 
             cat("Downloading the sdrf.txt and converting to CSV...\n")
 
-            system(paste("wget https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",serie,".sdrf.txt",sep = ""))
+            system2("wget", args = paste("https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",serie,".sdrf.txt",sep = ""))
 
-            system(paste("tr -s \"[\t]\" < ", serie,".sdrf.txt | sed 's/[\t]/;/g' > ", serie,".csv",sep = ""))
+            system2("tr", args = paste("-s \"[\t]\" < ", serie,".sdrf.txt | sed 's/[\t]/;/g' > ", serie,".csv",sep = ""))
 
             fileMove(from = paste(serie,".csv",sep = ""),
                       to =  paste("ReferenceFiles/",serie,".csv",sep = ""))
 
-            system(paste("rm ", serie,".sdrf.txt",sep = ""))
+            system2("rm", args = paste(serie,".sdrf.txt",sep = ""))
 
           }else{
 

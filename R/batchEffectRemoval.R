@@ -30,7 +30,7 @@
 #' svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 
 batchEffectRemoval <- function(expressionMatrix,labels,method = "combat", clusters = 2){
-
+  
   if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
   if(typeof(expressionMatrix) != "double"){stop("The type of expression matrix elements must be double.")}
 

@@ -16,10 +16,13 @@
 #' @examples
 #' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
 #'
-#' dir <- system.file("examples", package="KnowSeq")
-#'
-#  #Code to edit the example script
-#' #file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+#' # Downloading one series from NCBI/GEO and one series from ArrayExpress
+#' downloadPublicSeries(c("GSE74251"))
+#' 
+#  Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
+#' GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
+#' 
+#' \dontrun{kallistoAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "",tx2Counts = tx2Counts)}
 
 kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE,referenceGenome = 38, customFA = "", customGTF = "",tx2Counts = tx2Counts){
 
@@ -40,7 +43,7 @@ kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, crea
     gtftargz = "Homo_sapiens.GRCh38.90.gtf.gz"
     gtf = "Homo_sapiens.GRCh38.90.gtf"
 
-    genomeIndexCommand = paste("unixUtils/kallisto/kallisto index ReferenceFiles/", fa, " -i ReferenceFiles/kallisto_Homo_sapiens.index", sep = "")
+    genomeIndexCommand = paste("index ReferenceFiles/", fa, " -i ReferenceFiles/kallisto_Homo_sapiens.index", sep = "")
 
   }else if(referenceGenome == 37){
 
@@ -52,7 +55,7 @@ kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, crea
     gtftargz = "Homo_sapiens.GRCh37.75.gtf.gz"
     gtf = "Homo_sapiens.GRCh37.75.gtf"
 
-    genomeIndexCommand = paste("unixUtils/kallisto/kallisto index ReferenceFiles/", fa, " -i ReferenceFiles/kallisto_Homo_sapiens.index", sep = "")
+    genomeIndexCommand = paste("index ReferenceFiles/", fa, " -i ReferenceFiles/kallisto_Homo_sapiens.index", sep = "")
 
   }else if(referenceGenome == "custom"){
 
@@ -64,7 +67,7 @@ kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, crea
     gtf = customGTF
     downloadRef = FALSE
 
-    genomeIndexCommand = paste("unixUtils/kallisto/kallisto index ReferenceFiles/", fa, " -i ReferenceFiles/kallisto_Homo_sapiens.index", sep = "")
+    genomeIndexCommand = paste("index ReferenceFiles/", fa, " -i ReferenceFiles/kallisto_Homo_sapiens.index", sep = "")
     gtf <- gtf
     bowind <- fa
 
@@ -96,7 +99,7 @@ kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, crea
       urls <- as.character(data$download_path)
       lapply(urls,sraToFastq)
       if(length(list.files(pattern = "*.fastq")) != 0){
-        system("mv *.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
+        system2("mv", args = "*.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
 
       }
 
@@ -125,7 +128,7 @@ kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, crea
     if(createIndex){
 
       cat("Building index file for kallisto...\n")
-      system(genomeIndexCommand)
+      system2("unixUtils/kallisto/kallisto", args = genomeIndexCommand)
 
     }
 
@@ -139,11 +142,11 @@ kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, crea
       fastq = paste(samples[i,]$fastq1, samples[i,]$fastq2)
       filePath = paste("ReferenceFiles/Samples/RNAseq/QuantFiles/", samples[i,]$Run, sep = "")
       if(samples[i,]$LibraryLayout == "PAIRED"){
-        kallistoCommand = paste("unixUtils/kallisto/kallisto quant -i ", indexName, " --gtf ", gtf," -o ", filePath," -b 100 ", samples[i,]$fastq1 , " ", samples[i,]$fastq2)
+        kallistoCommand = paste("quant -i ", indexName, " --gtf ", gtf," -o ", filePath," -b 100 ", samples[i,]$fastq1 , " ", samples[i,]$fastq2)
       }else{
-        kallistoCommand = paste("unixUtils/kallisto/kallisto quant -i ", indexName, " --gtf ", gtf," -o ", filePath," -b 100 --single -l 180 -s 20 ", samples[i,]$fastq1)
+        kallistoCommand = paste("quant -i ", indexName, " --gtf ", gtf," -o ", filePath," -b 100 --single -l 180 -s 20 ", samples[i,]$fastq1)
       }
-      system(kallistoCommand)
+      system2("unixUtils/kallisto/kallisto", args = kallistoCommand)
 
       txi <- tximport(paste("ReferenceFiles/Samples/RNAseq/QuantFiles/", samples[i,]$Run,"/abundance.h5",sep = ""), type = "kallisto", tx2gene = tx2Counts)
 
@@ -180,7 +183,7 @@ kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, crea
       urls <- as.character(levels(data$Comment.FASTQ_URI.)[as.integer(data$Comment.FASTQ_URI.)])
       lapply(urls,sraToFastq)
       if(length(list.files(pattern = "*.fastq")) != 0){
-        system("mv *.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
+        system2("mv", args = "*.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
 
       }
 
@@ -209,7 +212,7 @@ kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, crea
     if(createIndex){
 
       cat("Building index file for kallisto...\n")
-      system(genomeIndexCommand)
+      system2("unixUtils/kallisto/kallisto", args = genomeIndexCommand)
 
     }
 
@@ -223,11 +226,11 @@ kallistoAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, crea
       fastq = paste(samples[i,]$fastq1, samples[i,]$fastq2)
       filePath = paste("ReferenceFiles/Samples/RNAseq/QuantFiles/", samples[i,]$Comment.ENA_RUN., sep = "")
       if(samples[i,]$Comment.LIBRARY_LAYOUT. == "PAIRED"){
-        kallistoCommand = paste("unixUtils/kallisto/kallisto quant -i ", indexName, " --gtf ", gtf," -o ", filePath," -b 100 ", samples[i,]$fastq1 , " ", samples[i,]$fastq2)
+        kallistoCommand = paste("quant -i ", indexName, " --gtf ", gtf," -o ", filePath," -b 100 ", samples[i,]$fastq1 , " ", samples[i,]$fastq2)
       }else{
-        kallistoCommand = paste("unixUtils/kallisto/kallisto quant -i ", indexName, " --gtf ", gtf," -o ", filePath," -b 100 --single -l 180 -s 20 ", samples[i,]$fastq1)
+        kallistoCommand = paste("quant -i ", indexName, " --gtf ", gtf," -o ", filePath," -b 100 --single -l 180 -s 20 ", samples[i,]$fastq1)
       }
-      system(kallistoCommand)
+      system2("unixUtils/kallisto/kallisto", args = kallistoCommand)
 
       txi <- tximport(paste("ReferenceFiles/Samples/RNAseq/QuantFiles/", samples[i,]$Comment.ENA_RUN.,"/abundance.h5",sep = ""), type = "kallisto", tx2gene = tx2Counts)
 

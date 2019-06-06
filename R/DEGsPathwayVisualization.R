@@ -87,19 +87,19 @@ DEGsPathwayVisualization <- function(DEGsMatrix, DEGsAnnotation, expressionMatri
 
     expressionMatrixNorm <- expressionMatrix
 
-    for(i in seq_len(dim(expressionMatrix)[1])){
-
-      maxValue <- max(expressionMatrix[i,])
-      minValue <- min(expressionMatrix[i,])
-      expressionMatrixNorm[i,] <- ((expressionMatrix[i,] - minValue) / (maxValue - minValue)) * 2 - 1
-
-    }
-
+    expressionMatrixNorm = vapply(as.data.frame(t(expressionMatrixNorm)), function(x){ 
+      max = max(x)
+      min = min(x)
+      x = ((x-min)/(max-min))*2-1}, double(ncol(expressionMatrixNorm)), USE.NAMES = TRUE)
+    
+    expressionMatrixNorm <- t(expressionMatrixNorm)
+    colnames(expressionMatrixNorm) <- colnames(expressionMatrix)
+    
     if(dim(expressionMatrixNorm)[2] > 24){expressionMatrixNorm <- expressionMatrixNorm[,seq_len(24)]}
 
     for(pathway in pathways.unique){
 
-      pathChecking <- httr::GET(paste("http://rest.kegg.jp/get/",pathway,sep = ""))
+      pathChecking <- GET(paste("http://rest.kegg.jp/get/",pathway,sep = ""))
 
       if(pathChecking$status_code != 404){
 

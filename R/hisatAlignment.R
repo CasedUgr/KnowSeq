@@ -15,10 +15,13 @@
 #' @examples
 #' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
 #'
-#' dir <- system.file("examples", package="KnowSeq")
-#'
-#  #Code to edit the example script
-#' #file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+#' # Downloading one series from NCBI/GEO and one series from ArrayExpress
+#' downloadPublicSeries(c("GSE74251"))
+#' 
+#  Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
+#' GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
+#' 
+#' \dontrun{hisatAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "")}
 
 hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = ""){
 
@@ -37,7 +40,7 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
     gtf = "Homo_sapiens.GRCh38.90.gtf"
 
     bowind <- paste("ReferenceFiles/",fa,sep = "")
-    genomeIndexCommand = paste("unixUtils/hisat2/hisat2-build ", bowind, " ReferenceFiles/hisatIndex/Homo_sapiens-index")
+    genomeIndexCommand = paste(bowind, " ReferenceFiles/hisatIndex/Homo_sapiens-index")
 
   }else if(referenceGenome == 37){
 
@@ -50,7 +53,7 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
     gtf = "Homo_sapiens.GRCh37.75.gtf"
 
     bowind <- paste("ReferenceFiles/",fa,sep = "")
-    genomeIndexCommand = paste("unixUtils/hisat2/hisat2-build ", bowind, " ReferenceFiles/hisatIndex/Homo_sapiens-index")
+    genomeIndexCommand = paste(bowind, " ReferenceFiles/hisatIndex/Homo_sapiens-index")
 
   }else if(referenceGenome == "custom"){
 
@@ -62,7 +65,7 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
     gtf = customGTF
     downloadRef = FALSE
 
-    genomeIndexCommand = paste("unixUtils/hisat2/hisat2-build ", fa, " ReferenceFiles/hisatIndex/Homo_sapiens-index")
+    genomeIndexCommand = paste(fa, " ReferenceFiles/hisatIndex/Homo_sapiens-index")
     gtf <- gtf
     bowind <- fa
 
@@ -99,7 +102,7 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
       urls <- as.character(data$download_path)
       lapply(urls,sraToFastq)
       if(length(list.files(pattern = "*.fastq")) != 0){
-        system("mv *.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
+        system2("mv", args = "*.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
 
       }
     }
@@ -128,9 +131,9 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
 
       cat("Building index file for hisat2...\n")
 
-      if(dir.exists("ReferenceFiles/hisatIndex/")){}else{ system("mkdir ReferenceFiles/hisatIndex/")}
+      if(dir.exists("ReferenceFiles/hisatIndex/")){}else{ system2("mkdir ReferenceFiles/hisatIndex/")}
 
-      system(genomeIndexCommand)
+      system2("unixUtils/hisat2/hisat2-build", args = genomeIndexCommand)
 
     }
 
@@ -143,29 +146,29 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
         cat(paste("Converting ", samples[i,]$Run, " sample to SAM file...\n",sep = ""))
 
         if(samples[i,]$LibraryLayout == "PAIRED"){
-          hisatCommand = paste("unixUtils/hisat2/hisat2 -p 8 --dta-cufflinks -x ", indexName," -1 ", samples[i,]$fastq1, " -2 ", samples[i,]$fastq2," -S ", SAMPath,samples[i,]$Run,".sam",sep="")
+          hisatCommand = paste("-p 8 --dta-cufflinks -x ", indexName," -1 ", samples[i,]$fastq1, " -2 ", samples[i,]$fastq2," -S ", SAMPath,samples[i,]$Run,".sam",sep="")
         }else{
-          hisatCommand = paste("unixUtils/hisat2/hisat2 -p 8 --dta-cufflinks -x ", indexName," -U ", samples[i,]$fastq1," -S ", SAMPath,samples[i,]$Run,".sam",sep="")
+          hisatCommand = paste("-p 8 --dta-cufflinks -x ", indexName," -U ", samples[i,]$fastq1," -S ", SAMPath,samples[i,]$Run,".sam",sep="")
         }
-        system(hisatCommand)
+        system2("unixUtils/hisat2/hisat2", args = hisatCommand)
       }
 
       if(BAMfiles){
 
         cat(paste("Converting ", samples[i,]$Run, ".SAM into BAM file...\n",sep = ""))
-        sambamCommand = paste("unixUtils/samtools/samtools view -Sb " ,SAMPath,samples[i,]$Run,".sam", " > ", BAMPath,samples[i,]$Run, ".bam",sep = "")
-        system(sambamCommand)
+        sambamCommand = paste("view -Sb " ,SAMPath,samples[i,]$Run,".sam", " > ", BAMPath,samples[i,]$Run, ".bam",sep = "")
+        system2("unixUtils/samtools/samtools", args = sambamCommand)
 
       }
 
       if(countFiles){
 
         cat(paste("Converting to count file...\n",sep = ""))
-        commandHtseq = paste("unixUtils/htseq/scripts-2.7/htseq-count -s no -a 10 ", SAMPath,samples[i,]$Run,".sam",sep = "")
+        commandHtseq = paste("-s no -a 10 ", SAMPath,samples[i,]$Run,".sam",sep = "")
         countFile = paste(countPath, samples[i,]$Run, ".count", sep = "")
         gf = paste(gtf,"  >", countFile)
         commandHtseq = paste(commandHtseq, gf)
-        system(commandHtseq)
+        system2("unixUtils/htseq/scripts-2.7/htseq-count", args = commandHtseq)
 
       }
 
@@ -194,7 +197,7 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
       urls <- as.character(data$Comment.FASTQ_URI.)
       lapply(urls,sraToFastq)
       if(length(list.files(pattern = "*.fastq")) != 0){
-        system("mv *.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
+        system2("mv", args = "*.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
 
       }
 
@@ -224,9 +227,9 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
 
       cat("Building index file for hisat2...\n")
 
-      if(dir.exists("ReferenceFiles/hisatIndex/")){}else{ system("mkdir ReferenceFiles/hisatIndex/")}
-      system(genomeIndexCommand)
-
+      if(dir.exists("ReferenceFiles/hisatIndex/")){}else{ system2("mkdir ReferenceFiles/hisatIndex/")}
+      system2("unixUtils/hisat2/hisat2-build", args = genomeIndexCommand)
+      
     }
 
     gtf = paste("ReferenceFiles/", gtf, sep = "")
@@ -239,30 +242,30 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
         cat(paste("Converting ", samples[i,]$Comment.ENA_RUN., " sample to SAM file...\n",sep = ""))
 
         if(samples[i,]$Comment.LIBRARY_LAYOUT. == "PAIRED"){
-          hisatCommand = paste("unixUtils/hisat2/hisat2 -p 8 --dta-cufflinks -x ", indexName," -1 ", samples[i,]$fastq1, " -2 ", samples[i,]$fastq2," -S ", SAMPath,samples[i,]$Comment.ENA_RUN.,".sam",sep="")
+          hisatCommand = paste("-p 8 --dta-cufflinks -x ", indexName," -1 ", samples[i,]$fastq1, " -2 ", samples[i,]$fastq2," -S ", SAMPath,samples[i,]$Comment.ENA_RUN.,".sam",sep="")
         }else{
-          hisatCommand = paste("unixUtils/hisat2/hisat2 -p 8 --dta-cufflinks -x ", indexName," -U ", samples[i,]$fastq1," -S ", SAMPath,samples$Comment.ENA_RUN.,".sam",sep="")
+          hisatCommand = paste("-p 8 --dta-cufflinks -x ", indexName," -U ", samples[i,]$fastq1," -S ", SAMPath,samples$Comment.ENA_RUN.,".sam",sep="")
         }
-        system(hisatCommand)
+        system2("unixUtils/hisat2/hisat2", args = hisatCommand)
 
       }
 
       if(BAMfiles){
 
         cat(paste("Converting ", samples[i,]$Comment.ENA_RUN., ".SAM into BAM file...\n",sep = ""))
-        sambamCommand = paste("unixUtils/samtools/samtools view -Sb " ,SAMPath,samples[i,]$Comment.ENA_RUN.,".sam", " > ", BAMPath,samples[i,]$Comment.ENA_RUN., ".bam",sep = "")
-        system(sambamCommand)
+        sambamCommand = paste("view -Sb " ,SAMPath,samples[i,]$Comment.ENA_RUN.,".sam", " > ", BAMPath,samples[i,]$Comment.ENA_RUN., ".bam",sep = "")
+        system2("unixUtils/samtools/samtools", args = sambamCommand)
 
       }
 
       if(countFiles){
 
         cat(paste("Converting to count file...\n",sep = ""))
-        commandHtseq = paste("unixUtils/htseq/scripts-2.7/htseq-count -s no -a 10 ", SAMPath,samples[i,]$Comment.ENA_RUN.,".sam",sep = "")
+        commandHtseq = paste("-s no -a 10 ", SAMPath,samples[i,]$Comment.ENA_RUN.,".sam",sep = "")
         countFile = paste(countPath, samples[i,]$Comment.ENA_RUN., ".count", sep = "")
         gf = paste(gtf,"  >", countFile)
         commandHtseq = paste(commandHtseq, gf)
-        system(commandHtseq)
+        system2("unixUtils/htseq/scripts-2.7/htseq-count", args = commandHtseq)
 
 
       }

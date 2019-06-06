@@ -17,13 +17,16 @@
 #' @param manifestPath The path to the manifest with the information required to downloads the controlled BAM files selected in GDC Portal.
 #' @param tx2Counts A matrix with two columns that contains the conversion of transcripts ID to genes ID. There is more information in the function \code{\link{tximport}}. This parameter is only required with salmon and kallisto.
 #' @return Nothing to return.
-#' #' @examples
+#' @examples
 #' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
 #'
-#' dir <- system.file("examples", package="KnowSeq")
-#'
-#  #Code to edit the example script
-#' #file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
+#' # Downloading one series from NCBI/GEO and one series from ArrayExpress
+#' downloadPublicSeries(c("GSE74251"))
+#' 
+#  Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
+#' GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
+#' 
+#' \dontrun{rawAlignment(GSE74251csv,seq="tophat2",downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "",tx2Counts = "")}
 
 
 rawAlignment <- function(data,seq="tophat2",downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "",tx2Counts = ""){
@@ -93,15 +96,15 @@ rawAlignment <- function(data,seq="tophat2",downloadRef=FALSE,downloadSamples=FA
 
   }else{
 
-    if(dir.exists("ReferenceFiles/")){}else{ system("mkdir ReferenceFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/")){}else{ system("mkdir ReferenceFiles/Samples/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/BAMFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/BAMFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/SAMFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/SAMFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/CountFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/CountFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/SRAFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/SRAFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/FASTQFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/FASTQFiles/")}
-    if(dir.exists("ReferenceFiles/Samples/RNAseq/QuantFiles/")){}else{ system("mkdir ReferenceFiles/Samples/RNAseq/QuantFiles/")}
+    if(dir.exists("ReferenceFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/BAMFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/BAMFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/SAMFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/SAMFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/CountFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/CountFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/SRAFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/SRAFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/FASTQFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/FASTQFiles/")}
+    if(dir.exists("ReferenceFiles/Samples/RNAseq/QuantFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/QuantFiles/")}
 
     if(fromGDC){
 
@@ -138,9 +141,9 @@ rawAlignment <- function(data,seq="tophat2",downloadRef=FALSE,downloadSamples=FA
         gtf = paste(gf,"  > ", countFile)
 
         filePathBamSorted = paste("ReferenceFiles/Samples/RNAseq/BAMFiles/", data$Sample.ID[i],"Sorted.bam", sep = "")
-        system(paste("unixUtils/samtools/samtools sort -n ", filePathBam , " -o ",filePathBamSorted,sep = ""))
+        system2("unixUtils/samtools/samtools", args = paste("sort -n ", filePathBam , " -o ",filePathBamSorted,sep = ""))
 
-        system(paste("unixUtils/samtools/samtools view -f 0x0002 ", filePathBamSorted ," |  awk '!/\t\\*\t/' - | unixUtils/htseq/scripts-2.7/htseq-count -s no -a 10 - ", gtf, sep=""))
+        system2("unixUtils/samtools/samtools", args = paste("view -f 0x0002 ", filePathBamSorted ," |  awk '!/\t\\*\t/' - | unixUtils/htseq/scripts-2.7/htseq-count -s no -a 10 - ", gtf, sep=""))
 
       }
 

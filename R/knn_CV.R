@@ -60,15 +60,16 @@ knn_CV<-function(data,labels,vars_selected,numFold=10){
   data <- as.data.frame(apply(data,2,as.double))
   data <- data[,vars_selected]
 
-  for(i in seq_len((ncol(data)-1))){
-    max=max(data[,i])
-    min=min(data[,i])
-    data[,i]=((data[,i]-min)/(max-min))*2-1
-  }
+  data = vapply(data, function(x){ 
+    max = max(x)
+    min = min(x)
+    x = ((x-min)/(max-min))*2-1}, double(nrow(data)))
+  
+  data <- as.data.frame(data)
 
-  fitControl <- caret::trainControl(method = "repeatedcv", number = numFold,repeats=3)
+  fitControl <- trainControl(method = "repeatedcv", number = numFold,repeats=3)
   cat("Tuning the optimal K...\n")
-  K_sb <- caret::train(data, labels, method = "knn",trControl = fitControl,preProcess = c("center", "scale"),tuneLength = 10)
+  K_sb <- train(data, labels, method = "knn",trControl = fitControl,preProcess = c("center", "scale"),tuneLength = 10)
 
   bestK = K_sb$bestTune
   acc_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])

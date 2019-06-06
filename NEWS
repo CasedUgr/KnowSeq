@@ -1,14 +1,12 @@
-VERSION 1.0.0
--------------
-  o Initial release with Bioconductor
+Changes in version 0.99.7 (2019-06-05)
+  + Initial release with Bioconductor
 
-  o Alignment functions only works on Unix system (For now)
+  + Alignment functions only works on Unix system (For now)
 
-  o The rest of the pipeline is completely functional for all the OS including windows and MAC_OS
+  + The rest of the pipeline is completely functional for all the OS including windows and MAC_OS
 
-NEXT RELEASE	
-------------
-  o MAC_OS alignment tools support
+Changes in version 1.1.0 (2019-08-01)
+  + MAC_OS alignment tools support
  
-  o Incorporation of RUV batch effect method 
+  + Incorporation of RUV to batch effect methods
 

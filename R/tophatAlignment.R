@@ -15,11 +15,13 @@
 #' @examples
 #' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
 #'
-#' dir <- system.file("examples", package="KnowSeq")
-#'
-#  #Code to edit the example script
-#' #file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
-
+#' # Downloading one series from NCBI/GEO and one series from ArrayExpress
+#' downloadPublicSeries(c("GSE74251"))
+#' 
+#  Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
+#' GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
+#' 
+#' \dontrun{tophatAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "")}
 
 tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = ""){
 
@@ -37,7 +39,7 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
     gtftargz = "Homo_sapiens.GRCh38.90.gtf.gz"
     gtf = "Homo_sapiens.GRCh38.90.gtf"
 
-    index <- paste("unixUtils/bowtie2/bowtie2-build -f ReferenceFiles/",fa, " ReferenceFiles/", fa,sep = "")
+    index <- paste("-f ReferenceFiles/",fa, " ReferenceFiles/", fa,sep = "")
     bowind <- paste("ReferenceFiles/",fa,sep = "")
 
   }else if(referenceGenome == 37){
@@ -50,7 +52,7 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
     gtftargz = "Homo_sapiens.GRCh37.75.gtf.gz"
     gtf = "Homo_sapiens.GRCh37.75.gtf"
 
-    index <- paste("unixUtils/bowtie2/bowtie2-build -f ReferenceFiles/",fa, " ReferenceFiles/", fa,sep = "")
+    index <- paste("-f ReferenceFiles/",fa, " ReferenceFiles/", fa,sep = "")
     bowind <- paste("ReferenceFiles/",fa,sep = "")
 
   }else if(referenceGenome == "custom"){
@@ -63,7 +65,7 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
     gtf = customGTF
     downloadRef = FALSE
 
-    index <- paste("unixUtils/bowtie2/bowtie2-build -f ",fa, " ", fa,sep = "")
+    index <- paste("-f ",fa, " ", fa,sep = "")
     bowind <- fa
 
   }else{
@@ -99,7 +101,7 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
       urls <- as.character(data$download_path)
       lapply(urls,sraToFastq)
       if(length(list.files(pattern = "*.fastq")) != 0){
-        system("mv *.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
+        system2("mv", args = "*.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
 
       }
 
@@ -130,7 +132,7 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
 
       cat("Building index file for bowtie2...\n")
 
-      system(index)
+      system2("unixUtils/bowtie2/bowtie2-build", args = index)
 
     }
 
@@ -147,16 +149,15 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
 
         fastq = paste(samples[i,]$fastq1, samples[i,]$fastq2)
         file = paste(bowind, fastq)
-        commandTopHat = paste("unixUtils/tophat2/tophat2 --no-coverage-search -G ", gtf, " -p 8 -o ", BAMPath, samples[i,]$Run,sep = "")
+        commandTopHat = paste("--no-coverage-search -G ", gtf, " -p 8 -o ", BAMPath, samples[i,]$Run,sep = "")
         commandTopHat = paste(commandTopHat, file)
-        system(commandTopHat)
-        print(commandTopHat)
+        system2("unixUtils/tophat2/tophat2", args = commandTopHat)
 
         filePath = paste(BAMPath,samples[i,]$Run,"Count.bam",sep = "_")
         dir = paste(BAMPath,samples[i,]$Run,"accepted_hits.bam", sep = "/")
         params = paste(dir, filePath, sep = " -o ")
-        commandSamTools1 = paste("unixUtils/samtools/samtools sort -n", params)
-        system(commandSamTools1)
+        commandSamTools1 = paste("sort -n", params)
+        system2("unixUtils/samtools/samtools", args = commandSamTools1)
 
       }
 
@@ -164,8 +165,8 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
 
         cat("Converting to SAM file...\n")
         params = paste(filePathSam, filePathBam)
-        commandSamTools2 = paste("unixUtils/samtools/samtools view -o", params)
-        system(commandSamTools2)
+        commandSamTools2 = paste("view -o", params)
+        system2("unixUtils/samtools/samtools", args = commandSamTools2)
 
       }
 
@@ -173,11 +174,11 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
 
         cat("Converting to Counts file...\n")
 
-        commandHtseq = paste("unixUtils/htseq/scripts-2.7/htseq-count -s no -a 10", filePathSam)
+        commandHtseq = paste("-s no -a 10", filePathSam)
         countFile = paste(countPath, samples[i,]$Run, ".count", sep = "")
         gtfCount = paste(gtf," > ", countFile)
         commandHtseq = paste(commandHtseq, gtfCount)
-        system(commandHtseq)
+        system2("unixUtils/htseq/scripts-2.7/htseq-count", args = commandHtseq)
 
       }
     }
@@ -208,7 +209,7 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
       print(urls)
       lapply(urls,sraToFastq)
       if(length(list.files(pattern = "*.fastq")) != 0){
-        system("mv *.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
+        system2("mv", args = "*.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
 
       }
     }
@@ -238,8 +239,8 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
 
       cat("Building index file for bowtie2...\n")
 
-      system(index)
-
+      system2("unixUtils/bowtie2/bowtie2-build", args = index)
+      
     }
 
     gtf = paste("ReferenceFiles/", gtf, sep = "")
@@ -255,16 +256,15 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
 
         fastq = paste(samples[i,]$fastq1, samples[i,]$fastq2)
         file = paste(bowind, fastq)
-        commandTopHat = paste("unixUtils/tophat2/tophat2 --no-coverage-search -G ", gtf, " -p 8 -o ", BAMPath, samples[i,]$Comment.ENA_RUN.,sep = "")
+        commandTopHat = paste("--no-coverage-search -G ", gtf, " -p 8 -o ", BAMPath, samples[i,]$Comment.ENA_RUN.,sep = "")
         commandTopHat = paste(commandTopHat, file)
-        system(commandTopHat)
-        print(commandTopHat)
+        system2("unixUtils/tophat2/tophat2", args = commandTopHat)
 
         filePath = paste(BAMPath,samples[i,]$Comment.ENA_RUN.,"Count.bam",sep = "_")
         dir = paste(BAMPath,samples[i,]$Comment.ENA_RUN.,"accepted_hits.bam", sep = "/")
         params = paste(dir, filePath, sep = " -o ")
         commandSamTools1 = paste("unixUtils/samtools/samtools sort -n", params)
-        system(commandSamTools1)
+        system2("unixUtils/tophat2/tophat2", args = commandSamTools1)
 
       }
 
@@ -272,8 +272,8 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
 
         cat("Converting to SAM file...\n")
         params = paste(filePathSam, filePathBam)
-        commandSamTools2 = paste("unixUtils/samtools/samtools view -o", params)
-        system(commandSamTools2)
+        commandSamTools2 = paste("view -o", params)
+        system2("unixUtils/samtools/samtools", args = commandSamTools2)
 
       }
 
@@ -282,11 +282,11 @@ tophatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, create
 
         cat("Converting to Counts file...\n")
 
-        commandHtseq = paste("unixUtils/htseq/scripts-2.7/htseq-count -s no -a 10", filePathSam)
+        commandHtseq = paste("-s no -a 10", filePathSam)
         countFile = paste(countPath, samples[i,]$Comment.ENA_RUN., ".count", sep = "")
         gtfCount = paste(gtf,"  >", countFile)
         commandHtseq = paste(commandHtseq, gtfCount)
-        system(commandHtseq)
+        system2("unixUtils/htseq/scripts-2.7/htseq-count", args = commandHtseq)
 
       }
     }

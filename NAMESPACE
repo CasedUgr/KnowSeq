@@ -1,10 +1,28 @@
-import(stringr,sva, cqn, edgeR, reshape2, factoextra, RCurl, XML, praznik, jsonlite, biomaRt,
-       tximport, caret, limma, class, arrayQualityMetrics, e1071, tximportData, rhdf5, pathview, topGO, Biobase, multtest, kernlab)
+import(stringr,sva, RCurl, XML, jsonlite, tximportData, rhdf5, Biobase, multtest, kernlab, quantreg, mclust)
 
 importFrom(randomForest, randomForest)
 importFrom(R.utils, mkdirs, gunzip)
 importFrom(gplots, heatmap.2, redgreen)
 importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal)
+importFrom(grDevices, colorRampPalette, dev.off, hsv, pdf, png)
+importFrom(graphics, abline, axis, box, boxplot, image, layout, lines, par, text, title)
+importFrom(stats, kmeans, model.matrix, p.adjust, setNames)
+importFrom(utils, read.csv, untar, write.csv, write.table, download.file)
+importFrom(cqn, cqn)
+importFrom(edgeR, readDGE, cpm)
+importFrom(reshape2, melt)
+importFrom(factoextra, fviz_nbclust, fviz_cluster)
+importFrom(praznik, MRMR)
+importFrom(biomaRt, getBM, useMart)
+importFrom(tximport, tximport)
+importFrom(caret, trainControl, train, knn3, confusionMatrix)
+importFrom(class, knn)
+importFrom(limma, eBayes, topTable, lmFit, makeContrasts, contrasts.fit, decideTests)
+importFrom(arrayQualityMetrics, arrayQualityMetrics)
+importFrom(e1071, svm)
+importFrom(pathview, pathview)
+importFrom(topGO, getPvalues, runTest, GenTable, genesInTerm, annFUN.org, groupGOTerms)
+importFrom(httr, GET)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getAnnotationFromEnsembl,

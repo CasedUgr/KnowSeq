@@ -60,24 +60,25 @@ svm_CV<-function(data,labels,vars_selected,numFold=10){
   data <- as.data.frame(apply(data,2,as.double))
   data <- data[,vars_selected]
 
-  for(i in seq_len((ncol(data)-1))){
-    max=max(data[,i])
-    min=min(data[,i])
-    data[,i]=((data[,i]-min)/(max-min))*2-1
-  }
-
-  fitControl <- caret::trainControl(method = "cv", number = 5)
+  data = vapply(data, function(x){ 
+    max = max(x)
+    min = min(x)
+    x = ((x-min)/(max-min))*2-1}, double(nrow(data)))
+  
+  data <- as.data.frame(data)
+  
+  fitControl <- trainControl(method = "cv", number = 5)
   cat("Tuning the optimal C and G...\n")
 
-  C_range =  sapply(seq(-1,3,1), function(x) 10^x)
-  sigma_range = sapply(seq(-3,3,1), function(x) 10^x)
+  C_range =  vapply(seq(-1,3,1), function(x) 10^x, double(1))
+  sigma_range = vapply(seq(-3,3,1), function(x) 10^x, double(1))
   C_range
   sigma_range
 
   fitGrid <- expand.grid(C= C_range, sigma = sigma_range)
   dataForTunning <- cbind(data,labels)
 
-  Rsvm_sb <- caret::train(labels ~ ., data = dataForTunning,type = "C-svc", method = "svmRadial",trControl = fitControl,tuneGrid = fitGrid)
+  Rsvm_sb <- train(labels ~ ., data = dataForTunning,type = "C-svc", method = "svmRadial",trControl = fitControl,tuneGrid = fitGrid)
 
   acc_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   sens_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])

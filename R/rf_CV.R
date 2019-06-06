@@ -61,6 +61,13 @@ rf_CV<-function(data,labels,vars_selected,numFold=10){
   data <- as.data.frame(apply(data,2,as.double))
   data <- data[,vars_selected]
 
+  data = vapply(data, function(x){ 
+    max = max(x)
+    min = min(x)
+    x = ((x-min)/(max-min))*2-1}, double(nrow(data)))
+  
+  data <- as.data.frame(data)
+  
   acc_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   sens_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   spec_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])

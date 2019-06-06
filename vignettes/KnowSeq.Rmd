@@ -16,7 +16,7 @@ output:
     number_sections: true
     highlight: tango
     citation_package: natbib
-bibliography: bib/bibliography.bib
+bibliography: bibliography.bib
 biblio-style: alphadin
 header-includes:
   - \setcitestyle{square,sort,comma,numbers}
@@ -27,22 +27,31 @@ link-citations: yes
 BiocStyle::html_vignette:
   md_extensions: -autolink_bare_uris
 vignette: >
-  %\VignetteEngine{knitr::knitr}
   %\VignetteIndexEntry{The KnowSeq users guide} 
   \usepackage[UTF-8]{inputenc} 
+  %\VignetteEngine{knitr::knitr}
 ---
 
 ```{r setup, cache = F, echo = FALSE}
 knitr::opts_chunk$set(error = TRUE,warning = FALSE)
 ```
+# Installation
+To install and load KnowSeq package in R, it is necessary the previous installation of BiocManager from Bioconductor. The next code shows how this install can be performed:
 
-\pagebreak
+```r
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+  
+BiocManager::install("KnowSeq")
 
-# Introduction <a name="introduction"></a>
+library(KnowSeq)
+```
+
+# Introduction
 
 KnowSeq proposes a whole pipeline that comprises the most relevant steps in the RNA-seq gene expression analysis, with the main goal of extracting biological knowledge from raw data (Differential Expressed Genes, Gene Ontology enrichment, pathway visualization and related diseases). In this sense, KnowSeq allows aligning raw data from the original fastq or sra files, by using the most renowned aligners such as tophat2, hisat2, salmon and kallisto. Nowadays, there is no package that only from the information of the samples to align -included in a text file-, automatically performs the download and alignment of all of the samples. Furthermore, the package includes functions to: calculate the gene expression values; remove batch effect; calculate the Differentially Expressed Genes (DEGs); plot different graphs; and perform the DEGs enrichment with the GO information, pathways visualization and related diseases information retrieval. Moreover, KnowSeq is the only package that allows applying both a machine learning and DEGs enrichment processes just after the DEGs extraction. To achieve these objectives, there are functions that allows performing a feature selection process as well as a machine learning process using k-NN, RF or SVM algorithms. Similarly, there are functions allowing the retrieval of biological knowledge of the DEGs candidates. This idea emerged with the aim of proposing a complete tool to the research community containing all the necessary steps to carry out complete studies in a simple and fast way. To achieve this goal, the package uses the most relevant and widespread tools in the scientific community for the aforementioned tasks. The current version of the aligner functions works under Unix, but further version will be extended to MAC_OS and to Windows (if the tools were available). This pipeline has been used in our previous publications for processing raw RNA-seq data and to perform the DEGs extraction and the machine learning classifier design steps, also for their integration with microarray data [@castillo2017integration; @galvez2018multiclass; @castillo2019leukemia].
 
-![](img/KnowSeqPipeline.png)
+![](KnowSeqPipeline.png)
 
 The whole pipeline included in KnowSeq has been designed carefully with the purpose of achieving a great quality and robustness in each of the steps that conform the pipeline. For that, the pipeline has three fundamental processes:
 
@@ -54,10 +63,10 @@ The first process is focused on the RNA-seq RAW data treatment. This step has th
 With the pipeline designed and addressed by KnowSeq, researchers can convert the RAW data of RNA-seq into real knowledge on the identification of possible gene signatures about the studied diseases.
 
 
-# RNA-seq RAW data processing <a name="RNARaw"></a>
-## Aligners preparation <a name="aligners"></a>
+# RNA-seq RAW data processing
+## Aligners preparation
 
-In order to avoid version incompatibilities with the aligners and the installation of the required tools, pre-compiled versions will be used to run the R functions. Consequently, all the tools were compressed and stored in an external server to be downloaded whenever it is required (http://iwbbio.ugr.es/utils/utils.tar.gz). If the tools are directly downloaded from the link, the compressed files must be decompressed in the current project folder in R or RStudio. The name of the resultant folder must be *"utils"*. Nevertheless, this file can be downloaded automatically by just calling the function *rawAlignment*, in case the folder utils is not detected in the project folder. This is all needed to run the different aligners through the function *rawAlignment*. It is not possible to run the alignment without the utils folder. It must be mentioned too that the different files included in the compressed *.tar.gz* are not only the aligners but also functions needed in the raw alignment process. The tools included are the following:
+In order to avoid version incompatibilities with the aligners and the installation of the required tools, pre-compiled versions will be used to run the R functions. Consequently, all the tools were compressed and stored in an external server to be downloaded whenever it is required (http://iwbbio.ugr.es/utils/unixUtils.tar.gz). If the tools are directly downloaded from the link, the compressed files must be decompressed in the current project folder in R or RStudio. The name of the resultant folder must be *"utils"*. Nevertheless, this file can be downloaded automatically by just calling the function *rawAlignment*, in case the folder utils is not detected in the project folder. This is all needed to run the different aligners through the function *rawAlignment*. It is not possible to run the alignment without the utils folder. It must be mentioned too that the different files included in the compressed *.tar.gz* are not only the aligners but also functions needed in the raw alignment process. The tools included are the following:
 
 - Bowtie2 [@bowtie2].
 - Hisat2 [@hisat2].
@@ -78,7 +87,7 @@ The *rawAlignment* function allows running different aligners, chosen by the use
 
 rawAlignment(x,seq="hisat2",downloadRef=TRUE,downloadSamples=TRUE,BAMfiles = TRUE,
 SAMfiles = TRUE,countFiles = TRUE,referenceGenome = 38, fromGDC = FALSE, customFA = "", 
-customGTF = "", fromGDC = FALSE, tokenPath = "", manifest = "",tx2Counts = "")
+customGTF = "", tokenPath = "", manifest = "",tx2Counts = "")
 ```
 
 To run the function with salmon or kallisto, it is necessary to use the parameter *tx2Counts*. The quantification files of these aligners contain the identification of the transcriptions, but for the count files it is necessary to convert these transcriptions IDs to gene IDs. To perform that, the *tx2Counts* parameter needs a matrix with two columns. One column with the transcription IDs and a second column with the correspondent gene IDs for each transcription. The package *tximportData* [@tximportData] has a set of files that contain different transcript conversion that can be used to achieve the tx2Counts matrix. An example to run the function with kallisto aligner is showed below:
@@ -94,7 +103,7 @@ tx2gene <- read.csv(file.path(dir, "tx2gene.ensembl.v87.csv"))
 
 rawAlignment(x,seq="kallisto",downloadRef=TRUE,downloadSamples=TRUE,BAMfiles = TRUE,
 SAMfiles = TRUE,countFiles = TRUE,referenceGenome = 38, fromGDC = FALSE, customFA = "",
-customGTF = "", fromGDC = FALSE, tokenPath = "", manifest = "",tx2Counts = tx2gene)
+customGTF = "", tokenPath = "", manifest = "",tx2Counts = tx2gene)
 ```
 
 *RawAlignment* function creates a folder structure in the current project folder which will store all the downloaded and created files. The main folder of this structure is the folder ReferenceFiles but inside of it there are more folders that allows storing the different files used by the process in an organized way.
@@ -106,7 +115,7 @@ Another important requirement to take into account is the format of the csv file
 
 Series belonging to RNA-seq have a SRA identifier. If this identifier is clicked, a list with the samples that conform this series is showed. Then, the desired samples of the series can be checked and the CSV is automatically generated by clicking the button shown in the image below:
 
-![](img/ncbi.png)
+![](ncbi.png)
 
 The previous selection generates a csv files that contains a number of columns with information about the samples. However, running the *rawAlignment* function only needs the three columns shown below in the csv (although the rest of the columns can be kept):
 
@@ -121,7 +130,7 @@ There is another way to obtain this csv automatically by calling the function *d
 ### ArrayExpress CSV format
 The process for ArrayExpress is the very similar to that for NCBI/GEO. It changes the way to download the csv and the name of the columns in the file. To download the csv there is a file finished as .sdrf.txt inside the RNA-seq series in ArrayExpress, as can be seen in the example below:
 
-![](img/arrayexpress.png)
+![](arrayexpress.png)
 
 As with the NCBI/GEO csv, the csv of ArrayExpress requires only three columns as is shown below:
 
@@ -135,7 +144,7 @@ There is another way to achieve this csv automatically by calling the function d
 ### GDC Portal CSV format
 GDC portal has the BAM files access restricted or controlled for the user who has access to them. However, the count files are open and can be used directly in this package as input of the function countsToMatrix. If there exist the possibility to download the controlled BAM files, the tsv file that this package uses to convert them into count files is the tsv file generated when the button Sample Sheet is clicked in the cart:
 
-![](img/gdc.png)
+![](gdc.png)
 
 As in the other two repositories, there are a lot of columns inside the tsv files but this package only needs two of them. Furthermore, if the BAM download is carried out by the gdc-client or the web browser, the BAM has to be moved to the path *ReferenceFiles/Samples/RNAseq/BAMFiles/Sample.ID/File.Name/* where Sample.ID and File.Name are the columns with the samples information in the tsv file. This folder is created automatically in the current project folder when the *rawAlignment* function is called, but it can be created manually. However, GDC portal has public access to count files that can be used in a posterior step of the KnowSeq pipeline to merge and analyze them.
 
@@ -192,7 +201,7 @@ write.csv(mergedCountsInfo, file = "ReferenceFiles/mergedCountsInfo.csv")
 However, the user can run a complete example by coding the following code:
 
 ```r 
-dir <- system.file("example", package="KnowSeq")
+dir <- system.file("script", package="KnowSeq")
 
 # Code to execute the example script
 source(paste(dir,"/KnowSeqExample.R",sep=""))
@@ -202,7 +211,7 @@ file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
 
 ```
 
-## Processing count files <a name="counts"></a>
+## Processing count files
 
 After the raw alignment step, a list of count files of the samples is available at *ReferenceFiles/Samples/RNAseq/CountFiles*. The next step in the pipeline implemented in this package is the processing of those count files in order to obtain a gene expression matrix by merging all of them.
 
@@ -256,7 +265,7 @@ expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation,
 genesNames = TRUE)
 ```
 
-At this time of the pipeline, there is a function that plots the expression data and allows verifying if the data is well normalized. This function has the purpose of join all the important graphical representation of the pipeline in the same function and is called *dataPlot*. It is very easy to use because as only by changing the parameter method many different representations can be achieved. In this case, in order to see the expression boxplot of each sample, the function has to be called with the parameter method equal to *"boxplot"*. The labels are necessary to colour the different samples depending on the class of the samples. These colours can be selected by the user, by introducing in the parameter colours a vector with the name of the desired colours. The function also allows exporting the plots as PNG and PDF files.
+At this time of the pipeline, there is a function that plots the expression data and allows verifying if the data is well normalized. This function has the purpose of join all the important graphical representation of the pipeline in the same function and is called *dataPlot*. It is very easy to use because as only by changing the parameter method many different representations can be achieved. In this case, in order to see the expression boxplot of each sample, the function has to be called with the parameter mode equal to *"boxplot"*. The labels are necessary to colour the different samples depending on the class of the samples. These colours can be selected by the user, by introducing in the parameter colours a vector with the name of the desired colours. The function also allows exporting the plots as PNG and PDF files.
 
 ```{r Plotting_boxplot} 
 # Plotting the boxplot of the expression of each samples for all the genes
@@ -265,8 +274,8 @@ dataPlot(expressionMatrix,labels,mode = "boxplot", toPNG = TRUE,
 toPDF = TRUE)
 ```
 
-# Biomarkers identification & assessment <a name="biomarkersIDAS"></a>
-## Quality analysis and batch effect removal <a name="QABatch"></a>
+# Biomarkers identification & assessment
+## Quality analysis and batch effect removal
 
 Before the DEGs extraction process, it is important to detect and removes any possible outlier that can be present in the samples. The outliers are samples numerically different with respect to the rest of samples, introducing noise in the study. In order to achieve that, the function *RNAseqQA* performs different statistical test by using arrayQualityMetrics bioc package. This package was designed for microarrays but it has been adapted in our function to allow RNA-seq data as input. The output of this function is the same as the output of the *arrayQualityMetrics* package [@arrayqualitymetrics], creating a new folder with an index.html file including a report about the results of the different statistical tests and the possible outliers detected by each of them.
 
@@ -276,7 +285,7 @@ Before the DEGs extraction process, it is important to detect and removes any po
 RNAseqQA(expressionMatrix)
 ```
 
-The other important step in this section is the batch effect treatment. It is widely known that this is a crucial step in the omics data processing due to the intrinsic deviations that the data can present due to its origin, sequencing design, etc… Besides, when working with public data it is very difficult to know if exists a real batch effect among the selected datasets. This package provides a way of detecting possible clusters implying possible batch effect groups and correcting them [@gohBatch]. If there are batch effects in the data, it will present clusters formed because of the batch effect influence. For that, first, the function *dataPlot* with the parameter method equal to *"optimalClusters"* has to be run with the purpose of detecting the optimal number of clusters existing in the samples. Furthermore, this clusters can be represented graphically by calling the function dataPlot again but this time with the parameter method equal to *"knnClustering"*. Once the optimal number of clusters is calculated, the second and final step to remove the batch effect is by calling the function *batchEffectRemoval*, that makes use of sva package [@sva], with the parameter method equal to *"combat"* and the parameter clusters equal to the optimal number of clusters calculated before. This step allows obtaining an expression matrix with the batch effect treated by combat method. An example to do this is below:
+The other important step in this section is the batch effect treatment. It is widely known that this is a crucial step in the omics data processing due to the intrinsic deviations that the data can present due to its origin, sequencing design, etc… Besides, when working with public data it is very difficult to know if exists a real batch effect among the selected datasets. This package provides a way of detecting possible clusters implying possible batch effect groups and correcting them [@gohBatch]. If there are batch effects in the data, it will present clusters formed because of the batch effect influence. For that, first, the function *dataPlot* with the parameter mode equal to *"optimalClusters"* has to be run with the purpose of detecting the optimal number of clusters existing in the samples. Furthermore, this clusters can be represented graphically by calling the function dataPlot again but this time with the parameter method equal to *"knnClustering"*. Once the optimal number of clusters is calculated, the second and final step to remove the batch effect is by calling the function *batchEffectRemoval*, that makes use of sva package [@sva], with the parameter mode equal to *"combat"* and the parameter clusters equal to the optimal number of clusters calculated before. This step allows obtaining an expression matrix with the batch effect treated by combat method. An example to do this is below:
 
 
 ```{r Removing_batch_effect_combat} 
@@ -299,7 +308,7 @@ There is another method in the function that removes the batch effect and it is 
 svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 ```
 
-## Differential Expressed Genes extraction and visualization <a name="DEGsextr"></a>
+## Differential Expressed Genes extraction and visualization
 
 There is a long way between the raw data and the DEGs extraction, for that in this step the samples have to have had a strong pre-processing step applied. At this point of the pipeline the DEGs existing among two or more classes will be extracted using the most extended library for that called limma. The function *limmaDEGsExtraction* receives an expression matrix, the labels of the samples and the restriction imposed for considering a gene as differential expressed gene. The function returns a list containing the table with statistical values of each DEGs and the expression matrix of the DEGs instead all of the genes. The well-known limma package is used internally to perform the DEGs extraction [@limma]. The call to the function is listed below:
 
@@ -356,7 +365,7 @@ Finally, it is possible to plot one of the most widespread visualization methods
 dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = FALSE,toPDF = FALSE)
 ```
 
-## Performing the machine learning processing: classifier design and assessment and gene selection. <a name="machineLearning"></a>
+## Performing the machine learning processing: classifier design and assessment and gene selection
 
 Normally, in the literature, the last step in the pipeline for differential gene expression analysis is the DEGs extraction step. However, in this package a novel machine learning step is implemented with the purpose of giving to the user an automatic tool to assess the DEGs, and evaluate their robustness in the discernment among the studied pathologies. This library has three possible classification methodologies to take into account. These options are k-NN  [@knn], SVM  [@svm] and Random Forest  [@randomforest], three of the most popular classifiers in the literature. Furthermore, it includes two different working procedures for each of them. The first one implements a cross-validation process, in order to assess the expected accuracy with different models and samples the DEGs with a specific number of folds. The second one is to assess a specific test dataset by using a classifier trained using the training dataset separately. Moreover, the function featureSelection allows performing a feature selection process by using either mRMR[@mrmr] or Random Forest (as feature selector instead of classifier) algorithms with the purpose of finding the best DEGs order to assess the data. The functions return a list with 4 objects that contain the confusion matrices, the accuracy, the sensitivity and the specificity.
 
@@ -446,13 +455,13 @@ dataPlot(results_test_rf$accVector,mode = "classResults",
 main = "Accuracy with RF", xlab = "Genes", ylab = "Accuracy")
 ```
 
-# DEGs enrichment methodology <a name="DEGsEnrichment"></a>
+# DEGs enrichment methodology
 The main goal of the previous pipeline is the extraction of biological relevant information from the DEGs. For that, this package provides a set of tools that allows doing it. The last step of the pipeline conformed by all the available tools in KnowSeq is the DEGs enrichment and this enrichment has three different points of view. The gene ontology information, the pathway visualization and the relationship between the DEGs and diseases related to the studied pathologies.
 
-## Gene Ontology <a name="GO"></a>
+## Gene Ontology
 Gene ontology (GO) provides information about the biological functions of the genes. In order to complete this pipeline, it is important to know if the DEGs have functions related with the studied pathologies. In this sense, this package brings the possibility to know the GOs from the three different ontologies (BP, MF and CC) by using the function *geneOntologyEnrichment* that internally used the packaged *topGO* [@topgo]. The only requirement is to put the label of first class to *1* and the label of the second class to *0*. Furthermore, with the parameter *nGOs*, the number of resultant GOs that are returned can be modified. The function returns a list that contains a matrix for each ontology and a matrix with the GOs of the three ontologies together. Moreover, the matrices have different statistical measures and the description of the functionality of each GO.
 
-```{r Retrieving_GOs}
+```{r Retrieving_GOs, message=FALSE}
 # Retrieving the GO information from the three different ontologies
 
 labelsGo <- gsub("Control",0,labels)
@@ -464,9 +473,9 @@ GOsMatrix <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
 
 For example, in this example, the top 10 GOs from the BP ontology for the extracted DEGs are shown in the following image.
 
-![](img/GOExample.png)
+![](GOExample.png)
 
-## Pathways visualization <a name="paths"></a>
+## Pathways visualization
 Another important step in the enrichment methodology in this pipeline is the pathway visualization. The function uses the DEGs to show graphically the expression of the samples in the pathways in which those genes appear. For that, the function makes use of a DEGsMatrix with the expression of the DEGs and the annotation of those DEGs in which appear the pathway or pathways of each DEGs. Internally, the function *DEGsPathwayVisualization* uses *pathview* package [@pathview] to retrieve and colour the pathways, but a maximum number of 24 samples can be used, for that, if the input matrix has more than 24 samples, only the first 24 will be used by the operation. Furthermore, the function needs the expression matrix with all the genes in order to use them to colour the rest of the elements in the pathways. It is important to retrieve the annotation from Ensembl for both the DEGsMatrix and the expressionMatrix because the entrezgene IDs and the KEGG enzyme of each gene are necessary.
 
 
@@ -485,10 +494,10 @@ DEGsPathwayVisualization(DEGsMatrix[1:3,], myDEGsAnnotation, expressionMatrix,
 allMyAnnotation, labels)
 ``` 
 
-![](img/pathway.png){ width=90% height=90% }
+![](pathway.png){ width=90% height=90% }
 
 
-## Related diseases <a name="diseases"></a>
+## Related diseases
 Finally, the last enrichment method implemented is the related diseases enrichment. In this step, the function *DEGsToDisease* searchs the diseases related to a list of genes or DEGs indicated as parameter. The function returns a list of diseases only for genes and also for group of genes with several statistical values to know the relation between the diseases and the gene or group of genes. This information is retrieved from the Gene Set to Diseases web platform [@fontaine2016gene].
 
 ```{r Downloading_diseases}
@@ -498,7 +507,12 @@ diseases <- DEGsToDiseases(rownames(DEGsMatrix))
 ``` 
 For example, the image below shows the diseases related only with KRT19 gene that the function returns.
 
-![](img/diseaseKRT19.png)
+![](diseaseKRT19.png)
+
+# Session Info
+```{r Session_info}
+sessionInfo()
+```
 
 # References
 

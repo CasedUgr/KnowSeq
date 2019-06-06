@@ -78,18 +78,19 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   test <- as.data.frame(apply(test,2,as.double))
   test <- test[,vars_selected]
 
-  for(i in seq_len((ncol(train)-1))){
-    max=max(train[,i])
-    min=min(train[,i])
-    train[,i]=((train[,i]-min)/(max-min))*2-1
-  }
-
-  for(i in seq_len((ncol(test)-1))){
-    max=max(test[,i])
-    min=min(test[,i])
-    test[,i]=((test[,i]-min)/(max-min))*2-1
-  }
-
+  train = vapply(train, function(x){ 
+    max = max(x)
+    min = min(x)
+    x = ((x-min)/(max-min))*2-1}, double(nrow(train)))
+  
+  train <- as.data.frame(train)
+  
+  test = vapply(test, function(x){ 
+    max = max(x)
+    min = min(x)
+    x = ((x-min)/(max-min))*2-1}, double(nrow(test)))
+  
+  test <- as.data.frame(test)
 
   accVector <- double()
   sensVector <- double()

@@ -38,7 +38,7 @@ knitr::opts_chunk$set(error = TRUE,warning = FALSE)
 # Installation
 To install and load KnowSeq package in R, it is necessary the previous installation of BiocManager from Bioconductor. The next code shows how this install can be performed:
 
-```r
+```{r, eval=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
   
@@ -82,17 +82,28 @@ In order to avoid version incompatibilities with the aligners and the installati
 
 The *rawAlignment* function allows running different aligners, chosen by the user. The function takes as single input a CSV from GEO or ArrayExpress loaded in R. There is the possibility to process data from GDC-portal, but a previous authorization (token file) from this platform is required. Then, the user has to select with the parameter seq which aligner he wants to use, by default this parameter runs tophat2. Furthermore, there is a set of logical parameters to edit the default pipeline followed for the function. With the parameters the user can select if the BAM/SAM/Count files are created. The user can choose if wants to download the reference genome, the GTF, and which version. Even if the user has custom FASTA and GTF files, this can be specified by setting the parameter *referenceGenome* to *"custom"* and using the parameters *customFA* and *customGTF* to indicates the paths to the custom files. Other functionality is the possibility to process BAM files from the GDC Portal database by setting to *TRUE* the parameter *fromGDC*. Then the function will download the specific genome reference of GDC and process the BAM files to Count files. Furthermore, if the user has access to the controlled data, with the token and the manifest acquired from GDC Portal web platform, the samples can be downloaded automatically. An example to run the function with hisat2 aligner is showed below:
 
-```r 
-# Performing the alignment of the samples by using hisat2 aligner 
+```{r, eval=FALSE} 
+# Downloading one series from NCBI/GEO and one series from ArrayExpress
+downloadPublicSeries(c("GSE74251"))
 
-rawAlignment(x,seq="hisat2",downloadRef=TRUE,downloadSamples=TRUE,BAMfiles = TRUE,
+# Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
+GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
+
+# Performing the alignment of the samples by using hisat2 aligner 
+rawAlignment(GSE74251csv,seq="hisat2",downloadRef=TRUE,downloadSamples=TRUE,BAMfiles = TRUE,
 SAMfiles = TRUE,countFiles = TRUE,referenceGenome = 38, fromGDC = FALSE, customFA = "", 
 customGTF = "", tokenPath = "", manifest = "",tx2Counts = "")
 ```
 
 To run the function with salmon or kallisto, it is necessary to use the parameter *tx2Counts*. The quantification files of these aligners contain the identification of the transcriptions, but for the count files it is necessary to convert these transcriptions IDs to gene IDs. To perform that, the *tx2Counts* parameter needs a matrix with two columns. One column with the transcription IDs and a second column with the correspondent gene IDs for each transcription. The package *tximportData* [@tximportData] has a set of files that contain different transcript conversion that can be used to achieve the tx2Counts matrix. An example to run the function with kallisto aligner is showed below:
 
-```r 
+```{r, eval=FALSE} 
+# Downloading one series from NCBI/GEO and one series from ArrayExpress
+downloadPublicSeries(c("GSE74251"))
+
+# Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
+GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
+
 # Loading the transcripts to genes converter variable
 
 dir <- system.file("extdata", package="tximportData")
@@ -101,7 +112,7 @@ tx2gene <- read.csv(file.path(dir, "tx2gene.ensembl.v87.csv"))
 
 # Performing the alignment of the samples by using kallisto aligner 
 
-rawAlignment(x,seq="kallisto",downloadRef=TRUE,downloadSamples=TRUE,BAMfiles = TRUE,
+rawAlignment(GSE74251csv,seq="kallisto",downloadRef=TRUE,downloadSamples=TRUE,BAMfiles = TRUE,
 SAMfiles = TRUE,countFiles = TRUE,referenceGenome = 38, fromGDC = FALSE, customFA = "",
 customGTF = "", tokenPath = "", manifest = "",tx2Counts = tx2gene)
 ```
@@ -152,7 +163,7 @@ As in the other two repositories, there are a lot of columns inside the tsv file
 
 It exists the possibility to download automatically the raw data from GDC portal by using the *rawAlignment* function. In order to carry this out, the function needs the parameters downloadSamples and fromGDC set to *TRUE*, the path to the token in order to obtain the authentication to download the controlled data and the path to the manifest that contains the information to download the samples. This step needs the permission of GDC portal to the controlled data.
 
-```r 
+```{r, eval=FALSE} 
 # GDC portal controlled data processing with automatic raw data download
 
 rawAlignment(x, downloadRef=TRUE, downloadSamples=TRUE, fromGDC = TRUE,
@@ -200,7 +211,7 @@ write.csv(mergedCountsInfo, file = "ReferenceFiles/mergedCountsInfo.csv")
 
 However, the user can run a complete example by coding the following code:
 
-```r 
+```{r, eval=FALSE} 
 dir <- system.file("script", package="KnowSeq")
 
 # Code to execute the example script
@@ -312,7 +323,7 @@ svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 
 There is a long way between the raw data and the DEGs extraction, for that in this step the samples have to have had a strong pre-processing step applied. At this point of the pipeline the DEGs existing among two or more classes will be extracted using the most extended library for that called limma. The function *limmaDEGsExtraction* receives an expression matrix, the labels of the samples and the restriction imposed for considering a gene as differential expressed gene. The function returns a list containing the table with statistical values of each DEGs and the expression matrix of the DEGs instead all of the genes. The well-known limma package is used internally to perform the DEGs extraction [@limma]. The call to the function is listed below:
 
-```r
+```{r, eval=FALSE}
 # Extracting DEGs that pass the imposed restrictions
 
 DEGsInformation <- limmaDEGsExtraction(expressionMatrixCorrected, labels,

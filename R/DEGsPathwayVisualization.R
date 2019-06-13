@@ -11,14 +11,6 @@
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #'
-#' myDEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix)[1:3],
-#' referenceGenome=38,attributes = c("external_gene_name","entrezgene"),
-#' filters = "external_gene_name")
-#'
-#' allMyAnnotation <-  getAnnotationFromEnsembl(rownames(expressionMatrix),
-#'                                              referenceGenome=38,attributes = c("external_gene_name","entrezgene"),
-#'                                              filters = "external_gene_name")
-#'
 #' \dontrun{DEGsPathwayVisualization(DEGsMatrix, myDEGsAnnotation, expressionMatrix, allMyAnnotation, labels)}
 
 DEGsPathwayVisualization <- function(DEGsMatrix, DEGsAnnotation, expressionMatrix, expressionAnnotation, labels){

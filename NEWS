@@ -1,4 +1,4 @@
-Changes in version 0.99.7 (2019-06-05)
+Changes in version 0.99.2 (2019-06-05)
   + Initial release with Bioconductor
 
   + Alignment functions only works on Unix system (For now)

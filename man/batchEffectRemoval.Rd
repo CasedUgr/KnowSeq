@@ -24,22 +24,7 @@ This function corrects the batch effect of the expression matrix indicated by pa
 }
 \examples{
 dir <- system.file("extdata", package="KnowSeq")
-countsInfo <- read.csv(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
-
-countsInfo$Path <- paste(dir,"/countFiles/",countsInfo$Run,sep = "")
-
-write.csv(countsInfo, file = "countsInfo.csv")
-
-countsInformation <- countsToMatrix("countsInfo.csv")
-
-countsMatrix <- countsInformation$countsMatrix
-labels <- countsInformation$labels
-
-file.remove("countsInfo.csv")
-
-myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
-
-expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
+load(paste(dir,"/expressionExample.RData",sep = ""))
 
 expressionMatrixNoBatch <- batchEffectRemoval(expressionMatrix, labels, clusters = 4)
 svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")

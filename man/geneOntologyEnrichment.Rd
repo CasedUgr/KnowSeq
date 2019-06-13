@@ -28,29 +28,7 @@ The function obtains the information about GO terms from the three differents on
 }
 \examples{
 dir <- system.file("extdata", package="KnowSeq")
-countsInfo <- read.csv(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
-
-countsInfo$Path <- paste(dir,"/countFiles/",countsInfo$Run,sep = "")
-
-write.csv(countsInfo, file = "countsInfo.csv")
-
-countsInformation <- countsToMatrix("countsInfo.csv")
-
-countsMatrix <- countsInformation$countsMatrix
-labels <- countsInformation$labels
-
-file.remove("countsInfo.csv")
-
-myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
-
-expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
-
-DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
-pvalue = 0.01, number = Inf)
-
-topTable <- DEGsInformation$Table
-
-DEGsMatrix <- DEGsInformation$DEGsMatrix
+load(paste(dir,"/expressionExample.RData",sep = ""))
 
 labelsGo <- gsub("Control",0,labels)
 labelsGo <- gsub("Tumor",1,labelsGo)

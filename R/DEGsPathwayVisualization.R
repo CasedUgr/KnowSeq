@@ -8,10 +8,8 @@
 #' @param labels A vector that contains the labels of the samples for both the DEGsMatrix and the expressionMatrix.
 #' @return Nothing to return.
 #' @examples
-#' dir <- system.file("extdata", package="KnowSeq")
-#' load(paste(dir,"/expressionExample.RData",sep = ""))
-#'
 #' \dontrun{DEGsPathwayVisualization(DEGsMatrix, myDEGsAnnotation, expressionMatrix, allMyAnnotation, labels)}
+#' 
 
 DEGsPathwayVisualization <- function(DEGsMatrix, DEGsAnnotation, expressionMatrix, expressionAnnotation, labels){
 

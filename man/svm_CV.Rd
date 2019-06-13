@@ -25,5 +25,5 @@ svm_CV allows assessing the final DEGs through a machine learning step by using 
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 
-svm_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),5)
+svm_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),2)
 }

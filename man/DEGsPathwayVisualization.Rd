@@ -25,16 +25,6 @@ Nothing to return.
 The function uses the DEGs to show graphically the expression of the samples in the pathways in which those genes appear. For that, the function makes use of a DEGsMatrix with the expression of the DEGs and the annotation of those DEGs in which appear the pathway or pathways of each DEGs. Internally, the function uses \code{\link{pathview}} to retrieve and colours the pathways, but a maximum number of 24 samples can be used. Furthermore, the function needs the expression matrix with all the genes in order to use them to colour the rest of the elements in the pathways.
 }
 \examples{
-dir <- system.file("extdata", package="KnowSeq")
-load(paste(dir,"/expressionExample.RData",sep = ""))
-
-myDEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix)[1:3],
-referenceGenome=38,attributes = c("external_gene_name","entrezgene"),
-filters = "external_gene_name")
-
-allMyAnnotation <-  getAnnotationFromEnsembl(rownames(expressionMatrix),
-                                             referenceGenome=38,attributes = c("external_gene_name","entrezgene"),
-                                             filters = "external_gene_name")
-
 \dontrun{DEGsPathwayVisualization(DEGsMatrix, myDEGsAnnotation, expressionMatrix, allMyAnnotation, labels)}
+
 }

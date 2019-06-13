@@ -11,7 +11,7 @@
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #'
-#' rf_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),5)
+#' rf_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),2)
 
 rf_CV<-function(data,labels,vars_selected,numFold=10){
 

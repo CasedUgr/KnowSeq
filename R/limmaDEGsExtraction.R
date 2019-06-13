@@ -12,20 +12,7 @@
 #' @return A list that contains two objects. The table with statistics of the different DEGs and a reduced expression matrix which contains the DEGs and the samples.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
-#' countsInfo <- read.csv(paste(dir,"/countFiles/mergedCountsInfo.csv",sep = ""))
-#' 
-#' countsInfo$Path <- paste(dir,"/countFiles/",countsInfo$Run,sep = "")
-#' 
-#' write.csv(countsInfo, file = "countsInfo.csv")
-#'
-#' countsInformation <- countsToMatrix("countsInfo.csv")
-#'
-#' countsMatrix <- countsInformation$countsMatrix
-#' labels <- countsInformation$labels
-#'
-#' file.remove("countsInfo.csv")
-#'
-#' myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+#' load(paste(dir,"/expressionExample.RData",sep = ""))
 #'
 #' expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
 #'

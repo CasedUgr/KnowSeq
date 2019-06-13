@@ -41,10 +41,10 @@ This function allows downloading and processing the fastq samples in a CSV file 
 \examples{
 # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
 
-# Downloading one series from NCBI/GEO and one series from ArrayExpress
-downloadPublicSeries(c("GSE74251"))
+dir <- system.file("extdata", package="KnowSeq")
 
-GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
+#Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
+GSE74251csv <- read.csv(paste(dir,"/GSE74251.csv",sep = ""))
 
 \dontrun{salmonAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "",tx2Counts = tx2Counts)}
 }

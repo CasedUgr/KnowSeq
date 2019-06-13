@@ -16,5 +16,5 @@ Nothing to return.
 Download automatically samples from series of either microarray and RNA-seq. Furthermore, both NCBI/GEO and ArrayExpress public databases are supported. In the case of Microarray, the raw file are downloaded, if they are available, but for RNA-seq a csv is created with the necessary information to download the samples with the function \code{\link{rawAlignment}}.
 }
 \examples{
-downloadPublicSeries(c("GSE74251","GSE81593"))
+downloadPublicSeries(c("GSE74251"))
 }

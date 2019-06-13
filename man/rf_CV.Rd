@@ -25,5 +25,5 @@ rf_CV allows assessing the final DEGs through a machine learning step by using R
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 
-rf_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),5)
+rf_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),2)
 }

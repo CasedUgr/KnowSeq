@@ -25,5 +25,5 @@ knn_CV allows assessing the final DEGs through a machine learning step by using 
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 
-knn_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),2)
+knn_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),3)
 }

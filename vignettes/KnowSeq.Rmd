@@ -10,12 +10,6 @@ output:
     number_sections: true
     highlight: tango
     citation_package: natbib
-  html_document: 
-    toc: true
-    toc_depth: 3
-    number_sections: true
-    highlight: tango
-    citation_package: natbib
 bibliography: bibliography.bib
 biblio-style: alphadin
 header-includes:
@@ -29,7 +23,7 @@ BiocStyle::html_vignette:
 vignette: >
   %\VignetteIndexEntry{The KnowSeq users guide} 
   \usepackage[UTF-8]{inputenc} 
-  %\VignetteEngine{knitr::knitr}
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r setup, cache = F, echo = FALSE}

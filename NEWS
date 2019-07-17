@@ -1,11 +1,14 @@
-Changes in version 0.99.2 (2019-06-05)
+Changes in version 0.99.30 (2019-06-05)
   + Initial release with Bioconductor
 
   + Alignment functions only works on Unix system (For now)
 
   + The rest of the pipeline is completely functional for all the OS including windows and MAC_OS
 
-Changes in version 1.1.0 (2019-08-01)
+Changes in version 0.99.31 (2019-07-17)
+  + Best tunning parameters for SVM functions
+  
+Further versions
   + MAC_OS alignment tools support
  
   + Incorporation of RUV to batch effect methods

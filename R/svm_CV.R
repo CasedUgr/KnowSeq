@@ -45,13 +45,11 @@ svm_CV<-function(data,labels,vars_selected,numFold=10){
   
   data <- as.data.frame(data)
   
-  fitControl <- trainControl(method = "cv", number = 5)
+  fitControl <- caret::trainControl(method = "cv", number = 10)
   cat("Tuning the optimal C and G...\n")
-
-  C_range =  vapply(seq(-1,3,1), function(x) 10^x, double(1))
-  sigma_range = vapply(seq(-3,3,1), function(x) 10^x, double(1))
-  C_range
-  sigma_range
+  
+  C_range =  vapply(seq(-10,0,2), function(x) 2^x, double(1))
+  sigma_range = vapply(seq(-10,0,2), function(x) 2^x, double(1))
 
   fitGrid <- expand.grid(C= C_range, sigma = sigma_range)
   dataForTunning <- cbind(data,labels)

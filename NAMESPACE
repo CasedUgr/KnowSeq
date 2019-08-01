@@ -3,7 +3,7 @@ import(stringr,sva, RCurl, XML, jsonlite, tximportData, rhdf5, Biobase, multtest
 importFrom(randomForest, randomForest)
 importFrom(R.utils, mkdirs, gunzip)
 importFrom(gplots, heatmap.2, redgreen)
-importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal)
+importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal,scale_fill_manual,ggtitle, ylab, xlab, labs)
 importFrom(grDevices, colorRampPalette, dev.off, hsv, pdf, png)
 importFrom(graphics, abline, axis, box, boxplot, image, layout, lines, par, text, title)
 importFrom(stats, kmeans, model.matrix, p.adjust, setNames)

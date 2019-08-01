@@ -74,13 +74,14 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   fitControl <- caret::trainControl(method = "cv", number = 10)
   cat("Tuning the optimal C and G...\n")
 
-  C_range =  vapply(seq(-10,0,2), function(x) 2^x, double(1))
-  sigma_range = vapply(seq(-10,0,2), function(x) 2^x, double(1))
-
-  fitGrid <- expand.grid(C= C_range, sigma = sigma_range)
+  grid_radial <- expand.grid(sigma = c(0,0.01, 0.02, 0.025, 0.03, 0.04,
+                                       0.05, 0.06, 0.07,0.08, 0.09, 0.1, 0.25, 0.5, 0.75,0.9),
+                             C = c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75,
+                                   1, 1.5, 2,5))
+  
   trainForTunning <- cbind(train,labelsTrain)
 
-  Rsvm_sb <- caret::train(labelsTrain ~ ., data = trainForTunning,type = "C-svc", method = "svmRadial",trControl = fitControl,tuneGrid = fitGrid)
+  Rsvm_sb <- caret::train(labelsTrain ~ ., data = trainForTunning,type = "C-svc", preProc = c("center","scale"), method = "svmRadial",trControl = fitControl,tuneGrid = grid_radial)
 
   accVector <- double()
   sensVector <- double()

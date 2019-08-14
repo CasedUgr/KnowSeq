@@ -131,16 +131,14 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
     
     if(toPNG){
       cat("Creating PNG...\n")
-      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) 
-      + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
+      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
       
       ggsave("genesBoxplot.png", width = 15, height = 10)
       
     }
     if(toPDF){
       cat("Creating PDF...\n")
-      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3)
-      + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
+      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
       
       ggsave("genesBoxplot.pdf", width = 15, height = 10)
       

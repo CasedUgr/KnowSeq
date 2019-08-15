@@ -122,10 +122,10 @@ GOsInfo <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
 
 # Downloading and filling with expression the pathways of the DEGs
 myDEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix)[1:10],
-                                             referenceGenome=38,attributes = c("external_gene_name","entrezgene","gene_biotype")
+                                             referenceGenome=38,attributes = c("external_gene_name","entrezgene_id","gene_biotype")
                                              , filters = "external_gene_name")
 allMyAnnotation <- getAnnotationFromEnsembl(rownames(expressionMatrix),
-                                            referenceGenome=38,attributes = c("external_gene_name","entrezgene","gene_biotype")
+                                            referenceGenome=38,attributes = c("external_gene_name","entrezgene_id","gene_biotype")
                                             , filters = "external_gene_name")
 
 DEGsPathwayVisualization(DEGsMatrix[1:10,], myDEGsAnnotation, expressionMatrix, allMyAnnotation, labels)

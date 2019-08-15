@@ -1,4 +1,4 @@
-import(stringr,sva, RCurl, XML, jsonlite, tximportData, rhdf5, Biobase, multtest, kernlab, quantreg, mclust)
+import(stringr,sva, RCurl, XML, jsonlite, tximportData, rhdf5, multtest, kernlab, quantreg, mclust)
 
 importFrom(randomForest, randomForest)
 importFrom(R.utils, mkdirs, gunzip)
@@ -7,8 +7,9 @@ importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal
 importFrom(grDevices, colorRampPalette, dev.off, hsv, pdf, png)
 importFrom(graphics, abline, axis, box, boxplot, image, layout, lines, par, text, title)
 importFrom(stats, kmeans, model.matrix, p.adjust, setNames)
-importFrom(utils, read.csv, untar, write.csv, write.table, download.file)
+importFrom(utils, read.csv, untar, write.csv, write.table, download.file, capture.output)
 importFrom(cqn, cqn)
+importFrom(Biobase, ExpressionSet)
 importFrom(edgeR, readDGE, cpm)
 importFrom(reshape2, melt)
 importFrom(factoextra, fviz_nbclust, fviz_cluster)
@@ -22,7 +23,7 @@ importFrom(arrayQualityMetrics, arrayQualityMetrics)
 importFrom(e1071, svm)
 importFrom(pathview, pathview)
 importFrom(topGO, getPvalues, runTest, GenTable, genesInTerm, annFUN.org, groupGOTerms)
-importFrom(httr, GET)
+importFrom(httr, GET, content)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getAnnotationFromEnsembl,

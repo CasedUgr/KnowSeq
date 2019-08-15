@@ -11,6 +11,9 @@ Changes in version 0.99.31 (2019-07-17)
 Changes in version 0.99.42 (2019-08-5)
   + dataPlots genesBoxplot mode improvements
 
+Changes in version 0.99.50 (2019-08-15)
+  + New method web platform added (targetValidation) to retrieve the diseases in the DEGsToDiseases function 
+  
 Further versions
   + MAC_OS alignment tools support
  

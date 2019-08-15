@@ -1,8 +1,8 @@
 ---
 subtitle: "KnowSeq: R/Bioconductor package"
 title: "From RAW to Knowledge: The KnowSeq user guide"
-author: "Daniel Castillo, Juan Manuel Galvez, Luis Javier Herrera and Ignacio Rojas"
-date: "may, 16 of 2019"
+author: "Daniel Castillo, Juan Manuel Galvez, Francisco Manuel Ortuno, Luis Javier Herrera and Ignacio Rojas"
+date: "august, 15 of 2019"
 output:
   pdf_document: 
     toc: true
@@ -488,11 +488,11 @@ Another important step in the enrichment methodology in this pipeline is the pat
 # Downloading and filling with expression the pathways of the DEGs
 
 myDEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix)[1:3],
-referenceGenome=38,attributes = c("external_gene_name","entrezgene"), 
+referenceGenome=38,attributes = c("external_gene_name","entrezgene_id"), 
 filters = "external_gene_name")
 
 allMyAnnotation <-  getAnnotationFromEnsembl(rownames(expressionMatrix),
-referenceGenome=38,attributes = c("external_gene_name","entrezgene"), 
+referenceGenome=38,attributes = c("external_gene_name","entrezgene_id"), 
 filters = "external_gene_name")
 
 DEGsPathwayVisualization(DEGsMatrix[1:3,], myDEGsAnnotation, expressionMatrix,
@@ -503,14 +503,16 @@ allMyAnnotation, labels)
 
 
 ## Related diseases
-Finally, the last enrichment method implemented is the related diseases enrichment. In this step, the function *DEGsToDisease* searchs the diseases related to a list of genes or DEGs indicated as parameter. The function returns a list of diseases only for genes and also for group of genes with several statistical values to know the relation between the diseases and the gene or group of genes. This information is retrieved from the Gene Set to Diseases web platform [@fontaine2016gene].
+Finally, the last enrichment method implemented is the related diseases enrichment. In this step, the function *DEGsToDisease* searchs the diseases related to a list of genes or DEGs indicated as parameter. The function returns a list of diseases only for genes and also for group of genes with several statistical values to know the relation between the diseases and the gene or group of genes. This information can be retrieved from two different web platforms: the first one is the Gene Set to Diseases [@fontaine2016gene] and the second one targetValidation [@targetValidation]. The web platform to use can be chosen by changing the method parameter.
 
 ```{r Downloading_diseases}
 # Downloading the information about the DEGs related diseases
 
-diseases <- DEGsToDiseases(rownames(DEGsMatrix))
+diseasesGenes2Diseases <- DEGsToDiseases(rownames(DEGsMatrix), method = "genes2Diseases", minCitation = 2)
+diseasesTargetValidation <- DEGsToDiseases(rownames(DEGsMatrix), method = "targetValidation", size = 5)
+
 ``` 
-For example, the image below shows the diseases related only with KRT19 gene that the function returns.
+For example, the image below shows the diseases related only with KRT19 gene that the function returns with the method parameter setted to genes2Diseases.
 
 ![](diseaseKRT19.png)
 

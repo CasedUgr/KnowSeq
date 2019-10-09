@@ -18,35 +18,41 @@ DEGsPathwayVisualization <- function(DEGsMatrix, DEGsAnnotation, expressionMatri
     if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
     if(!is.data.frame(expressionAnnotation)){stop("The class of expressionAnnotation parameter must be data.frame.")}
 
-    DEGsAnnotation <- DEGsAnnotation[which(!is.na(DEGsAnnotation$entrezgene) == TRUE),]
+    DEGsAnnotation <- DEGsAnnotation[which(!is.na(DEGsAnnotation$entrezgene_id) == TRUE),]
 
     commonDEGs <- intersect(rownames(DEGsMatrix),unique(DEGsAnnotation$external_gene_name))
     posCommonDEGs <- match(rownames(DEGsMatrix[commonDEGs,]),DEGsAnnotation$external_gene_name)
     DEGsMatrix <- DEGsMatrix[commonDEGs,]
-    rownames(DEGsMatrix) <- DEGsAnnotation$entrezgene[posCommonDEGs]
+    rownames(DEGsMatrix) <- DEGsAnnotation$entrezgene_id[posCommonDEGs]
 
-    expressionAnnotation <- expressionAnnotation[which(!is.na(expressionAnnotation$entrezgene) == TRUE),]
+    expressionAnnotation <- expressionAnnotation[which(!is.na(expressionAnnotation$entrezgene_id) == TRUE),]
 
     commonGenes <- intersect(rownames(expressionMatrix),unique(expressionAnnotation$external_gene_name))
     posCommonGenes <- match(rownames(expressionMatrix[commonGenes,]),expressionAnnotation$external_gene_name)
     expressionMatrix <- expressionMatrix[commonGenes,]
-    rownames(expressionMatrix) <- expressionAnnotation$entrezgene[posCommonGenes]
+    rownames(expressionMatrix) <- expressionAnnotation$entrezgene_id[posCommonGenes]
 
     pathways_unique <- character()
 
     cat("Retrieving DEGs associated pathways...\n")
 
-    for(gene in DEGsAnnotation$entrezgene){
+    for(gene in DEGsAnnotation$entrezgene_id){
 
-      get_GO <- httr::GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
-      get_GO_text <- httr::content(get_GO, "text")
-      pathways <- gsub('^.*PATHWAY\\s*|\\s*MODULE.*$', '', get_GO_text)
-      pathways_unique <- c(pathways_unique,unique(as.character(unlist(str_extract_all(pathways,"hsa[a-zA-Z0-9]{5}")))))
-
+      if(!is.na(gene)){
+          get_GO <- httr::GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
+          get_GO_text <- httr::content(get_GO, "text")
+          pathway_start <- str_locate_all(pattern = "PATHWAY", get_GO_text)[[1]][2]
+          pathway_end <- str_locate_all(pattern = "BRITE", get_GO_text)[[1]][1]
+          pathways <- substr(get_GO_text,pathway_start+1,pathway_end-1)
+          pathways_unique <- c(pathways_unique,unique(as.character(unlist(str_extract_all(pathways,"hsa[a-zA-Z0-9]{5}")))))
+      }
     }
 
+    naPos <- which(is.na(pathways_unique) == TRUE)
+    if(length(naPos) != 0)
+      pathways_unique <- pathways_unique[-naPos]
+    
     pathways.unique <- unique(pathways_unique)
-    pathways.unique <- pathways.unique[-which(pathways.unique == "hsa01100")]
 
     cat(paste("A total of ",length(pathways.unique)," pathways have been retrieved!\n", sep = ""))
     cat(paste(pathways.unique,"\n",sep = ""))

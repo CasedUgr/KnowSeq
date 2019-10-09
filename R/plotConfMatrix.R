@@ -44,6 +44,7 @@ plotConfMatrix <- function(data){
   if(ncol(x) > 2){
 
       text(40, 35, colnames(res$byClass)[7], cex=1.2, font=2)
+      res$byClass[is.na(res$byClass[,7]),7] <- 0
       text(40, 25, round(mean(as.numeric(res$byClass[,7]))*100, 3), cex=1.4)
       text(60, 35, colnames(res$byClass)[1], cex=1.2, font=2)
       text(60, 25, round(mean(as.numeric(res$byClass[,1]))*100, 3), cex=1.4)

@@ -8,6 +8,8 @@
 #' @param main The title for the plot.
 #' @param ylab The description for the y axis.
 #' @param xlab The description for the x axis.
+#' @param xgrid Shows the x grid into the plot
+#' @param ygrid Shows the y grid into the plot
 #' @param legend A vector with the elements in the legend of the plot.
 #' @param mode The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, optimalClusters, knnClustering, confusionMatrix and classResults.
 #' @param clusters The number of optimal clusters for the data parameter calculated with this function in mode optimalCluster. This is useful to know the possible clusters formed due to the batch effect.
@@ -24,7 +26,7 @@
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE,toPDF = TRUE)
 
 
-dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab = "Expression", xlab = "Samples", legend = "", mode="boxplot",clusters = 2, toPNG = FALSE, toPDF = FALSE){
+dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot",clusters = 2, toPNG = FALSE, toPDF = FALSE){
   
   if(!is.logical(toPNG)){stop("toPNG parameter can only take the values TRUE or FALSE.")}
   if(!is.logical(toPDF)){stop("toPDF parameter can only take the values TRUE or FALSE.")}
@@ -261,6 +263,13 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
       plot(data,type='l',col=colours[2], main=main,
            xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5)
       
+      if(xgrid){
+        grid(nx = TRUE, ny = NULL, col = "gray", lty = "dashed")
+      }
+      if(ygrid){
+        grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
+      }
+      
       if(legend != ""){
         legend("bottomright", legend=legend, col=colours[2],lwd = 2.5,cex=0.8,lty = "solid")
       }
@@ -276,6 +285,13 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
         
         lines(data[i,],col=colours[i], lty="solid",lwd = 2.5)
         
+      }
+      
+      if(xgrid){
+        grid(nx = TRUE, ny = NULL, col = "gray", lty = "dashed")
+      }
+      if(ygrid){
+        grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
       }
       
       if(legend == ""){legend = rownames(data)}
@@ -295,6 +311,13 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
         plot(data,type='l',col=colours[2], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5)
         
+        if(xgrid){
+          grid(nx = TRUE, ny = NULL, col = "gray", lty = "dashed")
+        }
+        if(ygrid){
+          grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
+        }
+        
         if(legend != ""){
           legend("bottomright", legend=legend, col=colours[2],lwd = 2.5,cex=0.8,lty = "solid")
         }
@@ -310,6 +333,13 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
           
           lines(data[i,],col=colours[i], lty="solid",lwd = 2.5)
           
+        }
+        
+        if(xgrid){
+          grid(nx = TRUE, ny = NULL, col = "gray", lty = "dashed")
+        }
+        if(ygrid){
+          grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
         }
         
         if(legend == ""){legend = rownames(data)}
@@ -330,6 +360,14 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
         plot(data,type='l',col=colours[2], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5)
         
+        if(xgrid){
+          grid(nx = TRUE, ny = NULL, col = "gray", lty = "dashed")
+        }
+        if(ygrid){
+          grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
+        }
+        
+        
         if(legend != ""){
           legend("bottomright", legend=legend, col=colours[2],lwd = 2.5,cex=0.8,lty = "solid")
         }
@@ -345,6 +383,13 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
           
           lines(data[i,],col=colours[i], lty="solid",lwd = 2.5)
           
+        }
+        
+        if(xgrid){
+          grid(nx = TRUE, ny = NULL, col = "gray", lty = "dashed")
+        }
+        if(ygrid){
+          grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
         }
         
         if(legend == ""){legend = rownames(data)}

@@ -5,9 +5,8 @@
 \title{Plot different graphs depending on the current step of KnowSeq pipeline.}
 \usage{
 dataPlot(data, labels, colours = c("green", "red"), main = "",
-  ylab = "Expression", xlab = "Samples", xgrid = FALSE,
-  ygrid = FALSE, legend = "", mode = "boxplot", clusters = 2,
-  toPNG = FALSE, toPDF = FALSE)
+  ylab = "Expression", xlab = "Samples", legend = "",
+  mode = "boxplot", clusters = 2, toPNG = FALSE, toPDF = FALSE)
 }
 \arguments{
 \item{data}{Normally, the data parameter is an expression matrix or data.frame, however for the confusionMatrix plot, the data are a confussion matrix that can be achieved by using the output of any of the machine learning functions of this package.}
@@ -21,10 +20,6 @@ dataPlot(data, labels, colours = c("green", "red"), main = "",
 \item{ylab}{The description for the y axis.}
 
 \item{xlab}{The description for the x axis.}
-
-\item{xgrid}{Shows the x grid into the plot}
-
-\item{ygrid}{Shows the y grid into the plot}
 
 \item{legend}{A vector with the elements in the legend of the plot.}
 

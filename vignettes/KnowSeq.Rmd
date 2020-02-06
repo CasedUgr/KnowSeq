@@ -34,6 +34,9 @@ BiocManager::install("KnowSeq")
 library(KnowSeq)
 ```
 
+KnowSeq is now available on Docker by running the next command:
+
+Docker run -it casedugr/knowseq
 
 # Introduction
 

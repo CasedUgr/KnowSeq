@@ -4,8 +4,12 @@
 \alias{DEGsToDiseases}
 \title{DEGsToDiseases obtains the information about what diseases are related to the DEGs indicated by parameter.}
 \usage{
-DEGsToDiseases(geneList, minCitation = 5, size = 10,
-  method = "targetValidation")
+DEGsToDiseases(
+  geneList,
+  minCitation = 5,
+  size = 10,
+  method = "targetValidation"
+)
 }
 \arguments{
 \item{geneList}{A list that contains the gene symbols or gene names of the DEGs.}

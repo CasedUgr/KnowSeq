@@ -4,8 +4,12 @@
 \alias{batchEffectRemoval}
 \title{Corrects the batch effect of the data by using the selected method.}
 \usage{
-batchEffectRemoval(expressionMatrix, labels, method = "combat",
-  clusters = 2)
+batchEffectRemoval(
+  expressionMatrix,
+  labels,
+  method = "combat",
+  batchGroups = c()
+)
 }
 \arguments{
 \item{expressionMatrix}{The original expression matrix to treat the batch effect.}
@@ -14,7 +18,7 @@ batchEffectRemoval(expressionMatrix, labels, method = "combat",
 
 \item{method}{The method that will be used to remove the batch effect. The possibilities are "combat" or "sva". Next release will add RUV.}
 
-\item{clusters}{The number of clusters intrinsic to the expression matrix data which could means different batches. The optimal number of clusters in the expression matrix can be calculated by calling the function \code{\link{dataPlot}}, with the parameter mode equal to "optimalClusters". This parameter is only required when the user selects the combat method.}
+\item{batchGroups}{A numeric vector with the different known batch groups for the samples.}
 }
 \value{
 A matrix with the batch effect corrected for combat or a model for \code{\link{limmaDEGsExtraction}} function in the case of sva.
@@ -26,6 +30,8 @@ This function corrects the batch effect of the expression matrix indicated by pa
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 
-expressionMatrixNoBatch <- batchEffectRemoval(expressionMatrix, labels, clusters = 4)
+batchGroups <- c(1,1,1,1,2,2,1,2,1,2)
+
+expressionMatrixNoBatch <- batchEffectRemoval(expressionMatrix, labels, batchGroups = batchGroups)
 svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 }

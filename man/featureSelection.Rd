@@ -4,7 +4,7 @@
 \alias{featureSelection}
 \title{featureSelection function calculates the optimal order of DEGs to achieve the best result in the posterior machine learning process by using mRMR algorithm or Random Forest.}
 \usage{
-featureSelection(data, labels, vars_selected, mode = "mrmr")
+featureSelection(data, labels, vars_selected, mode = "mrmr", disease = "")
 }
 \arguments{
 \item{data}{The data parameter is an expression matrix or data.frame that contains the genes in the columns and the samples in the rows.}
@@ -13,7 +13,9 @@ featureSelection(data, labels, vars_selected, mode = "mrmr")
 
 \item{vars_selected}{The genes selected to use in the feature selection process. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes.}
 
-\item{mode}{The algorithm used to calculate the genes ranking. The possibilities are two: mrmr and rf.}
+\item{mode}{The algorithm used to calculate the genes ranking. The possibilities are two: mrmr, rf and da.}
+
+\item{disease}{The name of a disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.}
 }
 \value{
 A vector that contains the ranking of genes.

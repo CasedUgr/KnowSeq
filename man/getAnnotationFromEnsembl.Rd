@@ -4,10 +4,15 @@
 \alias{getAnnotationFromEnsembl}
 \title{getAnnotationFromEnsembl returns the required information about a list of genes from Ensembl biomart.}
 \usage{
-getAnnotationFromEnsembl(values, attributes = c("ensembl_gene_id",
-  "external_gene_name", "percentage_gene_gc_content", "gene_biotype"),
-  filters = "ensembl_gene_id", referenceGenome = 38,
-  notHSapiens = FALSE, notHumandataset = "")
+getAnnotationFromEnsembl(
+  values,
+  attributes = c("ensembl_gene_id", "external_gene_name", "percentage_gene_gc_content",
+    "gene_biotype"),
+  filters = "ensembl_gene_id",
+  referenceGenome = 38,
+  notHSapiens = FALSE,
+  notHumandataset = ""
+)
 }
 \arguments{
 \item{values}{A list of genes that contains the names or IDs.}

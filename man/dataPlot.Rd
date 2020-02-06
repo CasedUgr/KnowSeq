@@ -4,10 +4,20 @@
 \alias{dataPlot}
 \title{Plot different graphs depending on the current step of KnowSeq pipeline.}
 \usage{
-dataPlot(data, labels, colours = c("green", "red"), main = "",
-  ylab = "Expression", xlab = "Samples", xgrid = FALSE,
-  ygrid = FALSE, legend = "", mode = "boxplot", clusters = 2,
-  toPNG = FALSE, toPDF = FALSE)
+dataPlot(
+  data,
+  labels,
+  colours = c("green", "red"),
+  main = "",
+  ylab = "Expression",
+  xlab = "Samples",
+  xgrid = FALSE,
+  ygrid = FALSE,
+  legend = "",
+  mode = "boxplot",
+  toPNG = FALSE,
+  toPDF = FALSE
+)
 }
 \arguments{
 \item{data}{Normally, the data parameter is an expression matrix or data.frame, however for the confusionMatrix plot, the data are a confussion matrix that can be achieved by using the output of any of the machine learning functions of this package.}
@@ -28,9 +38,7 @@ dataPlot(data, labels, colours = c("green", "red"), main = "",
 
 \item{legend}{A vector with the elements in the legend of the plot.}
 
-\item{mode}{The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, optimalClusters, knnClustering, confusionMatrix and classResults.}
-
-\item{clusters}{The number of optimal clusters for the data parameter calculated with this function in mode optimalCluster. This is useful to know the possible clusters formed due to the batch effect.}
+\item{mode}{The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, confusionMatrix and classResults.}
 
 \item{toPNG}{Boolean variable to indicate if a plot would be save to PNG.}
 

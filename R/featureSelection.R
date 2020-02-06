@@ -5,7 +5,8 @@
 #' @param data The data parameter is an expression matrix or data.frame that contains the genes in the columns and the samples in the rows.
 #' @param labels A vector or factor that contains the labels for each samples in data parameter.
 #' @param vars_selected The genes selected to use in the feature selection process. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes.
-#' @param mode The algorithm used to calculate the genes ranking. The possibilities are two: mrmr and rf.
+#' @param mode The algorithm used to calculate the genes ranking. The possibilities are two: mrmr, rf and da.
+#' @param disease The name of a disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.
 #' @return A vector that contains the ranking of genes.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
@@ -13,7 +14,7 @@
 #'
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix))
 
-featureSelection <-function(data,labels,vars_selected,mode="mrmr"){
+featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
 
   if(!is.data.frame(data) && !is.matrix(data)){
 
@@ -62,6 +63,38 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr"){
 
     return(rownames(rfRanking))
 
+  }else if(mode == "da"){
+    
+    if(disease == ""){
+      stop("Please, indicate a disease name to acquire the Disease Association Score and Feature selection.")
+    }
+    
+    cat("Calculating ranking of biological relevant genes by using DA implementation...\n")
+    
+    relatedDiseases <- DEGsToDiseases(vars_selected, size = 100)
+    
+    overallRanking <- c()
+    
+    for(i in seq(length(relatedDiseases))){
+      
+      if(is.na(grep(disease,relatedDiseases[[i]][,1])[1]))
+        overallScore <- 0.0
+      else
+        overallScore <- relatedDiseases[[i]][grep(disease,relatedDiseases[[i]][,1])[1],2]
+      
+      overallRanking <- c(overallRanking,overallScore)
+      
+    }
+    
+    names(overallRanking) <- names(relatedDiseases)
+    overallRanking <- sort(overallRanking,decreasing = TRUE)
+    
+    cat("Disease Association ranking: ")
+    cat(names(overallRanking))
+    cat("\n")
+    
+    return(overallRanking)
+    
   }else{
     stop("The mode is unrecognized, please use mrmr or rf.")
   }

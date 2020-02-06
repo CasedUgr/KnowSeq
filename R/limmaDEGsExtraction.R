@@ -93,9 +93,7 @@ limmaDEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0
           multIndMatches <- abs(multIndMatches)
 
           DEGsMultiClass <- expressionMatrix[names(ind),]
-          DEGsMultiClass <- t(DEGsMultiClass)
-          DEGsMultiClass <- cbind(DEGsMultiClass,labels)
-
+          
           results <- list(fitmicroMultiContrast,DEGsMultiClass)
           names(results) <- c("Table","DEGsMatrix")
 

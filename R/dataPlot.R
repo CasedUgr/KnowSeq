@@ -11,8 +11,7 @@
 #' @param xgrid Shows the x grid into the plot
 #' @param ygrid Shows the y grid into the plot
 #' @param legend A vector with the elements in the legend of the plot.
-#' @param mode The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, optimalClusters, knnClustering, confusionMatrix and classResults.
-#' @param clusters The number of optimal clusters for the data parameter calculated with this function in mode optimalCluster. This is useful to know the possible clusters formed due to the batch effect.
+#' @param mode The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, confusionMatrix and classResults.
 #' @param toPNG Boolean variable to indicate if a plot would be save to PNG.
 #' @param toPDF Boolean variable to indicate if a plot would be save to PDF.
 #' @return Nothing to return.
@@ -26,7 +25,7 @@
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE,toPDF = TRUE)
 
 
-dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot",clusters = 2, toPNG = FALSE, toPDF = FALSE){
+dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot", toPNG = FALSE, toPDF = FALSE){
   
   if(!is.logical(toPNG)){stop("toPNG parameter can only take the values TRUE or FALSE.")}
   if(!is.logical(toPDF)){stop("toPDF parameter can only take the values TRUE or FALSE.")}
@@ -187,52 +186,6 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
     heatmap.2(t(data), col=redgreen(75), scale="row", RowSideColors=coloursAux ,
               key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=1,
               cexCol=1, margins=c(6,11),srtCol=45)
-    
-  }else if(mode == "optimalClusters"){
-    
-    plot <- fviz_nbclust(data, kmeans, method = "gap_stat")
-    print(plot)
-    
-    if(toPNG){
-      cat("Creating PNG...\n")
-      png("optimalClusters.png",width = 1024, height = 720)
-      print(plot)
-      
-      dev.off()
-    }
-    
-    if(toPDF){
-      cat("Creating PDF...\n")
-      pdf("optimalClusters.pdf")
-      print(plot)
-      
-      dev.off()
-    }
-    
-  }else if(mode == "knnClustering"){
-    
-    km.res <- kmeans(data, clusters, nstart = 25)
-    
-    plot <- fviz_cluster(km.res, data = data, ellypse = TRUE, ellypse.type = "convex")+
-      theme_minimal()
-    
-    print(plot)
-    
-    if(toPNG){
-      cat("Creating PNG...\n")
-      png("knnClusters.png",width = 1024, height = 720)
-      print(plot)
-      
-      dev.off()
-    }
-    
-    if(toPDF){
-      cat("Creating PDF...\n")
-      pdf("knnClusters.pdf")
-      print(plot)
-      
-      dev.off()
-    }
     
   }else if(mode == "confusionMatrix"){
     

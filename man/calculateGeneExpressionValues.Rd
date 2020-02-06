@@ -4,8 +4,13 @@
 \alias{calculateGeneExpressionValues}
 \title{Calculates the gene expression values by using a matrix of counts from RNA-seq.}
 \usage{
-calculateGeneExpressionValues(countsMatrix, annotation,
-  genesNames = TRUE, notHuman = FALSE, notHumanGeneLengthCSV = "")
+calculateGeneExpressionValues(
+  countsMatrix,
+  annotation,
+  genesNames = TRUE,
+  notHuman = FALSE,
+  notHumanGeneLengthCSV = ""
+)
 }
 \arguments{
 \item{countsMatrix}{The original counts matrix returned by \code{\link{countsToMatrix}} function or a matrix with the gene Ensembl ID in the rows and the samples in the columns that contains the count values.}

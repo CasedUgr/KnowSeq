@@ -4,10 +4,19 @@
 \alias{salmonAlignment}
 \title{salmonAlignment allows downloading and processing the fastq samples in a CSV file by using salmon aligner.}
 \usage{
-salmonAlignment(data, downloadRef = FALSE, downloadSamples = FALSE,
-  createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE,
-  countFiles = TRUE, referenceGenome = 38, customFA = "",
-  customGTF = "", tx2Counts = tx2Counts)
+salmonAlignment(
+  data,
+  downloadRef = FALSE,
+  downloadSamples = FALSE,
+  createIndex = TRUE,
+  BAMfiles = TRUE,
+  SAMfiles = TRUE,
+  countFiles = TRUE,
+  referenceGenome = 38,
+  customFA = "",
+  customGTF = "",
+  tx2Counts = tx2Counts
+)
 }
 \arguments{
 \item{data}{The ID of the variable which contains the samples. Our recommendation is to load this variable from a CSV file.}

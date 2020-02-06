@@ -4,8 +4,13 @@
 \alias{DEGsPathwayVisualization}
 \title{The function uses the DEGs to show graphically the expression of the samples in the pathways in which those genes appear.}
 \usage{
-DEGsPathwayVisualization(DEGsMatrix, DEGsAnnotation, expressionMatrix,
-  expressionAnnotation, labels)
+DEGsPathwayVisualization(
+  DEGsMatrix,
+  DEGsAnnotation,
+  expressionMatrix,
+  expressionAnnotation,
+  labels
+)
 }
 \arguments{
 \item{DEGsMatrix}{A matrix that contains the expression of the DEGs for each samples. This matrix can be achieved by calling the function \code{\link{limmaDEGsExtraction}}. If the samples are more than 24, only the first 24 will be used to colour the pathways.}

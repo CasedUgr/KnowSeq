@@ -4,8 +4,14 @@
 \alias{geneOntologyEnrichment}
 \title{geneOntologyEnrichment obtains the information about what Gene Ontology terms are related to the DEGs.}
 \usage{
-geneOntologyEnrichment(geneMatrix, labels, identificator = "SYMBOL",
-  mapping = "org.Hs.eg.db", nGOs = 10, pvalCutOff = 0.01)
+geneOntologyEnrichment(
+  geneMatrix,
+  labels,
+  identificator = "SYMBOL",
+  mapping = "org.Hs.eg.db",
+  nGOs = 10,
+  pvalCutOff = 0.01
+)
 }
 \arguments{
 \item{geneMatrix}{A matrix that contains the expression of the DEGs for each samples.}

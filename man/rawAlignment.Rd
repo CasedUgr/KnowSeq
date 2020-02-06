@@ -4,11 +4,23 @@
 \alias{rawAlignment}
 \title{rawAlignment allows downloading and processing the fastq samples in a CSV file.}
 \usage{
-rawAlignment(data, seq = "tophat2", downloadRef = FALSE,
-  downloadSamples = FALSE, createIndex = TRUE, BAMfiles = TRUE,
-  SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38,
-  customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "",
-  manifestPath = "", tx2Counts = "")
+rawAlignment(
+  data,
+  seq = "tophat2",
+  downloadRef = FALSE,
+  downloadSamples = FALSE,
+  createIndex = TRUE,
+  BAMfiles = TRUE,
+  SAMfiles = TRUE,
+  countFiles = TRUE,
+  referenceGenome = 38,
+  customFA = "",
+  customGTF = "",
+  fromGDC = FALSE,
+  tokenPath = "",
+  manifestPath = "",
+  tx2Counts = ""
+)
 }
 \arguments{
 \item{data}{The ID of the variable which contains the samples. Our recommendation is to load this variable from a CSV file.}

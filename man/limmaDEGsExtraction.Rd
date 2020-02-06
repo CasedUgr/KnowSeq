@@ -4,8 +4,16 @@
 \alias{limmaDEGsExtraction}
 \title{limmaDEGsExtraction performs the analysis to extract the Differentially Expressed Genes (DEGs) among the classes to compare.}
 \usage{
-limmaDEGsExtraction(expressionMatrix, labels, pvalue = 0.05, lfc = 1,
-  cov = 1, number = Inf, svaCorrection = FALSE, svaMod)
+limmaDEGsExtraction(
+  expressionMatrix,
+  labels,
+  pvalue = 0.05,
+  lfc = 1,
+  cov = 1,
+  number = Inf,
+  svaCorrection = FALSE,
+  svaMod
+)
 }
 \arguments{
 \item{expressionMatrix}{The expressionMatrix parameter is an expression matrix or data.frame that contains the genes in the rows and the samples in the columns.}

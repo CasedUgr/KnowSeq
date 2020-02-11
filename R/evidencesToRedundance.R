@@ -4,7 +4,7 @@
 #' test <- list('gen1'= matrix(c('literature','literature','animal_model','code','code','code','score','score','score','http://europepmc.org/abstract/MED/6783302','http://europepmc.org/abstract/MED/21441245','TRUE','*','*','mouse'),nrow=3),'gen2'= matrix(c('literature','literature','animal_model','known_drug','code','code','code','code','score','score','score','score','http://europepmc.org/abstract/MED/6783302','http://europepmc.org/abstract/MED/182355','TRUE','http://europepmc.org/abstract/MED/26872','*','*','mouse','pancreatic cancer vs normal'),nrow=4),'gen3'= matrix(c('animal_model','code','score','TRUE','human'),nrow=1))
 # evs.red <- evidencesToRedundance(test)
 #' evs.red
-#' print(evs.red)
+#' 
 evidencesToRedundance <- function(evidences){
    cat('Calculating redundance between genes...')
    
@@ -43,6 +43,8 @@ evidencesToRedundance <- function(evidences){
                for (row2 in rows2){
                  # Add row to act.total.matrix with boolean values
                  act.total.matrix <- rbind(act.total.matrix, evidences[[gen1]][row1,(unused+1):(unused+ncol)] == evidences[[gen2]][row2,(unused+1):(unused+ncol)] )
+                 # This row fully coincide with actual evidencie, so we stop searching
+                 if (rowSums(tail(act.total.matrix,1) == ncol))  break
                }
                
                # If there are any row that fully coincide add 1 (this evidences is fully contained in gen2 evidences)

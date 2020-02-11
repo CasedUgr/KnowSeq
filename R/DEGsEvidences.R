@@ -6,7 +6,7 @@
 #' @param size The number of diseases to retrieve from targetValidation
 #' @return A list which names are genes from geneList and which contains related evidences for each gene in geneList and indicated disease.
 #' @example
-#' evidences <- DEGsToDiseases(c("KRT19","BRCA1"),'cancer')
+#' evidences <- DEGsEvidences(c("KRT19","BRCA1"),'cancer')
 
 DEGsEvidences <- function(geneList, disease, subdisease='', minCitation = 5, size = 10){
   if(length(geneList)[1] == 0 || is.null(geneList) ){
@@ -119,6 +119,9 @@ DEGsEvidences <- function(geneList, disease, subdisease='', minCitation = 5, siz
             evidences <- rbind(evidences,act.evidences)
           }
         }
+        # If there are found evidences, remove evidences with duplicated information
+        if (dim(evidences)[1] > 1)
+          evidences <- evidences[!duplicated(evidences[,4:6]),]
         # Save found evidences for gene j (first row is empty)
         info[[geneList[j]]] <- evidences[-1,]
       }else{

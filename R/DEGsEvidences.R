@@ -131,19 +131,7 @@ DEGsEvidences <- function(geneList, disease, subdisease='', minCitation = 5, siz
             }
           }
         }
-        
-        # Remove evidences with duplicated information
-        "
-        for (type in names(evidences)){
-          aux <- c()
-          for ( i in length(evidences[[type]])){
-            if (all(evidences[[type]][[i]]$evidence %in% aux)) evidences <- list.remove(evidences,i)
-            else aux <- rbind(aux,evidences[[type]][[i]]$evidence)
-          }
-          aux <- c()
-        }
-        "
-        
+
         # Save found evidences for gene j (first row is empty)
         info[[geneList[j]]] <- evidences
       }else{

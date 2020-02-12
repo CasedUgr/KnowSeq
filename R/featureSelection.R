@@ -13,7 +13,6 @@
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='mrmr')
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer')
-#' 
 
 featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
 
@@ -73,18 +72,16 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
     cat("Calculating ranking of biological relevant genes by using DA implementation...\n")
     
     relatedDiseases <- DEGsToDiseases(vars_selected, size = 100)
-    
     overallRanking <- c()
     
     for(i in seq(length(relatedDiseases))){
       
-      if(is.na(grep(disease,relatedDiseases[[i]][,1])[1]))
+      if(is.na(grep(disease,relatedDiseases[[i]]$summary[,1])[1]))
         overallScore <- 0.0
       else
-        overallScore <- relatedDiseases[[i]][grep(disease,relatedDiseases[[i]][,1])[1],2]
-      
+        overallScore <- relatedDiseases[[i]]$summary[grep(disease,relatedDiseases[[i]]$summary[,1])[1],2]
+
       overallRanking <- c(overallRanking,overallScore)
-      
     }
     
     names(overallRanking) <- names(relatedDiseases)
@@ -96,8 +93,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
     
     if (mode == 'da') return(overallRanking)
     
-    evidences <- DEGsEvidences(names(overallRanking), disease, size = 100)
-    
+    evidences <- DEGsEvidences(names(overallRanking), disease, size=100)
     cat("Calculating redundances between found evidences...\n")
     redundances <- evidencesToRedundance(evidences)
     

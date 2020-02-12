@@ -4,8 +4,8 @@
 #' @param geneList A list that contains the gene symbols or gene names of the DEGs.
 #' @param minCitation Minimum number of citations of each genes in a disease to consider the genes related with the disease.
 #' @param size The number of diseases to retrieve from targetValidation
-#' @param method The name of the desired web platform to use for the diseases download: genes2Diseases or targetValidation
-#' @return A list which contains the information about the diseases associated to each genes or to a set of genes.
+#' @param getEvidences Boolean. If true, for each gene, a list of found evidences for each disease will be returned.
+#' @return A list which contains the information about the diseases associated to each genes or to a set of genes. If getEvidences is TRUE, found evidences for each case will be returned too.
 #' @examples
 #' diseases <- DEGsToDiseases(c("KRT19","BRCA1"))
 
@@ -34,13 +34,11 @@ DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, getEvidences = 
       genePeti = paste(base, ensembl_id,"&direct=true&fields=association_score&fields=disease.efo_info.label&size=",size,sep = "")
       r <- GET(genePeti)
       response = content(r)
-      
       if(response$size != 0){
           currentGene = matrix(, nrow = response$size, ncol = 9)
           if (getEvidences) currentEvidences = vector("list", 0)
           
           for(i in seq(response$size)){
-            
             currentGene[i,1] = response$data[[i]]$disease$efo_info$label
             currentGene[i,2] = response$data[[i]]$association_score$overall
             currentGene[i,3] = response$data[[i]]$association_score$datatypes$literature
@@ -51,13 +49,15 @@ DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, getEvidences = 
             currentGene[i,8] = response$data[[i]]$association_score$datatypes$animal_model
             currentGene[i,9] = response$data[[i]]$association_score$datatypes$affected_pathway
   
-            if (getEvidences) currentEvidences[[currentGene[i,1]]] <- DEGsEvidences(unique(geneList)[j],response$data[[i]]$disease$efo_info$label)
+            if (getEvidences) currentEvidences[[currentGene[i,1]]] <- DEGsEvidences(unique(geneList)[j],response$data[[i]]$disease$efo_info$label)[[unique(geneList)[j]]]
           }
           colnames(currentGene) <- c("Disease","Overall Score","Literature","RNA Expr.","Genetic Assoc.","Somatic Mut.","Known Drug","Animal Model","Affected Pathways")
           
-          results[[j]] <- list('summary'=currentGene)
-          if (getEvidences) results[[j]]['evidences'] <- currentEvidences
+          
+          if (getEvidences) results[[j]] <- list('summary'=currentGene,'evidences'=currentEvidences)
+          else results[[j]] <- list('summary'=currentGene)
           names(results)[j] <- unique(geneList)[j]
+          
       }else{
         
         cat(paste("Removing ", unique(geneList)[j], " from the list, there is no exists associated diseases for this gene.\n",sep = ""))
@@ -69,5 +69,4 @@ DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, getEvidences = 
   cat("Diseases acquired successfully!\n")
   results <- results[lengths(results) != 0]
   invisible(results)
-
 }

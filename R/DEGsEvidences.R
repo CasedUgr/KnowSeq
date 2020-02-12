@@ -1,4 +1,3 @@
-
 #' @param geneList A list that contains the gene symbols or gene names of the DEGs.
 #' @param disease The name of a disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.
 #' @param subdisease The name of a particular subdisease from disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter. Default '' 
@@ -6,7 +5,7 @@
 #' @param size The number of diseases to retrieve from targetValidation
 #' @return A list which names are genes from geneList and which contains related evidences for each gene in geneList and indicated disease.
 #' @example
-#' evidences <- DEGsEvidences(c("KRT19","BRCA1"),'cancer')
+#' evidences <- DEGsEvidences(c("KRT19","BRCA1","TYMP"),'cancer')
 
 DEGsEvidences <- function(geneList, disease, subdisease='', minCitation = 5, size = 10){
   if(length(geneList)[1] == 0 || is.null(geneList) ){
@@ -19,11 +18,11 @@ DEGsEvidences <- function(geneList, disease, subdisease='', minCitation = 5, siz
     stop("Please, indicate a disease name to acquire related evidences.")
     
   }
-  
   # Get disease id (it's necesary for evidences request)
   r_Ensembl <- httr::GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
   respon <- content(r_Ensembl)
-  if (respon$size == 0){
+  
+  if ( 'size' %in% names(respon) && respon$size == 0){
     stop("Disease not found")
   }
   disease.id <- respon$data[[1]]$id
@@ -51,88 +50,111 @@ DEGsEvidences <- function(geneList, disease, subdisease='', minCitation = 5, siz
       # If response is not empty
       if(response.disease$size != 0){
         # Empty matrix that will contain information from obtained evidences for actual gene
-        evidences = matrix(,ncol = 6)
-        
+        evidences = list()
         
         # Iter in found evidences
         for(k in seq(response.disease$size)){
           # Check if disease is matching
           if ( (subdisease=='' && grepl(disease,response.disease$data[[k]]$disease$efo_info$label))
                || subdisease == response.disease$data[[k]]$disease$efo_info$label){
-            
-            # Actual evidence (empty)
-            act.evidences <- rep('*',6)
+            # Create empty evidence
+            act.evidence <- list()
             
             # Check if gene is matching
             if (response.disease$data[[k]]$target$gene_info$geneid == ensembl_id){
-              # Save evidence type, code and score
               type <- response.disease$data[[k]]$type
-              act.evidences[1] = type
-              act.evidences[2] = response.disease$data[[k]]$evidence$evidence_codes[[1]]
-              act.evidences[3] = response.disease$data[[k]]$scores$association_score
+              # Save evidence score
+              act.evidence <- list('score' = response.disease$data[[k]]$scores$association_score,
+                                   'evidence' = c())
+              # Save evidence codes
+              act.evidence['code'] <- c()
+              for (code.info in response.disease$data[[k]]$evidence$evidence_codes_info)
+                act.evidence['codes'] <- c(code.info[[1]]$label)
               
               # Save information depending on evidence type
               if (type == 'known_drug'){
-                act.evidences[4] = response.disease$data[[k]]$drug$molecule_name # Drug name
-                act.evidences[5] = response.disease$data[[k]]$drug$molecule_type # Molecule type
+                act.evidence$evidence <- c(act.evidence$evidence,
+                                           response.disease$data[[k]]$drug$molecule_name, # Drug name
+                                           response.disease$data[[k]]$drug$molecule_type) # Molecule type
               }
               else if (type == 'literature'){
-                act.evidences[4] = response.disease$data[[k]]$evidence$literature_ref$lit_id # paper url
+                act.evidence$evidence <- c(act.evidence$evidence,response.disease$data[[k]]$evidence$literature_ref$lit_id) # paper url
               }
               else if(type == 'affected_pathway'){
                 if (length(response.disease$data[[k]]$evidence$resource_score$method$reference) > 0){
-                  act.evidences[4] = response.disease$data[[k]]$evidence$resource_score$method$reference # paper url
-                }
+                  act.evidence$evidence <- c(act.evidence$evidence,response.disease$data[[k]]$evidence$resource_score$method$reference) # paper url
+                } else act.evidence$evidence <- c(act.evidence$evidence,'*')
                 if (length(response.disease$data[[k]]$evidence$known_mutations)>0){
-                  act.evidences[5] = response.disease$data[[k]]$evidence$known_mutations[[1]]$preferred_name
-                }
+                  act.evidence$evidence <- c(act.evidence$evidence,response.disease$data[[k]]$evidence$known_mutations[[1]]$preferred_name)
+                } else act.evidence$evidence <- c(act.evidence$evidence,'*')
                 if(length( response.disease$data[[k]]$evidence$urls[[1]]$url ) > 0){
-                  act.evidences[6] = response.disease$data[[k]]$evidence$urls[[1]]$url # reactome url
-                }
+                  act.evidence$evidence <- c(act.evidence$evidence,response.disease$data[[k]]$evidence$urls[[1]]$url) # reactome url
+                } else act.evidence$evidence <- c(act.evidence$evidence,'*')
               }
               else if(type == 'animal_model'){
-                act.evidences[4] = response.disease$data[[k]]$evidence$biological_model$is_associated # Boolean
-                act.evidences[5] = response.disease$data[[k]]$evidence$biological_model$species       # Specie
+                act.evidence$evidence <- c(act.evidence$evidence,
+                                           response.disease$data[[k]]$evidence$biological_model$is_associated, # Boolean
+                                           response.disease$data[[k]]$evidence$biological_model$species)       # Specie
               }
               else if (type == 'rna_expression'){
-                if(length(response.disease$data[[k]]$literature$references[[1]]$lit_id>0))
-                  act.evidences[4] = response.disease$data[[k]]$literature$references[[1]]$lit_id[1] # paper url
-                act.evidences[5] = response.disease$data[[k]]$evidence$comparison_name # ej: "'oral squamous cell carcinoma' vs 'normal'"
+                if(length(response.disease$data[[k]]$literature$references[[1]]$lit_id>0)){
+                  act.evidence$evidence <- c(act.evidence$evidence,response.disease$data[[k]]$literature$references[[1]]$lit_id[1]) # paper url
+                }else act.evidence$evidence <- c(act.evidence$evidence,'*')
+                act.evidence$evidence <- c(act.evidence$evidence,response.disease$data[[k]]$evidence$comparison_name) # ej: "'oral squamous cell carcinoma' vs 'normal'"
               }
               else if (type == 'genetic_association'){
                 if(length(response.disease$data[[k]]$literature$references[[1]]$list_id > 0))
-                  act.evidences[4] = response.disease$data[[k]]$literature$references[[1]]$lit_id # paper url
+                  act.evidence$evidence <- c(act.evidence$evidence,response.disease$data[[k]]$literature$references[[1]]$lit_id) # paper url
+                else act.evidence$evidence <- c(act.evidence$evidence,'*')
+                
                 if(length(response.disease$data[[k]]$evidence$gene2variant$functional_consequence)>0)
-                  act.evidences[5] = response.disease$data[[k]]$evidence$gene2variant$functional_consequence # url ej: ontobee
+                  act.evidence$evidence <- c(act.evidence$evidence,response.disease$data[[k]]$evidence$gene2variant$functional_consequence) # url ej: ontobee
+                else act.evidence$evidence <- c(act.evidence$evidence,'*')
               }
               else if (type == 'somatic_mutation'){
-                act.evidences[4] = response.disease$data[[k]]$evidence$known_mutations[[1]]$functional_consequence # url ej: ontobee
-                act.evidences[5] = response.disease$data[[k]]$evidence$known_mutations[[1]]$preferred_name # ej: "sequence_alteration"
+                act.evidence$evidence <- c(act.evidence$evidence,
+                                           response.disease$data[[k]]$evidence$known_mutations[[1]]$functional_consequence, # url ej: ontobee
+                                           response.disease$data[[k]]$evidence$known_mutations[[1]]$preferred_name) # ej: "sequence_alteration"
                 if (length(response.disease$data[[k]]$evidence$known_mutations[[1]]$role_in_cancer) > 0)
-                  act.evidences[6] = response.disease$data[[k]]$evidence$known_mutations[[1]]$role_in_cancer # ej: "oncogene, TSG"
+                  act.evidence$evidence <- c(act.evidence$evidence,response.disease$data[[k]]$evidence$known_mutations[[1]]$role_in_cancer) # ej: "oncogene, TSG"
+                else act.evidence$evidence <- c(act.evidence$evidence,'*')
               }
               else{
-                print(paste('Unknown evidence type',response.disease$data[[k]]$type))
+                act.evidence <- c()
+                cat(paste('Unknown evidence type',response.disease$data[[k]]$type,'\n'))
               }
             }
-            # Save actual evidences 
-            evidences <- rbind(evidences,act.evidences)
+            # Save actual evidence if is not empty
+            if (length(act.evidence) > 0){
+              if (! type %in% names(evidences)) evidences[[type]] <- c()
+              evidences[[type]] <- c(evidences[[type]],list(act.evidence))
+            }
           }
         }
-        # If there are found evidences, remove evidences with duplicated information
-        if (dim(evidences)[1] > 1)
-          evidences <- evidences[!duplicated(evidences[,4:6]),]
+        
+        # Remove evidences with duplicated information
+        "
+        for (type in names(evidences)){
+          aux <- c()
+          for ( i in length(evidences[[type]])){
+            if (all(evidences[[type]][[i]]$evidence %in% aux)) evidences <- list.remove(evidences,i)
+            else aux <- rbind(aux,evidences[[type]][[i]]$evidence)
+          }
+          aux <- c()
+        }
+        "
+        
         # Save found evidences for gene j (first row is empty)
-        info[[geneList[j]]] <- evidences[-1,]
+        info[[geneList[j]]] <- evidences
       }else{
         # Not evidences found for gene j.
         # Add empty evidence
-        info[[geneList[j]]] <- rbind(c('literature',rep('*',5)),c('literature',rep('*',5)))
+        info[[geneList[j]]] <- list()
       }
     }else{
       # Gene not found. 
       # Add empty evidence
-      info[[geneList[j]]] <- rbind(c('literature',rep('*',5)),c('literature',rep('*',5)))
+      info[[geneList[j]]] <- list()
     }
   }
   

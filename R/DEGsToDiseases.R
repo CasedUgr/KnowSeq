@@ -9,7 +9,7 @@
 #' @examples
 #' diseases <- DEGsToDiseases(c("KRT19","BRCA1"))
 
-DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, method = "targetValidation"){
+DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, method = "targetValidation",getEvidences = FALSE){
 
   if(length(geneList)[1] == 0 || is.null(geneList)){
 
@@ -97,6 +97,7 @@ DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, method = "targe
             
             if(response$size != 0){
                 currentGene = matrix(, nrow = response$size, ncol = 9)
+                if (getEvidences) currentEvidences = vector("list", 0)
                 
                 for(i in seq(response$size)){
                   
@@ -109,10 +110,13 @@ DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, method = "targe
                   currentGene[i,7] = response$data[[i]]$association_score$datatypes$known_drug
                   currentGene[i,8] = response$data[[i]]$association_score$datatypes$animal_model
                   currentGene[i,9] = response$data[[i]]$association_score$datatypes$affected_pathway
-                  
+
+                  if (getEvidences) currentEvidences[[currentGene[i,1]]] <- DEGsEvidences(unique(geneList)[j],response$data[[i]]$disease$efo_info$label)
                 }
                 colnames(currentGene) <- c("Disease","Overall Score","Literature","RNA Expr.","Genetic Assoc.","Somatic Mut.","Known Drug","Animal Model","Affected Pathways")
-                results[[j]] <- currentGene
+                
+                results[[j]] <- list('summary'=currentGene)
+                if (getEvidences) results[[j]]['evidences'] <- currentEvidences
                 names(results)[j] <- unique(geneList)[j]
             }else{
               

@@ -19,7 +19,7 @@ DEGsEvidences <- function(geneList, disease, subdisease='', minCitation = 5, siz
     
   }
   # Get disease id (it's necesary for evidences request)
-  r_Ensembl <- httr::GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
+  r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
   respon <- content(r_Ensembl)
   
   if ( 'size' %in% names(respon) && respon$size == 0){

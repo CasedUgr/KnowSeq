@@ -11,8 +11,8 @@
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#'
-#' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix))
+#' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='mrmr')
+#' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer')
 
 featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
 
@@ -63,7 +63,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
 
     return(rownames(rfRanking))
 
-  }else if(mode == "da"){
+  }else if(mode == "da" || mode == 'daRed'){
     
     if(disease == ""){
       stop("Please, indicate a disease name to acquire the Disease Association Score and Feature selection.")
@@ -72,18 +72,16 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
     cat("Calculating ranking of biological relevant genes by using DA implementation...\n")
     
     relatedDiseases <- DEGsToDiseases(vars_selected, size = 100)
-    
     overallRanking <- c()
     
     for(i in seq(length(relatedDiseases))){
       
-      if(is.na(grep(disease,relatedDiseases[[i]][,1])[1]))
+      if(is.na(grep(disease,relatedDiseases[[i]]$summary[,1])[1]))
         overallScore <- 0.0
       else
-        overallScore <- relatedDiseases[[i]][grep(disease,relatedDiseases[[i]][,1])[1],2]
-      
+        overallScore <- relatedDiseases[[i]]$summary[grep(disease,relatedDiseases[[i]]$summary[,1])[1],2]
+
       overallRanking <- c(overallRanking,overallScore)
-      
     }
     
     names(overallRanking) <- names(relatedDiseases)
@@ -93,9 +91,59 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
     cat(names(overallRanking))
     cat("\n")
     
-    return(overallRanking)
+    if (mode == 'da') return(overallRanking)
+    
+    evidences <- DEGsEvidences(names(overallRanking), disease, size=100)
+    cat("Calculating redundances between found evidences...\n")
+    redundances <- evidencesToRedundance(evidences)
+    
+    
+    cat("Calculating genes scores...\n")
+    genes <- names(overallRanking)
+    
+    # Output: list of selected genes
+    selected.genes <- list()
+    # Select a gene with maximun score
+    selected.genes[[genes[which(overallRanking == max(overallRanking))[1]]]] = max(overallRanking)
+    
+    # Iter over all genes
+    for (i in seq(length(overallRanking)-1)){
+      # actual max score
+      max <- -1000
+      
+      # act.genes contains genes to select (genes that are not already selected)
+      act.genes <- genes[ ! genes %in% names(selected.genes) ]
+      
+      # Iter in genes to select
+      for ( gen in act.genes){
+        # Gene relevance is it's score
+        rel <- as.numeric(overallRanking[[gen]])
+        # Redundance begin as 0
+        red <- 0
+        
+        # Calculate redundance between actual gene and selected genes
+        for ( sel in names(selected.genes)){
+          red <- red + redundances[gen,sel]
+        }
+        # Score = relevance - relevance * redundance/ num of selected genes
+        score <- rel - red/length(selected.genes) * rel
+        
+        # If actual score is max. keep actual gene
+        if (score > max){
+          max <- score
+          act.selected <- gen
+        }
+      }
+      # Save gene with maximun score
+      selected.genes[[act.selected]] <- max
+    }
+    return(selected.genes)
     
   }else{
     stop("The mode is unrecognized, please use mrmr or rf.")
   }
 }
+
+
+
+

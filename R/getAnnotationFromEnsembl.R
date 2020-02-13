@@ -33,29 +33,21 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     
     filename <- paste('inst/extdata/',notHumandataset,'.csv',sep='')
 
-    if (file.exists(filename)){
-      cat(paste("Getting annotation ", notHumandataset, "...\n"))
-      myAnnotation <- read.csv(filename,header=TRUE)
-    }
-    else{
-      cat(paste("Downloading annotation ", notHumandataset, "...\n"))
-      query = paste('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE Query>
-          <Query  virtualSchemaName = "default" formatter = "CSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >
-          <Dataset name = "',notHumandataset,'" interface = "default" >',sep='')
-      for (attribute in attributes)
-        query <- paste(query,'<Attribute name = "',attribute,'" />',sep='')
-      query <- paste(query,'</Dataset></Query>',sep='')
+    cat(paste("Downloading annotation ", notHumandataset, "...\n"))
+    query = paste('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE Query>
+        <Query  virtualSchemaName = "default" formatter = "CSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >
+        <Dataset name = "',notHumandataset,'" interface = "default" >',sep='')
+    for (attribute in attributes)
+      query <- paste(query,'<Attribute name = "',attribute,'" />',sep='')
+    query <- paste(query,'</Dataset></Query>',sep='')
+  
+    request <- paste('http://www.ensembl.org/biomart/martservice?query=',query,sep='')
+    download.file(request,method='wget',destfile = filename)
     
-      request <- paste('http://www.ensembl.org/biomart/martservice?query=',query,sep='')
-      download.file(request,method='wget',destfile = filename)
-      myAnnotation <- read.csv(filename)
-      
-      # Set columns names as attributes
-      colnames(myAnnotation) <- attributes
-      write.csv(myAnnotation,filename,row.names=FALSE)
-
-    }
+    myAnnotation <- read.csv(filename)
+    colnames(myAnnotation) <- attributes
     myAnnotation <- myAnnotation[myAnnotation$ensembl_gene_id %in% values,]
+    system(paste('rm',filename))
   }
   return(myAnnotation)
 }

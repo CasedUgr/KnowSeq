@@ -19,19 +19,22 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   if(typeof(values) != "character"){stop("The parameter values must be a character vector that contains the genes IDs.")}
   if(typeof(filters) != "character"){stop("The parameter filters must be a character vector that contains at least one attributes used as filter.")}
   if(!is.logical(notHSapiens)){stop("notHSapiens parameter can only takes the values TRUE or FALSE.")}
-
+  
+  dir <- system.file("extdata", package="KnowSeq")
+  
   if(!notHSapiens){
 
       cat("Getting annotation of the Homo Sapiens...\n")
       cat(paste("Using reference genome 38.\n"))
 
-      myAnnotation <- read.csv('inst/extdata/GRCh38Annotation.csv')
+      myAnnotation <- read.csv(paste(dir,"GRCh38Annotation.csv",sep = "/"))
       myAnnotation <- myAnnotation[myAnnotation$ensembl_gene_id %in% values,]
+      
   }else{
 
     if(length(notHumandataset)[1] == 0 || is.null(notHumandataset)){stop("The notHumandataset is empty! Please, provide a right notHumandataset")}
     
-    filename <- paste('inst/extdata/',notHumandataset,'.csv',sep='')
+    filename <- paste(notHumandataset,'.csv',sep='')
 
     cat(paste("Downloading annotation ", notHumandataset, "...\n"))
     query = paste('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE Query>

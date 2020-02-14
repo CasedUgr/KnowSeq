@@ -7,14 +7,17 @@
 #' @param vars_selected The genes selected to use in the feature selection process. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes.
 #' @param mode The algorithm used to calculate the genes ranking. The possibilities are two: mrmr, rf and da.
 #' @param disease The name of a disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.
+#' @param subdiseases Vector with the name of the particular subdiseases from disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.
 #' @return A vector that contains the ranking of genes.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='mrmr')
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer')
+#' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer',subdiseases = c('colorectal cancer','breast cancer'))
 
-featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
+
+featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",subdiseases=c()){
 
   if(!is.data.frame(data) && !is.matrix(data)){
 
@@ -72,16 +75,41 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
     cat("Calculating ranking of biological relevant genes by using DA implementation...\n")
     
     relatedDiseases <- DEGsToDiseases(vars_selected, size = 100)
-    overallRanking <- c()
     
-    for(i in seq(length(relatedDiseases))){
-      
-      if(is.na(grep(disease,relatedDiseases[[i]]$summary[,1])[1]))
-        overallScore <- 0.0
-      else
-        overallScore <- relatedDiseases[[i]]$summary[grep(disease,relatedDiseases[[i]]$summary[,1])[1],2]
+    # Check if it is not a multiclass problem
+    if (length(subdiseases) == 0){
+      overallRanking <- c()
+      for(i in seq(length(relatedDiseases))){
+        
+        if(is.na(grep(disease,relatedDiseases[[i]]$summary[,1])[1]))
+          overallScore <- 0.0
+        else
+          overallScore <- relatedDiseases[[i]]$summary[grep(disease,relatedDiseases[[i]]$summary[,1])[1],2]
 
-      overallRanking <- c(overallRanking,overallScore)
+        overallRanking <- c(overallRanking,overallScore)
+      }
+    }
+    else{
+      overallRankingDisease <- list()
+      # Get DA score for each sub disease
+      for( subdisease in subdiseases){
+        overallRankingDisease[[subdisease]] = c()
+        for(i in seq(length(relatedDiseases))){
+          if(is.na(grep(subdisease,relatedDiseases[[i]]$summary[,1])[1])){
+            overallScore <- 0.0
+          }else{
+            overallScore <- relatedDiseases[[i]]$summary[grep(subdisease,relatedDiseases[[i]]$summary[,1])[1],2]
+          }
+          overallRankingDisease[[subdisease]] <- c(overallRankingDisease[[subdisease]],overallScore)
+        }
+        names(overallRankingDisease[[subdisease]]) <- names(relatedDiseases)
+      }
+      
+      # Final DA score is the difference in absolute value
+      overallRanking <- rep(0,length(overallRankingDisease[[1]]))
+      for (i in seq(length(overallRankingDisease))){
+        overallRanking <- abs(overallRanking-as.numeric(overallRankingDisease[[i]]))
+      }
     }
     
     names(overallRanking) <- names(relatedDiseases)
@@ -93,9 +121,24 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
     
     if (mode == 'da') return(overallRanking)
     
-    evidences <- DEGsEvidences(names(overallRanking), disease, size=100)
-    cat("Calculating redundances between found evidences...\n")
-    redundances <- evidencesToRedundance(evidences)
+    if (length(subdiseases) == 0){
+      evidences <- DEGsEvidences(names(overallRanking), disease, size=100)
+      cat("Calculating redundances between found evidences...\n")
+      redundances <- evidencesToRedundance(evidences)
+    }else{
+      evidences <- list()
+      act.redundances <- list()
+      redundances <- matrix(0,ncol=length(overallRanking),nrow=length(overallRanking))
+
+      for (subdisease in subdiseases){
+        evidences[[subdisease]] <- DEGsEvidences(names(overallRanking),disease,subdisease,size=10)
+        cat(paste("Calculating redundances between found evidences for subdisease",disease,"...\n"))
+        act.redundances[[subdisease]] <- evidencesToRedundance(evidences[[subdisease]])
+        redundances <- abs(redundances - act.redundances[[subdisease]])
+      }
+      colnames(redundances) = colnames(act.redundances[[subdisease[1]]])
+      rownames(redundances) = rownames(act.redundances[[subdisease[1]]])
+    }
     
     
     cat("Calculating genes scores...\n")
@@ -140,10 +183,8 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease=""){
     return(selected.genes)
     
   }else{
-    stop("The mode is unrecognized, please use mrmr or rf.")
+    stop("The mode is unrecognized, please use mrmr, rf, da or daRed.")
   }
 }
-
-
 
 

@@ -1,13 +1,13 @@
 #' @param geneList A list that contains the gene symbols or gene names of the DEGs.
-#' @param disease The name of a disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.
-#' @param subdisease The name of a particular subdisease from disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter. Default '' 
+#' @param disease The name of a disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.
+#' @param subdisease The name of a particular subdisease from disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.
 #' @param minCitation Minimum number of citations of each genes in a disease to consider the genes related with the disease.
 #' @param size The number of diseases to retrieve from targetValidation
 #' @return A list which names are genes from geneList and which contains related evidences for each gene in geneList and indicated disease.
 #' @example
 #' evidences <- DEGsEvidences(c("KRT19","BRCA1","TYMP"),'cancer')
 
-DEGsEvidences <- function(geneList, disease, subdisease='', minCitation = 5, size = 10){
+DEGsEvidences <- function(geneList, disease, subdisease='', size = 10){
   if(length(geneList)[1] == 0 || is.null(geneList) ){
     
     stop("The geneList is empty! Please, provide a right geneList.")

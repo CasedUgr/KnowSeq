@@ -1,15 +1,15 @@
 # KnowSeq R/bioc package: Beyond the traditional RNA-seq pipeline.
 
-[![Bioconductor Time](https://bioconductor.org/shields/years-in-bioc/KnowSeq.svg)](https://bioconductor.org/packages/release/bioc/html/KnowSeq.html "How long has been KnowSeq in a release of Bioconductor")
-[![Bioconductor Downloads](https://bioconductor.org/shields/downloads/KnowSeq.svg)](https://bioconductor.org/packages/stats/bioc/KnowSeq.html "Ranking by number of downloads. A lower number means the package is downloaded more frequently. Determined within a package type (software, experiment, annotation, workflow) and uses the number of distinct IPs for the last 12 months")
+[![Bioconductor Time](https://bioconductor.org/shields/years-in-bioc/KnowSeq.svg)](https://bioconductor.org/packages/release/bioc/html/KnowSeq "How long has been KnowSeq in a release of Bioconductor")
+[![Bioconductor Downloads](https://bioconductor.org/shields/downloads/KnowSeq.svg)](https://bioconductor.org/packages/stats/bioc/KnowSeq "Ranking by number of downloads. A lower number means the package is downloaded more frequently. Determined within a package type (software, experiment, annotation, workflow) and uses the number of distinct IPs for the last 12 months")
 [![Support posts](https://bioconductor.org/shields/posts/KnowSeq.svg)](https://support.bioconductor.org/t/KnowSeq/ "Support site activity on KnowSeq, last 6 months: tagged questions/avg. answers per question/avg. comments per question/accepted answers, or 0 if no tagged posts.")
 
 
 **Current build status**
-- `release` [![Bioconductor Availability](https://bioconductor.org/shields/availability/release/KnowSeq.svg)](https://bioconductor.org/packages/release/bioc/html/KnowSeq.html#archives "Whether KnowSeq release is available on all platforms") 
+- `release` [![Bioconductor Availability](https://bioconductor.org/shields/availability/3.10/KnowSeq.svg)](https://bioconductor.org/packages/release/bioc/html/KnowSeq.html#archives "Whether KnowSeq release is available on all platforms") 
 [![Bioconductor Commits](https://bioconductor.org/shields/lastcommit/release/bioc/KnowSeq.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/KnowSeq "Time since last commit, possible values: today, < 1 week, < 1 month, < 3 months, since release, before release")
 [![Bioconductor Release Build](https://bioconductor.org/shields/build/release/bioc/KnowSeq.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/KnowSeq/ "Bioconductor release build")
-- `development` [![Bioconductor Availability](https://bioconductor.org/shields/availability/devel/KnowSeq.svg)](https://bioconductor.org/packages/devel/bioc/html/KnowSeq.html#archives "Whether KnowSeq devel is available on all platforms") 
+- `development` [![Bioconductor Availability](https://bioconductor.org/shields/availability/3.11/KnowSeq.svg)](https://bioconductor.org/packages/devel/bioc/html/KnowSeq.html#archives "Whether KnowSeq devel is available on all platforms") 
 [![Bioconductor Commits](https://bioconductor.org/shields/lastcommit/devel/bioc/KnowSeq.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/KnowSeq "Time since last commit, possible values: today, < 1 week, < 1 month, < 3 months, since release, before release")
 [![Bioconductor Devel Build](https://bioconductor.org/shields/build/devel/bioc/KnowSeq.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/KnowSeq/ "Bioconductor devel build")
 

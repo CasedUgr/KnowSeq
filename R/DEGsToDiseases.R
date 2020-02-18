@@ -25,12 +25,12 @@ DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, getEvidences = 
   results <- vector("list", 0)
   
   for(j in seq_len(length(unique(geneList)))){
-  r_Ensembl <- httr::GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",geneList[j],"&size=1&filter=target",sep = ""))
-  respon <- content(r_Ensembl)
-  ensembl_id <- respon$data[[1]]$data$ensembl_gene_id
-  
-  if(!is.na(ensembl_id)){
+    r_Ensembl <- httr::GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",geneList[j],"&size=1&filter=target",sep = ""))
+    respon <- content(r_Ensembl)
+    ensembl_id <- respon$data[[1]]$data$ensembl_gene_id
     
+    if(!is.na(ensembl_id)){
+      
       genePeti = paste(base, ensembl_id,"&direct=true&fields=association_score&fields=disease.efo_info.label&size=",size,sep = "")
       r <- GET(genePeti)
       response = content(r)

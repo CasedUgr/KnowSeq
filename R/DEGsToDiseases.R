@@ -49,7 +49,11 @@ DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, getEvidences = 
             currentGene[i,8] = response$data[[i]]$association_score$datatypes$animal_model
             currentGene[i,9] = response$data[[i]]$association_score$datatypes$affected_pathway
   
-            if (getEvidences) currentEvidences[[currentGene[i,1]]] <- DEGsEvidences(unique(geneList)[j],response$data[[i]]$disease$efo_info$label,verbose=FALSE)[[unique(geneList)[j]]]
+            if (getEvidences) {
+              currentEvidences[[currentGene[i,1]]] <- DEGsEvidences(unique(geneList)[j],response$data[[i]]$disease$efo_info$label,verbose=FALSE)[[unique(geneList)[j]]]
+              if (length(currentEvidences[[currentGene[i,1]]]) == 0) 
+                currentEvidences[[currentGene[i,1]]] = 'No evidences found'
+            }
           }
           colnames(currentGene) <- c("Disease","Overall Score","Literature","RNA Expr.","Genetic Assoc.","Somatic Mut.","Known Drug","Animal Model","Affected Pathways")
           

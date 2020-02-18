@@ -145,6 +145,7 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
       # Add empty evidence
       info[[geneList[j]]] <- list()
     }
+    if (length(info[[geneList[j]]]) == 0) info[[geneList[j]]] = 'No  evidences found'
   }
   
   if (verbose) cat("Evidences acquired successfully!\n")

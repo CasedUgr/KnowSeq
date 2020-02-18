@@ -21,7 +21,7 @@ evidencesToRedundance <- function(data){
      for(gen2 in seq(length(data))){
        if (gen1 != gen2){
          # If evidence from gen1 and gen2 are not empty
-         if ( length(data[[gen1]]) > 0 && length(data[[gen2]]) > 0){
+         if ( class(data[[gen1]]) == 'list' && class(data[[gen2]]) == 'list'){
            # Iter in types
             gen1.nevs <- 0
             for (type in names(data[[gen1]])){

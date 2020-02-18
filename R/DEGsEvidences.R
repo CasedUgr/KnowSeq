@@ -3,11 +3,12 @@
 #' @param subdisease The name of a particular subdisease from disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.
 #' @param minCitation Minimum number of citations of each genes in a disease to consider the genes related with the disease.
 #' @param size The number of diseases to retrieve from targetValidation
+#' @param verbose Boolean that indicates if progress messages are printed to stdout
 #' @return A list which names are genes from geneList and which contains related evidences for each gene in geneList and indicated disease.
 #' @example
 #' evidences <- DEGsEvidences(c("KRT19","BRCA1","TYMP"),'cancer')
 
-DEGsEvidences <- function(geneList, disease, subdisease='', size = 10){
+DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRUE){
   if(length(geneList)[1] == 0 || is.null(geneList) ){
     
     stop("The geneList is empty! Please, provide a right geneList.")
@@ -27,7 +28,7 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size = 10){
   }
   disease.id <- respon$data[[1]]$id
   
-  cat("Obtaining related diseases with the DEGs from targetValidation platform...\n")
+  if (verbose) cat("Obtaining related diseases with the DEGs from targetValidation platform...\n")
   base = "https://api.opentargets.io/v3/platform/public/evidence/filter?target="
   
   # Create empty output
@@ -146,6 +147,6 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size = 10){
     }
   }
   
-  cat("Evidences acquired successfully!\n")
+  if (verbose) cat("Evidences acquired successfully!\n")
   invisible(info)
 }

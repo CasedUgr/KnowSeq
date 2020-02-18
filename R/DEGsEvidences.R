@@ -57,7 +57,7 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
         for(k in seq(response.disease$size)){
           # Check if disease is matching
           if ( (subdisease=='' && grepl(disease,response.disease$data[[k]]$disease$efo_info$label))
-               || subdisease == response.disease$data[[k]]$disease$efo_info$label){
+               || grepl(subdisease,response.disease$data[[k]]$disease$efo_info$label)){
             # Create empty evidence
             act.evidence <- list()
             

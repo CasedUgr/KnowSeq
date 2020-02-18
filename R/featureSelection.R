@@ -14,8 +14,7 @@
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='mrmr')
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer')
-#' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer',subdiseases = c('colorectal cancer','breast cancer'))
-
+#' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer',subdiseases=c('breast','colorectal'))
 
 featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",subdiseases=c()){
 
@@ -129,18 +128,22 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       evidences <- list()
       act.redundances <- list()
       redundances <- matrix(0,ncol=length(overallRanking),nrow=length(overallRanking))
-
+      
       for (subdisease in subdiseases){
-        evidences[[subdisease]] <- DEGsEvidences(names(overallRanking),disease,subdisease,size=10)
+        evidences[[subdisease]] <- DEGsEvidences(names(overallRanking),disease,subdisease,size=100)
         cat(paste("Calculating redundances between found evidences for subdisease",disease,"...\n"))
         act.redundances[[subdisease]] <- evidencesToRedundance(evidences[[subdisease]])
-        redundances <- abs(redundances - act.redundances[[subdisease]])
       }
+
+      # Global redundance is the mean of the subdiseases redundances
+      Y <- do.call(cbind, act.redundances)
+      Y <- array(Y, dim=c(dim(act.redundances[[1]]), length(act.redundances)))
+      redundances <- apply(Y, c(1, 2), mean, na.rm = TRUE)
+
       colnames(redundances) = colnames(act.redundances[[subdisease[1]]])
       rownames(redundances) = rownames(act.redundances[[subdisease[1]]])
     }
-    
-    
+
     cat("Calculating genes scores...\n")
     genes <- names(overallRanking)
     
@@ -181,10 +184,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       selected.genes[[act.selected]] <- max
     }
     return(selected.genes)
-    
   }else{
     stop("The mode is unrecognized, please use mrmr, rf, da or daRed.")
   }
 }
-
-

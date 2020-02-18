@@ -12,8 +12,10 @@
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' getReport(expressionMatrix,labels,'pdf-report',clasifAlgs=c('rf'))
 
+
 getReport <- function(data,labels,outdir,baseline='expression',
                       toHTML = TRUE, toPDF = TRUE,
+                      featureSelectionAlg = 'mrmr',
                       clasifAlgs=c('knn','rf','svm'),
                       metrics=c('accuracy','specificity','sensitivity')){
   # --- Check params --- #
@@ -44,18 +46,10 @@ getReport <- function(data,labels,outdir,baseline='expression',
   # markobj contain the text that will be displayed in html or pdf file
   markobj <- c()
 
-  cat("Performing the quality analysis of the samples\n")
+  #cat("Performing the quality analysis of the samples\n")
   #RNAseqQA(expressionMatrix)
   
-  #cat("Calculating the optimal number of clusters presented in the samples in order to try to identificate the batch effect groups to remove it by combat method")
-  #dataPlot(expressionMatrix,labels,mode = "optimalClusters",toPNG = TRUE,toPDF = FALSE)
-  #print("Plotting clusters")
-  #dataPlot(t(expressionMatrix),labels,mode = "knnClustering", clusters = 9,toPNG = TRUE,toPDF = FALSE)
-  # Corrrecting batch effect by using combat method
-  #expressionMatrixCorrected <- batchEffectRemoval(t(expressionMatrix), labels, method = "combat")
-  
   # --- Differencia Expressed Genes --- #
-
   markobj <- c(markobj,'## Differential Expressed Genes extraction and visualization',
                '### Extracting DEGs\n')
 
@@ -103,18 +97,17 @@ getReport <- function(data,labels,outdir,baseline='expression',
     else if (clasifAlg == 'rf') results_cv <- rf_CV(DEGsMatrixML,labels,mrmrRanking[1:10],5)
     else if (clasifAlg == 'svm') results_cv <- svm_CV(DEGsMatrixML,labels,mrmrRanking[1:10],5)
     
-    markobj <- c(markobj,'####',clasifAlg,'\n')
+    markobj <- c(markobj,paste('####',clasifAlg),'\n')
     
     for (metric in metrics){
       if (metric == 'accuracy') act.metric = 'accMatrix'
       else if (metric == 'specificity') act.metric = 'specMatrix'
       else if (metric == 'sensitivity') act.metric = 'sensMatrix'
-      
       markobj <- c(markobj,'```{r echo = FALSE}',
-                  'dataPlot(results_cv[[act.metric]],
+                  paste('dataPlot(results_cv[["',act.metric,'"]],
                        mode = "classResults",
-                       main = paste(metric,"for each fold with",clasifAlg), 
-                       xlab = "Genes", ylab = metric)','```')
+                       main = "',metric,' for each fold with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',metric,'")',sep=''),'```')
     }
     #allCfMats <- results_cv$cfMats[[1]]$table + results_cv$cfMats[[2]]$table + results_cv$cfMats[[3]]$table + results_cv$cfMats[[4]]$table + results_cv$cfMats[[5]]$table
     #dataPlot(allCfMats,labels,mode = "confusionMatrix")
@@ -128,7 +121,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
   for (i in seq(length(unique(labels)))){
     labelsGo <- gsub(unique(labels)[i],i-1,labelsGo) 
   }
-
+  
   GOsMatrix <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
   GOsMatrix$`BP Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`BP Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
   markobj <- c(markobj,'#### BP Ontology GOs\n','```{r}','knitr::kable(data.frame(GOsMatrix$`BP Ontology GOs`),longtable = T)','```\n')
@@ -137,13 +130,12 @@ getReport <- function(data,labels,outdir,baseline='expression',
   GOsMatrix$`CC Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`CC Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
   markobj <- c(markobj,'#### CC Ontology GOs\n','```{r}','knitr::kable(data.frame(GOsMatrix$`CC Ontology GOs`),longtable = T)','```\n')
   
-  
+  # --- Pathways Visualization --- #
   DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE)
   genomeAnnotation <- getAnnotationFromEnsembl('allGenome',notHSapiens=FALSE)
   
-  # --- Pathways Visualization --- #
-  markobj <- c(markobj,'### Pathways visualization\n',       
-               '```{r}','DEGsPathwayVisualization(DEGsMatrix,DEGsAnnotation,expressionMatrix,genomeAnnotation)',
+  markobj <- c(markobj,'\n### Pathways visualization\n',       
+               '```{r echo=FALSE}','DEGsPathwayVisualization(DEGsMatrix,DEGsAnnotation,expressionMatrix,genomeAnnotation)',
                '```\n')
   
   # --- Related Diseases --- #
@@ -151,10 +143,11 @@ getReport <- function(data,labels,outdir,baseline='expression',
   diseases <- DEGsToDiseases(rownames(DEGsMatrix), size = 5)
   
   for (gene in names(diseases)){
-    markobj <- c(markobj,'\n\t- ',gene,': ',diseases[[gene]]$summary[,1])
+    markobj <- c(markobj,paste('\n\t- **',gene,'**.',sep=''))
+    for (disease in diseases[[gene]]$summary[,1])
+      markobj <- c(markobj,disease,', ')
+    markobj <- markobj[-length(markobj)]
   }
-  
-
   
   # --- Save Report --- #
   if ( toHTML ){
@@ -184,8 +177,5 @@ getReport <- function(data,labels,outdir,baseline='expression',
   }
   setwd(act.folder)
 }
-
-
-
 
 

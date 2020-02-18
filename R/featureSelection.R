@@ -16,6 +16,7 @@
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer')
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer',subdiseases=c('breast','colorectal'))
 
+
 featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",subdiseases=c()){
 
   if(!is.data.frame(data) && !is.matrix(data)){
@@ -131,7 +132,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       
       for (subdisease in subdiseases){
         evidences[[subdisease]] <- DEGsEvidences(names(overallRanking),disease,subdisease,size=100)
-        cat(paste("Calculating redundances between found evidences for subdisease",disease,"...\n"))
+        cat(paste("Calculating redundances between found evidences for subdisease",subdisease,"...\n"))
         act.redundances[[subdisease]] <- evidencesToRedundance(evidences[[subdisease]])
       }
 

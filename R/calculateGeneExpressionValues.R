@@ -50,10 +50,10 @@ calculateGeneExpressionValues <- function(countsMatrix,annotation,genesNames=TRU
     mylength <- mylength[-NaPos]
 
     mygenes <- mygenes[-NaPos]
-    rownames <- annotation$external_gene_name[which(annotation$ensembl_gene_id[-NaPos] == mygenes)]
+    rownames <- annotation$external_gene_name[match(annotation$ensembl_gene_id[-NaPos], mygenes)]
   }else{
     
-    rownames <- annotation$external_gene_name[which(annotation$ensembl_gene_id == mygenes)]
+    rownames <- annotation$external_gene_name[match(annotation$ensembl_gene_id, mygenes)]
     
   }
   myGCannot <- myGCannot[match(mygenes,names(myGCannot))]

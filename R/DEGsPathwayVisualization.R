@@ -9,103 +9,107 @@
 #' @return Nothing to return.
 #' @examples
 #' \dontrun{DEGsPathwayVisualization(DEGsMatrix, myDEGsAnnotation, expressionMatrix, allMyAnnotation, labels)}
-#' 
+#' dir <- system.file("extdata", package="KnowSeq")
+#' load(paste(dir,"/expressionExample.RData",sep = ""))
+#' DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix)[1:2],filter='external_gene_name')
+#' expressionAnnotation <-getAnnotationFromEnsembl(rownames(DEGsMatrix)[1:10],filter='external_gene_name')
+#' DEGsPathwayVisualization(DEGsMatrix, DEGsAnnotation, expressionMatrix, expressionAnnotation, labels)
 
 DEGsPathwayVisualization <- function(DEGsMatrix, DEGsAnnotation, expressionMatrix, expressionAnnotation, labels){
-
-    if(!is.matrix(DEGsMatrix)){stop("The class of DEGsMatrix parameter must be matrix.")}
-    if(!is.data.frame(DEGsAnnotation)){stop("The class of DEGsAnnotation parameter must be data.frame.")}
-    if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
-    if(!is.data.frame(expressionAnnotation)){stop("The class of expressionAnnotation parameter must be data.frame.")}
-
-    DEGsAnnotation <- DEGsAnnotation[which(!is.na(DEGsAnnotation$entrezgene_id) == TRUE),]
-
-    commonDEGs <- intersect(rownames(DEGsMatrix),unique(DEGsAnnotation$external_gene_name))
-    posCommonDEGs <- match(rownames(DEGsMatrix[commonDEGs,]),DEGsAnnotation$external_gene_name)
-    DEGsMatrix <- DEGsMatrix[commonDEGs,]
-    rownames(DEGsMatrix) <- DEGsAnnotation$entrezgene_id[posCommonDEGs]
-
-    expressionAnnotation <- expressionAnnotation[which(!is.na(expressionAnnotation$entrezgene_id) == TRUE),]
-
-    commonGenes <- intersect(rownames(expressionMatrix),unique(expressionAnnotation$external_gene_name))
-    posCommonGenes <- match(rownames(expressionMatrix[commonGenes,]),expressionAnnotation$external_gene_name)
-    expressionMatrix <- expressionMatrix[commonGenes,]
-    rownames(expressionMatrix) <- expressionAnnotation$entrezgene_id[posCommonGenes]
-
-    pathways_unique <- character()
-
-    cat("Retrieving DEGs associated pathways...\n")
-
-    for(gene in DEGsAnnotation$entrezgene_id){
-
-      if(!is.na(gene)){
-          get_GO <- httr::GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
-          get_GO_text <- httr::content(get_GO, "text")
-          pathway_start <- str_locate_all(pattern = "PATHWAY", get_GO_text)[[1]][2]
-          pathway_end <- str_locate_all(pattern = "BRITE", get_GO_text)[[1]][1]
-          pathways <- substr(get_GO_text,pathway_start+1,pathway_end-1)
-          pathways_unique <- c(pathways_unique,unique(as.character(unlist(str_extract_all(pathways,"hsa[a-zA-Z0-9]{5}")))))
-      }
+  
+  if(!is.matrix(DEGsMatrix)){stop("The class of DEGsMatrix parameter must be matrix.")}
+  if(!is.data.frame(DEGsAnnotation)){stop("The class of DEGsAnnotation parameter must be data.frame.")}
+  if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
+  if(!is.data.frame(expressionAnnotation)){stop("The class of expressionAnnotation parameter must be data.frame.")}
+  
+  DEGsAnnotation <- DEGsAnnotation[which(!is.na(DEGsAnnotation$external_gene_name) == TRUE),]
+  
+  commonDEGs <- intersect(rownames(DEGsMatrix),unique(DEGsAnnotation$external_gene_name))
+  posCommonDEGs <- match(rownames(DEGsMatrix[commonDEGs,]),DEGsAnnotation$external_gene_name)
+  DEGsMatrix <- DEGsMatrix[commonDEGs,]
+  rownames(DEGsMatrix) <- DEGsAnnotation$external_gene_name[posCommonDEGs]
+  
+  expressionAnnotation <- expressionAnnotation[which(!is.na(expressionAnnotation$external_gene_name) == TRUE),]
+  
+  commonGenes <- intersect(rownames(expressionMatrix),unique(expressionAnnotation$external_gene_name))
+  posCommonGenes <- match(rownames(expressionMatrix[commonGenes,]),expressionAnnotation$external_gene_name)
+  expressionMatrix <- expressionMatrix[commonGenes,]
+  rownames(expressionMatrix) <- expressionAnnotation$external_gene_name[posCommonGenes]
+  
+  pathways_unique <- character()
+  
+  cat("Retrieving DEGs associated pathways...\n")
+  
+  for(gene in DEGsAnnotation$external_gene_name){
+    
+    if(!is.na(gene)){
+      get_GO <- httr::GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
+      get_GO_text <- httr::content(get_GO, "text")
+      pathway_start <- str_locate_all(pattern = "PATHWAY", get_GO_text)[[1]][2]
+      pathway_end <- str_locate_all(pattern = "BRITE", get_GO_text)[[1]][1]
+      pathways <- substr(get_GO_text,pathway_start+1,pathway_end-1)
+      pathways_unique <- c(pathways_unique,unique(as.character(unlist(str_extract_all(pathways,"hsa[a-zA-Z0-9]{5}")))))
     }
-
-    naPos <- which(is.na(pathways_unique) == TRUE)
-    if(length(naPos) != 0)
-      pathways_unique <- pathways_unique[-naPos]
+  }
+  
+  naPos <- which(is.na(pathways_unique) == TRUE)
+  if(length(naPos) != 0)
+    pathways_unique <- pathways_unique[-naPos]
+  
+  pathways.unique <- unique(pathways_unique)
+  
+  cat(paste("A total of ",length(pathways.unique)," pathways have been retrieved!\n", sep = ""))
+  cat(paste(pathways.unique,"\n",sep = ""))
+  pathways.dir <- paste(getwd(),"Pathways",sep = "/")
+  dir.create(pathways.dir)
+  
+  expressionMatrixNorm <- expressionMatrix
+  
+  expressionMatrixNorm = vapply(as.data.frame(t(expressionMatrixNorm)), function(x){ 
+    max = max(x)
+    min = min(x)
+    x = ((x-min)/(max-min))*2-1}, double(ncol(expressionMatrixNorm)), USE.NAMES = TRUE)
+  
+  expressionMatrixNorm <- t(expressionMatrixNorm)
+  colnames(expressionMatrixNorm) <- colnames(expressionMatrix)
+  
+  if(dim(expressionMatrixNorm)[2] > 24){expressionMatrixNorm <- expressionMatrixNorm[,seq_len(24)]}
+  
+  for(pathway in pathways.unique){
     
-    pathways.unique <- unique(pathways_unique)
-
-    cat(paste("A total of ",length(pathways.unique)," pathways have been retrieved!\n", sep = ""))
-    cat(paste(pathways.unique,"\n",sep = ""))
-    pathways.dir <- paste(getwd(),"Pathways",sep = "/")
-    dir.create(pathways.dir)
-
-    expressionMatrixNorm <- expressionMatrix
-
-    expressionMatrixNorm = vapply(as.data.frame(t(expressionMatrixNorm)), function(x){ 
-      max = max(x)
-      min = min(x)
-      x = ((x-min)/(max-min))*2-1}, double(ncol(expressionMatrixNorm)), USE.NAMES = TRUE)
+    pathChecking <- GET(paste("http://rest.kegg.jp/get/",pathway,sep = ""))
     
-    expressionMatrixNorm <- t(expressionMatrixNorm)
-    colnames(expressionMatrixNorm) <- colnames(expressionMatrix)
-    
-    if(dim(expressionMatrixNorm)[2] > 24){expressionMatrixNorm <- expressionMatrixNorm[,seq_len(24)]}
-
-    for(pathway in pathways.unique){
-
-      pathChecking <- GET(paste("http://rest.kegg.jp/get/",pathway,sep = ""))
-
-      if(pathChecking$status_code != 404){
-
-        kegg.dir = paste(pathways.dir,pathway,sep = "/")
-        dir.create(kegg.dir)
-
-        tryCatch(
-          {
-
-            pathways.out <- pathview(gene.data = expressionMatrixNorm, pathway.id = pathway, species = "hsa", new.signature=FALSE)
-            fileMove(from = paste(pathway,".png",sep = ""),
-                     to =  paste(kegg.dir,"/",pathway,".png",sep = ""))
-            fileMove(from = paste(pathway,".pathview.png",sep = ""),
-                     to =  paste(kegg.dir,"/",pathway,".pathview.png",sep = ""))
-            fileMove(from = paste(pathway,".pathview.multi.png",sep = ""),
-                     to =  paste(kegg.dir,"/",pathway,".pathview.multi.png",sep = ""))
-            fileMove(from = paste(pathway,".xml",sep = ""),
-                     to =  paste(kegg.dir,"/",pathway,".xml",sep = ""))
-
-          },
-          error=function(cond) {
-            cat("This pathway cannot be processed successfully...")
-            file.remove(paste(pathway,"*"))
-            }
-          )
-
-
-      }else{
-
-        cat(paste("Pathway ", pathway, " cannot be downloaded due to a 404 error.\n",sep = ""))
-
-      }
+    if(pathChecking$status_code != 404){
+      
+      kegg.dir = paste(pathways.dir,pathway,sep = "/")
+      dir.create(kegg.dir)
+      
+      tryCatch(
+        {
+          pathways.out <- pathview(gene.data = expressionMatrixNorm, pathway.id = pathway, species = "hsa", new.signature=FALSE)
+          fileMove(from = paste(pathway,".png",sep = ""),
+                   to =  paste(kegg.dir,"/",pathway,".png",sep = ""))
+          fileMove(from = paste(pathway,".pathview.png",sep = ""),
+                   to =  paste(kegg.dir,"/",pathway,".pathview.png",sep = ""))
+          fileMove(from = paste(pathway,".pathview.multi.png",sep = ""),
+                   to =  paste(kegg.dir,"/",pathway,".pathview.multi.png",sep = ""))
+          fileMove(from = paste(pathway,".xml",sep = ""),
+                   to =  paste(kegg.dir,"/",pathway,".xml",sep = ""))
+          
+        },
+        error=function(cond) {
+          cat("This pathway cannot be processed successfully...")
+          file.remove(paste(pathway,"*"))
+        }
+      )
+      
+      
+    }else{
+      
+      cat(paste("Pathway ", pathway, " cannot be downloaded due to a 404 error.\n",sep = ""))
+      
     }
-
+  }
+  
 }
+

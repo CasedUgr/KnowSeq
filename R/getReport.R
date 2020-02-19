@@ -13,7 +13,7 @@
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-getReport(expressionMatrix,labels,'pdf-report',clasifAlgs=c('rf'))
+#' getReport(expressionMatrix,labels,'pdf-report',clasifAlgs=c('rf'))
 
 
 
@@ -136,7 +136,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
   GOsMatrix <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
   GOsMatrix$`BP Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`BP Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
   bp.frame <- data.frame(GOsMatrix$`BP Ontology GOs`)
-  colnames(bp.frame) <- fixGOsColumns(colnames(bp.frame))
+  bp.frame <- bp.frame[,c("GO.ID","GO_Genes","Term","Description")]
   markobj <- c(markobj,'#### BP Ontology GOs\n','```{r}',paste('knitr::kable(bp.frame)',sep=''),'```\n')
   
   #GOsMatrix$`MF Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`MF Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
@@ -198,16 +198,5 @@ getReport <- function(data,labels,outdir,baseline='expression',
     file.remove(paste(outdir,'report.log',sep='/'))
   }
 }
-
-fixGOsColumns <- function(columns){
-  for (i in seq(length(columns))){
-    columns[i] <- str_replace(columns[i],'classif','classif.')
-    columns[i] <- paste(strsplit(columns[i],'[.]')[[1]],collapse=' ')
-    columns[i] <- paste(strsplit(columns[i],'_')[[1]],collapse=' ')
-  }
-  return(columns)
-}
-
-
 
 

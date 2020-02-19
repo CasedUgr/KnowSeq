@@ -13,7 +13,7 @@
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#' getReport(expressionMatrix,labels,'pdf-report',clasifAlgs=c('rf'))
+getReport(expressionMatrix,labels,'pdf-report',clasifAlgs=c('rf'))
 
 
 
@@ -24,8 +24,6 @@ getReport <- function(data,labels,outdir,baseline='expression',
                       clasifAlgs=c('knn','rf','svm'),
                       metrics=c('accuracy','specificity','sensitivity')){
   
-  if (outputFormat == 'html') table.format <-'html'
-  else table.format <-'pandoc'
   # --- Check params --- #
   if(baseline == 'expression'){
     if(!is.data.frame(data) && !is.matrix(data)){
@@ -41,10 +39,10 @@ getReport <- function(data,labels,outdir,baseline='expression',
     expressionMatrix <- data
   }
   else if (baseline == 'count'){
-
+    
     myAnnotation <- getAnnotationFromEnsembl(rownames(data),notHSapiens = FALSE)
     expressionMatrix <- calculateGeneExpressionValues(data,myAnnotation, genesNames = TRUE)
-
+    
   }
   # Create output's directory if it doesn't exists
   if (! dir.exists(outdir)) dir.create(outdir)
@@ -56,12 +54,12 @@ getReport <- function(data,labels,outdir,baseline='expression',
   
   #cat("Performing the quality analysis of the samples\n")
   #RNAseqQA(expressionMatrix)
-
-
+  
+  
   # --- Differencia Expressed Genes --- #
   markobj <- c(markobj,'## Differential Expressed Genes extraction and visualization',
                '### Remove Batch Effect\n')
-
+  
   #DEGsInformation <- limmaDEGsExtraction(t(expressionMatrixCorrected), labels, lfc = 1.0, pvalue = 0.01, number = 100)
   svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
   DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0, pvalue = 0.01, number = Inf, svaCorrection = TRUE, svaMod = svaMod)
@@ -77,16 +75,16 @@ getReport <- function(data,labels,outdir,baseline='expression',
   
   if (featureSelectionMode == 'mrmr') ranking <- names(sort(ranking,decreasing = FALSE))
   else if (featureSelectionMode == 'da') ranking <- names(ranking)
-
+  
   genes <- ''
   for (gene in ranking[1:12]) genes <- paste(genes,gene,sep=', ')
   markobj <- c(markobj,'### Feature Selection\n','First 12 selected genes are:',sub(".","",genes))
-
+  
   markobj <- c(markobj,'\nThe expression of those 12 selected DEGs for each of the samples in an ordered way is plotted below\n',
                '```{r echo=FALSE}',
                "dataPlot(DEGsMatrix[ranking[1:12],],labels,mode = 'orderedBoxplot',toPNG = FALSE,toPDF = FALSE)",
                '```\n')
-
+  
   markobj <- c(markobj,"The expression of those 12 DEGs separatelly for all the samples is plotted below.\n")
   
   markobj <- c(markobj,
@@ -104,7 +102,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
   # --- Machine learning --- #
   # --- ---  Training --- --- #
   markobj <- c(markobj,'### Training \n')
-
+  
   for (clasifAlg in clasifAlgs){
     if (clasifAlg == 'knn') results_cv <- knn_CV(DEGsMatrixML,labels,ranking[1:12],5)
     else if (clasifAlg == 'rf') results_cv <- rf_CV(DEGsMatrixML,labels,ranking[1:12],5)
@@ -117,7 +115,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
       else if (metric == 'specificity') act.metric = 'specMatrix'
       else if (metric == 'sensitivity') act.metric = 'sensMatrix'
       markobj <- c(markobj,'```{r echo = FALSE}',
-                  paste('dataPlot(results_cv[["',act.metric,'"]],
+                   paste('dataPlot(results_cv[["',act.metric,'"]],
                        mode = "classResults",
                        main = "',metric,' for each fold with ',clasifAlg,'",
                        xlab = "Genes", ylab ="',metric,'")',sep=''),'```')
@@ -139,7 +137,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
   GOsMatrix$`BP Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`BP Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
   bp.frame <- data.frame(GOsMatrix$`BP Ontology GOs`)
   colnames(bp.frame) <- fixGOsColumns(colnames(bp.frame))
-  markobj <- c(markobj,'#### BP Ontology GOs\n','```{r}',paste('knitr::kable(bp.frame,"',table.format,'")',sep=''),'```\n')
+  markobj <- c(markobj,'#### BP Ontology GOs\n','```{r}',paste('knitr::kable(bp.frame)',sep=''),'```\n')
   
   #GOsMatrix$`MF Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`MF Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
   #markobj <- c(markobj,'#### MF Ontology GOs\n','```{r echo=FALSE}','knitr::kable(data.frame(GOsMatrix$`MF Ontology GOs`))','```\n')
@@ -154,19 +152,26 @@ getReport <- function(data,labels,outdir,baseline='expression',
   
   # --- Related Diseases --- #
   markobj <- c(markobj,'### Related diseases')
-  diseases <- DEGsToDiseases(rownames(DEGsMatrix), size = 5)
+  diseases <- DEGsToDiseases(rownames(DEGsMatrix), size = 5, getEvidences = TRUE)
   
-  diseases.frame <- data.frame()
   for (gene in names(diseases)){
-    rel.diseases <- ''
-    for (disease in diseases[[gene]]$summary[,1]) 
-      rel.diseases <- paste(rel.diseases,disease,sep=', ')
-    diseases.frame <- rbind(diseases.frame,data.frame(gene,sub(".","",rel.diseases)))
+    markobj <- c(markobj,paste('\n####',gene,sep=' '))
+
+    for (act.disease in names(diseases[[gene]]$evidences)){
+      if ( class(diseases[[gene]]$evidences[[act.disease]]) == 'list' ){
+        markobj <- c(markobj,paste('\n#####',act.disease,sep=' '))
+        for ( evidence.type in names(diseases[[gene]]$evidences[[act.disease]]) ){
+          act.evidences.frame <- c()
+          for (act.evidence in diseases[[gene]]$evidences[[act.disease]][[evidence.type]]){
+            act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
+          }
+          
+          markobj <- c(markobj,
+                       '```{r echo=FALSE}',paste('knitr::kable(data.frame(act.evidences.frame),caption="',evidence.type,' evidences for ',act.disease,'")',sep=''),'```')
+        }
+      }
+    }
   }
-  colnames(diseases.frame) <- c('Gene','Related Diseases')
-  markobj <- c(markobj,
-               '```{r echo=FALSE}',paste('knitr::kable(diseases.frame,"',table.format,'")',sep=''),'```')
-  
   
   # --- Save Report --- #
   if ( outputFormat == 'html' ){
@@ -202,4 +207,7 @@ fixGOsColumns <- function(columns){
   }
   return(columns)
 }
+
+
+
 

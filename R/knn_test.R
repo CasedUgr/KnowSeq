@@ -80,7 +80,20 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   sensVector <- double()
   specVector <- double()
   cfMatList  <- list()
-
+  
+  # Firstly with one variable
+  cat(paste("Testing with ", 1," variables...\n",sep=""))
+  predicts<-knn(train[, 1, drop=FALSE],test[, 1, drop=FALSE],labelsTrain,k=bestK)
+  
+  cfMat<-confusionMatrix(predicts,labelsTest)
+  acc<-confusionMatrix(predicts,labelsTest)$overall[[1]]
+  sens<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
+  spec<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
+  
+  cfMatList[[1]] <- cfMat
+  accVector[1] <- acc
+  sensVector[1] <- sens
+  specVector[1] <- spec
   for(i in c(2:dim(train)[2])){
 
     cat(paste("Testing with ", i," variables...\n",sep=""))

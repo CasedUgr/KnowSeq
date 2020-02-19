@@ -77,7 +77,15 @@ rf_CV<-function(data,labels,vars_selected,numFold=10){
 
     labelsTrain <- factor(labelsTrain[-1])
     labelsTest <- factor(labelsTest[-1])
-
+    # first iteration is performed outside of the foor lopp
+    # in order to avoid having a if inside
+    rf_mod = randomForest(x = trainingDataset[, 1, drop=FALSE], y = labelsTrain, ntree = 100)
+    predicts <- predict(rf_mod , testDataset[, 1, drop=FALSE])
+    cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)
+    acc_cv[i,1]<-confusionMatrix(predicts,labelsTest)$overall[[1]]
+    sens_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
+    spec_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
+    
     for(j in 2:length(vars_selected)){
 
       rf_mod = randomForest(x = trainingDataset[,seq(j)], y = labelsTrain, ntree = 100)

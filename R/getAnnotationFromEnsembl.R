@@ -29,7 +29,7 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
       myAnnotation <- read.csv(paste(dir,"GRCh38Annotation.csv",sep = "/"))
       
       if (filter %in% colnames(myAnnotation) && length(intersect(attributes,colnames(myAnnotation))) == length(attributes)){
-        if ( all(values != 'allGenome')) myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
+        myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
         myAnnotation <- myAnnotation[,union(attributes,filter)]
         return(myAnnotation)
       }
@@ -55,8 +55,7 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   query = paste('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE Query>
                   <Query  virtualSchemaName = "default" formatter = "CSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >
                   <Dataset name = "',dataset.name,'" interface = "default" >',sep='')
-  if ( all(values != 'allGenome')) 
-    query <- paste(query,'<Filter name = "',filter,'" value = "',sep='')
+  query <- paste(query,'<Filter name = "',filter,'" value = "',sep='')
                   
   for ( value in values) query <- paste(query,value,',',sep='')
   query <- str_sub(query, 1, nchar(query)-1)

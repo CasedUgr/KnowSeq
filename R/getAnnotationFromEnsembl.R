@@ -20,7 +20,7 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   if(!is.logical(notHSapiens)){stop("notHSapiens parameter can only takes the values TRUE or FALSE.")}
   
   dir <- system.file("extdata", package="KnowSeq")
-  dir <- 'inst/extdata'
+
   if(!notHSapiens){
 
       cat("Getting annotation of the Homo Sapiens...\n")

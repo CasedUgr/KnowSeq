@@ -81,12 +81,20 @@ knn_CV<-function(data,labels,vars_selected,numFold=10){
 
     labelsTrain <- factor(labelsTrain[-1])
     labelsTest <- factor(labelsTest[-1])
-
+    
+    # first iteration is performed outside of the foor lopp
+    # in order to avoid having a if inside
+    knn_mod = knn3(x = trainingDataset[, 1, drop=FALSE], y = labelsTrain, k = bestK)
+    predicts <- predict(knn_mod, testDataset[, 1, drop=FALSE], type = "class")
+    
+    cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)
+    acc_cv[i,1]<-confusionMatrix(predicts,labelsTest)$overall[[1]]
+    sens_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
+    spec_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
     for(j in 2:length(vars_selected)){
-
         knn_mod = knn3(x = trainingDataset[,seq(j)], y = labelsTrain, k = bestK)
         predicts <- predict(knn_mod, testDataset[,seq(j)], type = "class")
-
+        
         cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)
         acc_cv[i,j]<-confusionMatrix(predicts,labelsTest)$overall[[1]]
         sens_cv[i,j]<-confusionMatrix(predicts,labelsTest)$byClass[[1]]

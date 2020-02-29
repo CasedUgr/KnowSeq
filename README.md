@@ -1,7 +1,11 @@
 # KnowSeq R/bioc package: Beyond the traditional RNA-seq pipeline.
 
+<img align="right" src="logoKnow.png" height="200"/>
+
 [![Bioconductor Time](https://bioconductor.org/shields/years-in-bioc/KnowSeq.svg)](https://bioconductor.org/packages/release/bioc/html/KnowSeq "How long has been KnowSeq in a release of Bioconductor")
 [![Support posts](https://bioconductor.org/shields/posts/KnowSeq.svg)](https://support.bioconductor.org/t/KnowSeq/ "Support site activity on KnowSeq, last 6 months: tagged questions/avg. answers per question/avg. comments per question/accepted answers, or 0 if no tagged posts.")
+
+
 
 
 **Current build status**

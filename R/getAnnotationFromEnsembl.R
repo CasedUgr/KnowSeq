@@ -54,9 +54,10 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   act.values <- values
   max <- 900
   max.values <- min(length(values),900)
-  print(max.values)
+
   myAnnotation <- data.frame()
   while(length(act.values>0)){
+
     # Create query
     query = paste('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE Query>
                     <Query  virtualSchemaName = "default" formatter = "CSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >
@@ -87,7 +88,6 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
 
     if (dim(myAnnotation)[1] == 0) myAnnotation <- act.myAnnotation
     else myAnnotation <- rbind(myAnnotation,act.myAnnotation)
-    print(dim(myAnnotation))
 
     if(length(act.values) <= max.values) act.values <- c()
     else act.values <- act.values[(max.values+1):length(act.values)]

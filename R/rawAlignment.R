@@ -121,7 +121,7 @@ rawAlignment <- function(data,seq="hisat2",downloadRef=FALSE,downloadSamples=FAL
         if(file.exists(manifestPath)){cat("Manifest found!\n")}else{stop("Manifest not found, please revise the path to the manifest.\n")}
 
         cat ("Downloading samples from GDC by using the selected token and manifest...\n")
-        gdcClientDownload(tokenPath = tokenPath, manifestPath = manifestPath, data = data)
+        gdcClientDownload(tokenPath = tokenPath, manifestPath = manifestPath)
 
       }
       gf = "gencode.v22.annotation.gtf"

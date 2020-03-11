@@ -22,7 +22,6 @@ sraToFastq <- function(urlsVector){
       
       if(dir.exists("unixUtils/")){
         cat("Directory unixUtils found. Checking the tools...\n")
-        if(file.exists("unixUtils/tophat2/tophat2")){cat("Tophat2 found!\n")}else{stop("Tophat2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
         if(file.exists("unixUtils/salmon/bin/salmon")){cat("Salmon found!\n")}else{stop("Salmon not found, please remove unixUtils folder and re-run the function to download it.\n")}
         if(file.exists("unixUtils/hisat2/hisat2")){cat("Hisat2 found!\n")}else{stop("Hisat2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
         if(file.exists("unixUtils/bowtie2/bowtie2")){cat("Bowtie2 found!\n")}else{stop("Bowtie2 not found, please remove unixUtils folder and re-run the function to download it.\n")}

@@ -63,7 +63,7 @@ downloadPublicSeries <- function(samplesVector) {
             fileMove(from = paste(serie,"_RAW.tar",sep = ""),
                       to =  paste("ReferenceFiles/Samples/Microarray/",serie,"_RAW.tar",sep = ""))
 
-            if(dir.exists(paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))){}else{ system2(paste("mkdir", args = "ReferenceFiles/Samples/Microarray/",serie,sep=""))}
+            if(dir.exists(paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))){}else{ system2("mkdir", args = paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))}
 
             system2("tar", args = paste("-xf ReferenceFiles/Samples/Microarray/", serie,"_RAW.tar -C ", "ReferenceFiles/Samples/Microarray/",serie,sep = ""))
             system2("rm", args = paste("ReferenceFiles/Samples/Microarray/", serie,"_RAW.tar",sep = ""))

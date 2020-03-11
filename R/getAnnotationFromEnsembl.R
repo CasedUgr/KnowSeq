@@ -51,41 +51,56 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
 
   cat(paste("Downloading annotation ", dataset.name, "...\n"))
 
-  # Create query
-  query = paste('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE Query>
-                  <Query  virtualSchemaName = "default" formatter = "CSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >
-                  <Dataset name = "',dataset.name,'" interface = "default" >',sep='')
-  query <- paste(query,'<Filter name = "',filter,'" value = "',sep='')
-                  
-  for ( value in values) query <- paste(query,value,',',sep='')
-  query <- str_sub(query, 1, nchar(query)-1)
-  query <- paste(query,'"/>',sep='')
+  act.values <- values
+  max <- 900
+  max.values <- min(length(values),900)
+
+  myAnnotation <- data.frame()
+  while(length(act.values>0)){
+
+    # Create query
+    query = paste('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE Query>
+                    <Query  virtualSchemaName = "default" formatter = "CSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >
+                    <Dataset name = "',dataset.name,'" interface = "default" >',sep='')
+    query <- paste(query,'<Filter name = "',filter,'" value = "',sep='')
+                    
+    for ( value in act.values[1:max.values]) query <- paste(query,value,',',sep='')
+    query <- str_sub(query, 1, nchar(query)-1)
+    query <- paste(query,'"/>',sep='')
+    
+    for (attribute in attributes)
+      query <- paste(query,'<Attribute name = "',attribute,'" />',sep='')
+    if (! filter %in% attributes ) 
+      query <- paste(query,'<Attribute name = "',filter,'" />',sep='')
+    query <- paste(query,'</Dataset></Query>',sep='')
   
-  for (attribute in attributes)
-    query <- paste(query,'<Attribute name = "',attribute,'" />',sep='')
-  if (! filter %in% attributes ) 
-    query <- paste(query,'<Attribute name = "',filter,'" />',sep='')
-  query <- paste(query,'</Dataset></Query>',sep='')
-
-  # Download annotation file
-  request <- paste('http://www.ensembl.org/biomart/martservice?query=',query,sep='')
-  download.file(request,method='wget',destfile = filename)
-
-  myAnnotation <- read.csv(filename,header=FALSE)
-
-  if( grepl('ERROR',myAnnotation[1,1]) ){
+    # Download annotation file
+    request <- paste('http://www.ensembl.org/biomart/martservice?query=',query,sep='')
+    download.file(request,method='wget',destfile = filename)
+  
+    act.myAnnotation <- read.csv(filename,header=FALSE)
     
-    stop('Error in query, please check attributes and filter')
-    
+    if( grepl('ERROR',act.myAnnotation[1,1]) ){
+      
+      stop('Error in query, please check attributes and filter')
+      
+    }
+
+    if (dim(myAnnotation)[1] == 0) myAnnotation <- act.myAnnotation
+    else myAnnotation <- rbind(myAnnotation,act.myAnnotation)
+
+    if(length(act.values) <= max.values) act.values <- c()
+    else act.values <- act.values[(max.values+1):length(act.values)]
+    max.values <- min(max,length(act.values))
   }
-
+  
   colnames(myAnnotation) <- union(attributes,filter)
+  myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
 
   system(paste('rm',filename))
 
   return(myAnnotation)
 }
-
 
 
 

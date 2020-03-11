@@ -26,4 +26,4 @@ importFrom(httr, GET, content)
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getAnnotationFromEnsembl,
               hisatAlignment, kallistoAlignment, knn_CV, knn_test, limmaDEGsExtraction, plotConfMatrix, rawAlignment, rf_CV, rf_test,
-              RNAseqQA, salmonAlignment, sraToFastq, svm_CV, svm_test, tophatAlignment)
+              RNAseqQA, salmonAlignment, sraToFastq, svm_CV, svm_test)

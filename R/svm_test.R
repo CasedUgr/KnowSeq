@@ -2,39 +2,22 @@
 #'
 #' svm_test allows assessing the final DEGs through a machine learning step by using SVM with a test dataset. An optimization of C and G hiperparameters is done at the start of the process.
 #'
-#' @param train The train parameter is an expression matrix or data.frame that contains the training dataset with the genes in the columns and the samples in the rows.
-#' @param labelsTrain A vector or factor that contains the training labels for each of the samples in the train object.
 #' @param test The test parameter is an expression matrix or data.frame that contains the test dataset with the genes in the columns and the samples in the rows.
 #' @param labelsTest A vector or factor that contains the test labels for each of the samples in the test object.
 #' @param vars_selected The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.
+#' @param bestParameters Best values for C and gamma parameters selected during the training phase.
 #' @return A list that contains four objects. The confusion matrix, the accuracy, the sensitibity and the specificity for each genes.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #'
-#' trainingMatrix <- t(DEGsMatrix)[c(1:4,6:9),]
-#' trainingLabels <- labels[c(1:4,6:9)]
 #' testMatrix <- t(DEGsMatrix)[c(5,10),]
 #' testLabels <- labels[c(5,10)]
-#'
-#' svm_test(trainingMatrix,trainingLabels,testMatrix,testLabels,rownames(DEGsMatrix)[1:10])
+#' #previously trained svm model
+#' bestParameters <- c(cost = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma)
+#' svm_test(testMatrix,testLabels,rownames(DEGsMatrix)[1:10], bestParameters)
 
-svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
-
-  if(!is.data.frame(train) && !is.matrix(train)){
-
-    stop("The train argument must be a dataframe or a matrix.")
-
-  }
-
-  if(dim(train)[1] != length(labelsTrain)){
-
-    stop("The length of the rows of the argument train must be the same than the length of the lablesTrain. Please, ensures that the rows are the samples and the columns are the variables.")
-
-  }
-
-  if(!is.character(labelsTrain)  && !is.factor(labelsTrain)){stop("The class of the labelsTrain parameter must be character vector or factor.")}
-  if(is.character(labelsTrain)){ labelsTrain <- as.factor(labelsTrain) }
+svm_test <-function(test,labelsTest,vars_selected,bestParameters){
 
   if(!is.character(labelsTest)  && !is.factor(labelsTest)){stop("The class of the labelsTest parameter must be character vector or factor.")}
   if(is.character(labelsTest)){ labelsTest <- as.factor(labelsTest) }
@@ -51,37 +34,15 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
 
   }
 
-  train <- as.data.frame(apply(train,2,as.double))
-  train <- train[,vars_selected]
   test <- as.data.frame(apply(test,2,as.double))
   test <- test[,vars_selected]
 
-  train = vapply(train, function(x){ 
-    max = max(x)
-    min = min(x)
-    x = ((x-min)/(max-min))*2-1}, double(nrow(train)))
-  
-  train <- as.data.frame(train)
-  
   test = vapply(test, function(x){ 
     max = max(x)
     min = min(x)
     x = ((x-min)/(max-min))*2-1}, double(nrow(test)))
   
   test <- as.data.frame(test)
-
-
-  fitControl <- caret::trainControl(method = "cv", number = 10)
-  cat("Tuning the optimal C and G...\n")
-
-  grid_radial <- expand.grid(sigma = c(0,0.01, 0.02, 0.025, 0.03, 0.04,
-                                       0.05, 0.06, 0.07,0.08, 0.09, 0.1, 0.25, 0.5, 0.75,0.9),
-                             C = c(0.01, 0.05, 0.1, 0.25, 0.5, 0.75,
-                                   1, 1.5, 2,5))
-  
-  trainForTunning <- cbind(train,labelsTrain)
-
-  Rsvm_sb <- caret::train(labelsTrain ~ ., data = trainForTunning,type = "C-svc", preProc = c("center","scale"), method = "svmRadial",trControl = fitControl,tuneGrid = grid_radial)
 
   accVector <- double()
   sensVector <- double()
@@ -92,7 +53,7 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
 
     cat(paste("Testing with ", i," variables...\n",sep=""))
     svm_model<-svm(train[,seq(i)],labelsTrain,kernel='radial',
-                   cost=Rsvm_sb$bestTune$C,gamma=Rsvm_sb$bestTune$sigma,probability=TRUE)
+                   cost=bestParameters$C,gamma=bestParameters$gamma,probability=TRUE)
     predicts<-predict(svm_model,test[,seq(i)],probability=TRUE)
 
     cfMat<-confusionMatrix(predicts,labelsTest)

@@ -238,7 +238,7 @@ The function returns a list that contains the matrix with the merged counts and 
 
 ### Getting the annotation of the genes
 
-This step is only required if the user wants to get the gene names and the annotation is retrieved with the information given by the ensembl biomart webpage [16]. Normally, the counts matrix has the Ensembl Ids as gene identifier, but with this step, the Ensembl Ids are change by the gene names. However, the user can decide to keep its own annotation or the Ensembl Ids. For example, to achieve the gene names the function needs the current Ensembl Ids, and the reference Genome used would be the number 38. If the user wants a different annotation than the human annotation, the parameter *notHSapiens* has to be set to *TRUE* and the desired specie dataset from ensembl indicated in the parameter *notHumandataset* (i.e. “mmusculus_gene_ensembl”). An example can be seen below:
+This step is only required if the user wants to get the gene names and the annotation is retrieved with the information given by the ensembl webpage [16]. Normally, the counts matrix has the Ensembl Ids as gene identifier, but with this step, the Ensembl Ids are change by the gene names. However, the user can decide to keep its own annotation or the Ensembl Ids. For example, to achieve the gene names the function needs the current Ensembl Ids, and the reference Genome used would be the number 38. If the user wants a different annotation than the human annotation, the parameter *notHSapiens* has to be set to *TRUE* and the desired specie dataset from ensembl indicated in the parameter *notHumandataset* (i.e. “mm129s1svimj_gene_ensembl”). An example can be seen below:
 
 ```{r Downloading_annotation} 
 # Downloading human annotation
@@ -246,7 +246,7 @@ myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix))
 
 # Downloading mus musculus annotation
 myAnnotationMusMusculus <- getAnnotationFromEnsembl(rownames(countsMatrix), 
-notHSapiens = TRUE,notHumandataset = "mmusculus_gene_ensembl")
+notHSapiens = TRUE,notHumandataset = "mm129s1svimj_gene_ensembl")
 
 ```
 ### Converting to gene expression matrix
@@ -545,7 +545,7 @@ sessionInfo()
 
 15. Robinson, M. D., McCarthy, D. J., & Smyth, G. K. (2010). edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics, 26(1), 139-140.
 
-16. Durinck, S., Spellman, P. T., Birney, E., & Huber, W. (2009). Mapping identifiers for the integration of genomic datasets with the R/Bioconductor package biomaRt. Nature protocols, 4(8), 1184.
+16. Cunningham,  F., Achuthan, P., Akanni, W., Allen, J., ... , & Huber, W. (2018). Ensembl 2019. Nucleic Acids Research, 47(D1), D745–D751.
 
 17. Hansen, K. D., Irizarry, R. A., & Wu, Z. (2012). Removing technical variability in RNA-seq data using conditional quantile normalization. Biostatistics, 13(2), 204-216.
 

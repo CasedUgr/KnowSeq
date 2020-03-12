@@ -498,6 +498,15 @@ For example, the image below shows the diseases related only with KRT19 gene tha
 ![](diseaseKRT19.png)
 -->
 
+# Report
+Most of these steps can be displayed using a single function, *getReport*, that starting from an expression matrix, or counts matrix, and the labels of the samples, will follow part of the pipeline explained above and display the result in a report which format can be html of pdf, depending on outputFormat parameter.
+
+This report will contain DEGs extraction using limma package, a feature selection process, where theused algorithm can be set by the featureSelectionMode param, and the visualization steps described above are shown.
+
+Then, machine learning process starts, where the classification algorithms and the classification metrics to me displayed can be chossen by the user by clasifAlgs and metrics params. 
+
+Finally DEGs enrichment is obtained, showing Gene Ontologies and found evidences for related diseases with each gene. It is possible to obtain evidences for a certain disease, specifying it by the disease parameter.
+
 
 # Session Info
 ```{r Session_info}

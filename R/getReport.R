@@ -1,24 +1,22 @@
 #' getReport creates a report for a given set of genes which their label
 #'
-#' getReport creates a report for a given set of genes which their label. This provide an html and/or pdf file with all the information that can be obtained for a certain set of genes (as GO, pathway visualization, associated diseases) and their labels (machine learning process)
+#' getReport creates a report for a given set of genes which their label. This provide an html file with all the information that can be obtained for a certain set of genes (as GO, pathway visualization, associated diseases) and their labels (machine learning process)
 #' @param data A matrix that contains the gene expression or counts values.
 #' @param labels A vector or factor that contains the labels for each of the samples in the data object.
 #' @param outdir The output directory to store the report
 #' @param baseline A string that indicates the start point. This will be 'expression' if data contains genes expression values or 'counts' if data contains genes counts values.
-#' @param outputFormat String to indicate in which formar will be the report saved. There are two ossible values: pdf or hmtl.
 #' @param featureSelectionMode String that indicates which feature selection algorithm is going to be used. Possible values are: mrmr, rf or da.
 #' @param disease String that indicates from which disease wants the user to know if selected genes are related to. Found evidences will be shown. Default empty, this means that all related diseases, and found evidences, will be shown.
 #' @param maxGenes Integer that indicates the maximun number of genes which information will be shown and that will be used to train models
 #' @param clasifAlgs A vector with including algorithms names that will be used in training cv.
 #' @return Nothing to return.
-#' @examples
+#' @example
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#' getReport(expressionMatrix,labels,'pdf-report',outputFormat='pdf',clasifAlgs=c('rf'),disease='cancer',maxGenes = 9)
+#' getReport(expressionMatrix,labels,'pdf-report',clasifAlgs=c('rf'),disease='cancer',maxGenes = 9)
 
 
 getReport <- function(data,labels,outdir,baseline='expression',
-                      outputFormat='pdf',
                       featureSelectionMode = 'mrmr',
                       disease = '',
                       maxGenes = 12,
@@ -45,8 +43,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
     expressionMatrix <- calculateGeneExpressionValues(data,myAnnotation, genesNames = TRUE)
     
   }
-  if ( outputFormat == 'html') table.format <- 'html'
-  else table.format = 'pandoc'
+  table.format <- 'html'
   
   # Create output's directory if it doesn't exists
   if (! dir.exists(outdir)) dir.create(outdir)
@@ -230,27 +227,12 @@ getReport <- function(data,labels,outdir,baseline='expression',
   }
   
   # --- Save Report --- #
-  if ( outputFormat == 'html' ){
-    mark.header.html <- c('---',
-                          'title: "Genes Report"',
-                          'output: html_document',
-                          '---',
-                          '')
-    markdown::markdownToHTML(text = knitr::knit(text = c(mark.header.html,markobj)), output =paste(outdir,'report.html',sep='/'))
-    browseURL('report.html')
-  }
-  else{
-    mark.header.pdf <- c('---',
-                         'title: "Genes Report"',
-                         'output: pdf_document',
-                         '---','')#, '```{r}','library(knitr)','```')
-    file.create(paste(outdir,'report.rmd',sep='/'))
-    fileConn<-file(paste(outdir,'report.rmd',sep='/'))
-    writeLines(c(mark.header.pdf,markobj), fileConn)
-    close(fileConn)
-    render(paste(outdir,'report.rmd',sep='/'))
-    file.remove(paste(outdir,'report.rmd',sep='/'))
-    file.remove(paste(outdir,'report.tex',sep='/'))
-    file.remove(paste(outdir,'report.log',sep='/'))
-  }
+  mark.header.html <- c('---',
+                        'title: "Genes Report"',
+                        'output: html_document',
+                        '---',
+                        '')
+  markdown::markdownToHTML(text = knitr::knit(text = c(mark.header.html,markobj)), output =paste(outdir,'report.html',sep='/'))
+  browseURL('report.html')
+
 }

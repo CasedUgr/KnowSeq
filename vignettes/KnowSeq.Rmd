@@ -361,7 +361,7 @@ Moreover, targetValidation webplatform allow to acquire evidences that tie a gen
 $$
 max_{g \in G - S_G}  DA(g) - \frac{\sum_{g_i \in S_g} RED(g,g_i)}{|S_G|} \times DA(g)
 $$
-Where $RED(g,g_i)$ is the redundance between gene $g$ and gen $g_i$ and $DA(g)$ is the DA score of gene $g$. The algorithms ends when a fixed number of genes are selected.
+Where $RED(g,g_i)$ is the redundance between gene $g$ and gen $g_i$ and $DA(g)$ is the DA score of gene $g$. The algorithms ends when a certain number of genes are selected, this number can be fixed by the maxGenes parameter.
 
 To invoke these functions, it is necessary an expression matrix with the samples in the rows and the genes in the columns and the labels of the samples, the genes that will be assessed and the number of fold in the case of the cross-validation function. In the case of the test functions, it is necessary the matrix and the labels for both the training and the test datasets:
 

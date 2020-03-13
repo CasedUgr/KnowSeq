@@ -13,10 +13,10 @@
 #' @example
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#' getReport(expressionMatrix,labels,'pdf-report',clasifAlgs=c('rf'),disease='cancer',maxGenes = 9)
+#' knowseqReport(expressionMatrix,labels,'pdf-report',clasifAlgs=c('rf'),disease='cancer',maxGenes = 9)
 
 
-getReport <- function(data,labels,outdir,baseline='expression',
+knowseqReport <- function(data,labels,outdir,baseline='expression',
                       featureSelectionMode = 'mrmr',
                       disease = '',
                       maxGenes = 12,

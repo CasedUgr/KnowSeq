@@ -1,6 +1,7 @@
 import(stringr,sva, RCurl, XML, jsonlite, tximportData, rhdf5, multtest, kernlab, quantreg, mclust)
 
 importFrom(randomForest, randomForest)
+importFrom(arrayQualityMetrics, arrayQualityMetrics)
 importFrom(R.utils, mkdirs, gunzip)
 importFrom(gplots, heatmap.2, redgreen)
 importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal,scale_fill_manual,ggtitle, ylab, xlab, labs)
@@ -24,6 +25,6 @@ importFrom(httr, GET, content)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getAnnotationFromEnsembl,
-              hisatAlignment, kallistoAlignment, knn_CV, knn_test, limmaDEGsExtraction, plotConfMatrix, rawAlignment, rf_CV, rf_test
-              , salmonAlignment, sraToFastq, svm_CV, svm_test, DEGsEvidences, evidencesToRedundance)
+              hisatAlignment, kallistoAlignment, knn_CV, knn_test, limmaDEGsExtraction, plotConfMatrix, RNAseqQA, rawAlignment, rf_CV, rf_test
+              , salmonAlignment, sraToFastq, svm_CV, svm_test, DEGsEvidences, evidencesToRedundance, knowseqReport)
 

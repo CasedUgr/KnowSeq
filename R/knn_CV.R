@@ -50,6 +50,8 @@ knn_CV<-function(data,labels,vars_selected,numFold=10){
   K_sb <- train(data, labels, method = "knn",trControl = fitControl,preProcess = c("center", "scale"),tuneLength = 10)
   
   bestK = K_sb$bestTune
+  cat(paste("Optimal K:", K_sb$bestTune, "\n"))
+  
   acc_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   sens_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   spec_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])

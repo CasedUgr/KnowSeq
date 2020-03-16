@@ -78,7 +78,8 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   
   # Firstly with one variable
   cat(paste("Testing with ", 1," variables...\n",sep=""))
-  predicts<-knn(train[, 1, drop=FALSE],test[, 1, drop=FALSE],labelsTest,k=bestK)
+  knn_mod = knn3(x = train[, 1, drop=FALSE], y = labelsTrain, k = bestK)
+  predicts <- predict(knn_mod, test[, 1, drop=FALSE], type = "class")
   
   cfMat<-confusionMatrix(predicts,labelsTest)
   acc<-confusionMatrix(predicts,labelsTest)$overall[[1]]
@@ -93,7 +94,8 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   for(i in c(2:dim(test)[2])){
 
     cat(paste("Testing with ", i," variables...\n",sep=""))
-    predicts<-knn(train[,seq_len(i)],test[,seq_len(i)],labelsTest,k=bestK)
+    knn_mod = knn3(x = train[,seq(i)], y = labelsTrain, k = bestK)
+    predicts <- predict(knn_mod, test[,seq(i)], type = "class")
 
     cfMat<-confusionMatrix(predicts,labelsTest)
     acc<-confusionMatrix(predicts,labelsTest)$overall[[1]]

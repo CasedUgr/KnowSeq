@@ -17,8 +17,8 @@
 #' trainingLabels <- labels[c(1:4,6:9)]
 #' testMatrix <- t(DEGsMatrix)[c(5,10),]
 #' testLabels <- labels[c(5,10)]
-#' #previously trained svm model
-#' bestParameters <- c(cost = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma)
+#' # previously trained svm model
+#' bestParameters <- results_svm_cv$bestParameters
 #' svm_test(testMatrix,testLabels,rownames(DEGsMatrix)[1:10], bestParameters)
 
 svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameters){
@@ -81,7 +81,7 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
 
     cat(paste("Testing with ", i," variables...\n",sep=""))
     svm_model<-svm(train[,seq(i)],labelsTrain,kernel='radial',
-                   cost=bestParameters$C,gamma=bestParameters$gamma,probability=TRUE)
+                   cost=getElement(bestParameters, "cost"),gamma=getElement(bestParameters, "gamma"),probability=TRUE)
     predicts<-predict(svm_model,test[,seq(i)],probability=TRUE)
 
     cfMat<-confusionMatrix(predicts,labelsTest)

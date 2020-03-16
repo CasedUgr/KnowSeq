@@ -4,9 +4,13 @@
 \alias{svm_test}
 \title{svm_test allows assessing the final DEGs through a machine learning step by using SVM with a test dataset.}
 \usage{
-svm_test(test, labelsTest, vars_selected, bestParameters)
+svm_test(train, labelsTrain, test, labelsTest, vars_selected, bestParameters)
 }
 \arguments{
+\item{train}{The train parameter is an expression matrix or data.frame that contains the train dataset with the genes in the columns and the samples in the rows.}
+
+\item{labelsTrain}{A vector or factor that contains the train labels for each of the samples in the train object.}
+
 \item{test}{The test parameter is an expression matrix or data.frame that contains the test dataset with the genes in the columns and the samples in the rows.}
 
 \item{labelsTest}{A vector or factor that contains the test labels for each of the samples in the test object.}
@@ -25,9 +29,11 @@ svm_test allows assessing the final DEGs through a machine learning step by usin
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 
+trainingMatrix <- t(DEGsMatrix)[c(1:4,6:9),]
+trainingLabels <- labels[c(1:4,6:9)]
 testMatrix <- t(DEGsMatrix)[c(5,10),]
 testLabels <- labels[c(5,10)]
-#previously trained svm model
-bestParameters <- c(cost = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma)
+# previously trained svm model
+bestParameters <- results_svm_cv$bestParameters
 svm_test(testMatrix,testLabels,rownames(DEGsMatrix)[1:10], bestParameters)
 }

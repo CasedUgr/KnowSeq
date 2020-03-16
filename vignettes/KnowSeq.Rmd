@@ -23,7 +23,7 @@ vignette: >
 knitr::opts_chunk$set(error = TRUE,warning = FALSE)
 ```
 # Installation
-To install and load KnowSeq package in R, it is necessary the previous installation of BiocManager from Bioconductor. The next code shows how this install can be performed:
+To install and load KnowSeq package in R, it is necessary the previous installation of BiocManager from Bioconductor. The next code shows how this installation can be performed:
 
 ```{r, eval=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -50,7 +50,7 @@ The whole pipeline included in KnowSeq has been designed carefully with the purp
 - Biomarkers identification & assessment.
 - DEGs enrichment methodology.
 
-The first process is focused on the RNA-seq RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO [4] ArrayExpress [5] and GDC-Portal). The second one comprises the Differential Expressed Genes (DEGs) identification and extraction, and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). The last process, once the DEGs were assessed, is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the related diseases to the DEGs.
+The first process is focused on the RNA-seq RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO [4] ArrayExpress [5] and GDC-Portal). The second one englobes the Differential Expressed Genes (DEGs) identification and extraction, and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). The last process, once the DEGs were assessed, is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the related diseases to the DEGs.
 With the pipeline designed and addressed by KnowSeq, researchers can convert the RAW data of RNA-seq into real knowledge on the identification of possible gene signatures about the studied diseases.
 
 
@@ -162,7 +162,7 @@ tokenPath = "~/pathToToken", manifestPath = "~/pathToManifest")
 ```
 
 ## Preparing the count files
-From now on, the data that will be used for the documentation are real count files, but with a limited number of genes (around 1000). Furthermore, to reduce the computational cost of this example, only 5 samples from each of the two selected series will be taken into account. With the next code, two RNA-seq series from NCBI/GEO are downloaded automatically and the existing count files prepared to be merged in one matrix with the purpose of preparing the data for further steps:
+From now on, the data that will be used for the documentation are real count files, but with a limited number of genes (around 1000). Furthermore, to reduce the computational cost of this example, only 5 samples from each of the two selected series will be taken into account. Showed in the code snippet below, two RNA-seq series from NCBI/GEO are downloaded automatically and the existing count files prepared to be merged in one matrix with the purpose of preparing the data for further steps:
 
 ```{r Preparing_data}
 suppressMessages(library(KnowSeq))
@@ -193,7 +193,7 @@ write.csv(mergedCountsInfo, file = "mergedCountsInfo.csv")
 ```
 
 
-However, the user can run a complete example by coding the following code:
+However, the user can run a complete example by executing the following code:
 
 ```{r, eval=FALSE} 
 dir <- system.file("script", package="KnowSeq")
@@ -212,7 +212,7 @@ After the raw alignment step, a list of count files of the samples is available 
 
 ### Merging all count files 
 
-After the alignment, there has to be as many count files as samples in the CSV used for the alignment. In order to prepare the data for the DEGs analysis, it is important to merge all these files in one matrix that contains the genes Ensembl ID (or other IDs) in the rows and the name of the samples in the columns. To carry this out, the function countsToMatrix is available. This function reads all count files and joints them in one matrix by using edgeR package [15]. To call the function it is only necessary a CSV with the information about the count files paths. The required CSV has to have the following format:
+After the alignment, as many count files as samples in the CSV used for the alignment have been created. In order to prepare the data for the DEGs analysis, it is important to merge all these files in one matrix that contains the genes Ensembl ID (or other IDs) in the rows and the name of the samples in the columns. To carry this out, the function *countsToMatrix* is available. This function reads all count files and joints them in one matrix by using edgeR package [15]. To call the function it is only necessary a CSV with the information about the count files paths. The required CSV has to have the following format:
 
 |     Run    |             Path             |  Class  |
 |:----------:|:----------------------------:|:-------:|
@@ -251,7 +251,7 @@ notHSapiens = TRUE,notHumandataset = "mm129s1svimj_gene_ensembl")
 ```
 ### Converting to gene expression matrix
 
-Finally, once both the countsMatrix and the annotation are ready, it is time to convert those counts into gene expression values. For that, the function *calculateGeneExpressionValues* uses the cqn package to calculates the equivalent gene expression [17]. This function performs a conversion of counts into gene expression values, and changes the Ensembl Ids by the gene names if the parameter geneNames is equal to *TRUE*. An example of the use of this function is showed next:
+Finally, once both the countsMatrix and the annotation are ready, it is time to convert those counts into gene expression values. For that, the function *calculateGeneExpressionValues* uses the cqn package to calculates the equivalent gene expression [17]. This function performs a conversion of counts into gene expression values, and changes the Ensembl Ids by the gene names if the parameter geneNames is equal to *TRUE*. An example of the use of this function is showed below:
 
 ```{r Calculating_gene_expression} 
 # Calculating gene expression values matrix using the counts matrix
@@ -260,7 +260,7 @@ expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation,
 genesNames = TRUE)
 ```
 
-At this time of the pipeline, there is a function that plots the expression data and allows verifying if the data is well normalized. This function has the purpose of join all the important graphical representation of the pipeline in the same function and is called *dataPlot*. It is very easy to use because as only by changing the parameter method many different representations can be achieved. In this case, in order to see the expression boxplot of each sample, the function has to be called with the parameter mode equal to *"boxplot"*. The labels are necessary to colour the different samples depending on the class of the samples. These colours can be selected by the user, by introducing in the parameter colours a vector with the name of the desired colours. The function also allows exporting the plots as PNG and PDF files.
+At this time of the pipeline, a function that plots the expression data and allows verifying if the data is well normalized can be used. This function has the purpose of joining all the important graphical representation of the pipeline in the same function and is called *dataPlot*. It is very easy to use because just by changing the parameter method many different representations can be achieved. In this case, in order to see the expression boxplot of each sample, the function has to be called with the parameter mode equal to *"boxplot"*. The labels are necessary to colour the different samples depending on the class of the samples. These colours can be selected by the user, by introducing in the parameter colours a vector with the name of the desired colours. The function also allows exporting the plots as PNG and PDF files.
 
 ```{r Plotting_boxplot} 
 # Plotting the boxplot of the expression of each samples for all the genes
@@ -285,7 +285,7 @@ batchGroups = batchGroups, method = "combat")
 
 ```
 
-There is another method in the function that removes the batch effect and it is by using surrogate variable analysis or sva, the only requirement to use it is to set the parameter method equal to *"sva"*. This methodt does not return a matrix with the batch effect corrected, instead of this, the function returns a model that has to be used as single input parameter of the function *limmaDEGsExtraction*.
+There is another method in the function that removes the batch effect that uses surrogate variable analysis or sva. The only requirement to use it is to set the parameter method equal to *"sva"*. This methodt does not return a matrix with the batch effect corrected, instead of this, the function returns a model that has to be used as single input parameter of the function *limmaDEGsExtraction*.
 
 ```{r Removing_batch_effect_sva}
 # Calculating the surrogate variable analysis to remove batch effect
@@ -334,7 +334,7 @@ DEGs are genes that have a truly different expression among the studied classes,
 dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = FALSE,toPDF = FALSE)
 ```
 
-In the previous boxplot the expression of a set of DEGs for each sample its showed, however it is interesting to see the differentiation at gene expression level for each of the top 12 genes used before separately. It is recommendable to use this function with a low number of genes, because with a larger number the plot it is difficult to distinguish the information provided and R would not have enough memory to calculate the plot. For that, the function *dataPlot* with the mode *genesBoxplot* allows to do that by executing the next code:
+In the previous boxplot the expression of a set of DEGs for each sample its showed, however it is interesting to see the differentiation at gene expression level for each of the top 12 genes used before separately. It is recommended to use this function with a low number of genes, because with a larger number the plot it is difficult to distinguish the information provided and R would not have enough memory to calculate the plot. For that, the function *dataPlot* with the mode *genesBoxplot* allows to do that by executing the next code:
 
 ```{r Plotting_genes_boxplot}
 # Plotting the expression of the first 12 DEGs separatelly for all the samples
@@ -354,7 +354,7 @@ dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = FALSE,toPDF = FALSE)
 
 Normally, in the literature, the last step in the pipeline for differential gene expression analysis is the DEGs extraction step. However, in this package a novel machine learning step is implemented with the purpose of giving to the user an automatic tool to assess the DEGs, and evaluate their robustness in the discernment among the studied pathologies. This library has three possible classification methodologies to take into account. These options are k-NN  [21], SVM  [22] and Random Forest [23], three of the most popular classifiers in the literature. Furthermore, it includes two different working procedures for each of them. The first one implements a cross-validation process, in order to assess the expected accuracy with different models and samples the DEGs with a specific number of folds. These functions return a list with 4 objects that contain the confusion matrices, the accuracy, the sensitivity and the specificity.
 
-The second one is to assess a specific test dataset by using a classifier trained using the training dataset separately. Moreover, the function featureSelection allows performing a feature selection process by using, mRMR [24], Random Forest (as feature selector instead of classifier) or Disease Association based algorithms with the purpose of finding the best DEGs order to assess the data. Da-FS is a new novel method designed in KnowSeq with the purpose of giving to the expert a biological based feature selection method. This method makes use of targetValidation webplatform to acquire an association score for each DEGs with the required genetic disease, breast cancer in the example. This score takes values between 1 and 0, meaning 1 a total association and 0 no association. Therefore, the DEGs are sorted by this score, achieving a ranking in which the first places are occupied by those DEGs with more biological relation to breast cancer. 
+The second one is to assess a specific test dataset by using a classifier trained using the training dataset separately. Moreover, the function featureSelection allows performing a feature selection process by using, mRMR [24], Random Forest (as feature selector instead of classifier) or Disease Association based algorithms with the purpose of finding the best DEGs order to assess the data. Da-FS is a new novel method designed in KnowSeq with the purpose of giving to the expert a biological based feature selection method. This method makes use of targetValidation webplatform to acquire an association score for each DEGs with the required genetic disease, breast cancer in the example. This score takes values between 1 and 0, meaning 1 a total association and 0 no association. Therefore, the DEGs are sorted by this score, achieving a ranking in which in the first positions those DEGs with more biological relation to breast cancer are placed. 
 
 Moreover, targetValidation webplatform allow to acquire evidences that tie a gene with a certain disease. DA-RED-FS is an iterative method based on DA-FS that use these evidences to calculate the redundance between genes. This redundances take values between 1 and 0. For example, if gene A  has a redundance  of 1 with gene B, means  that all found evidences for gene A and a certain disease are also found in gene B and the disease. Likewise, if this redundance is 0, means that there are not any gene A evidences in gene B evidences. DA-RED-FS starts with an empty set of selected genes, $S_G$, and a set of possible genes $G$. In the first step, the gene with the highest DA score is selected. In the following steps, genes that verify the following equation are added to selected genes set.
 
@@ -452,7 +452,7 @@ main = "Accuracy with RF", xlab = "Genes", ylab = "Accuracy")
 ```
 
 # DEGs enrichment methodology
-The main goal of the previous pipeline is the extraction of biological relevant information from the DEGs. For that, this package provides a set of tools that allows doing it. The last step of the pipeline conformed by all the available tools in KnowSeq is the DEGs enrichment and this enrichment has three different points of view. The gene ontology information, the pathway visualization and the relationship between the DEGs and diseases related to the studied pathologies.
+The main goal of the previous pipeline is the extraction of biological relevant information from the DEGs. For that, this package provides a set of tools that allows doing it. The last step of the pipeline englobes all the available tools in KnowSeq for DEGs enrichment, where three different approaches can be taken. The gene ontology information, the pathway visualization and the relationship between the DEGs and diseases related to the studied pathologies.
 
 ## Gene Ontology
 Gene ontology (GO) provides information about the biological functions of the genes. In order to complete this pipeline, it is important to know if the DEGs have functions related with the studied pathologies. In this sense, this package brings the possibility to know the GOs from the three different ontologies (BP, MF and CC) by using the function *geneOntologyEnrichment* that internally used the packaged *topGO* [25]. The only requirement is to put the label of first class to *1* and the label of the second class to *0*. Furthermore, with the parameter *nGOs*, the number of resultant GOs that are returned can be modified. The function returns a list that contains a matrix for each ontology and a matrix with the GOs of the three ontologies together. Moreover, the matrices have different statistical measures and the description of the functionality of each GO.
@@ -511,7 +511,7 @@ For example, the image below shows the diseases related only with KRT19 gene tha
 # Report
 Most of these steps can be displayed using a single function, *knowseqReport*, that starting from an expression matrix, or counts matrix, and the labels of the samples, will follow part of the pipeline explained above and display the result in a report which format can be html of pdf, depending on outputFormat parameter.
 
-This report will contain DEGs extraction using limma package, a feature selection process, where theused algorithm can be set by the featureSelectionMode param, and the visualization steps described above are shown.
+This report will contain DEGs extraction using limma package, a feature selection process, where the used algorithm can be set by the featureSelectionMode param, and the visualization steps described above are shown.
 
 Then, machine learning process starts, where the classification algorithms and the classification metrics to me displayed can be chossen by the user by clasifAlgs and metrics params. 
 

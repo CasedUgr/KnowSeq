@@ -30,15 +30,15 @@ geneOntologyEnrichment <- function(geneList,ontologies=c('BP','CC','MF'),pvalCut
   geneType <- 'ENTREZ_GENE_ID'
   base  <- 'https://david.ncifcrf.gov/'
   
-  queryUrl <- paste(base,'api.jsp?type=',geneType,'&ids=',geneList,'&tool=chartReport&annot=',annotations, sep='') # Do not change order
+  url <- paste(base,'api.jsp?type=',geneType,'&ids=',geneList,'&tool=chartReport&annot=',annotations, sep='') # Do not change order
   curlHandle <- getCurlHandle(cookiefile = 'CurlHandleCookie.txt')
-  response <- RCurl::getURL(queryUrl, curl = curlHandle, ssl.verifypeer = FALSE)
+  response <- RCurl::getURL(url, curl = curlHandle, ssl.verifypeer = FALSE)
   
   rowids <- str_match(response,'document.apiForm.rowids.value=\"(.*?)"')[2]
   annotids <- str_match(response,'document.apiForm.annot.value=\"(.*?)"')[2]
 
-  getURL <- paste(base,'chartReport.jsp?rowids=', rowids, '&annot=', annotids,'&count=0&ease=',pvalCutOff, sep='')
-  response <- getURL(getURL, curl = curlHandle, ssl.verifypeer = FALSE)
+  url <- paste(base,'chartReport.jsp?rowids=', rowids, '&annot=', annotids,'&count=0&ease=',pvalCutOff, sep='')
+  response <- getURL(url, curl = curlHandle, ssl.verifypeer = FALSE)
   
   downloadFileName <- str_match(response,'<a href="data/download/(.*?)"')[2]
   
@@ -86,30 +86,5 @@ geneOntologyEnrichment <- function(geneList,ontologies=c('BP','CC','MF'),pvalCut
   
   return(final.gos)
 }
-
-
-
-"
-https://github.com/BaderLab/EnrichmentMap_docs/blob/master/FileFormats.rst
-Term - Gene set name
-Count - number of genes associated with this gene set
-Percentage (gene associated with this gene set/total number of query genes)
-P-value - modified Fisher Exact P-value
-Genes - the list of genes from your query set that are annotated to this gene set.
-List Total - number of genes in your query list mapped to any gene set in this ontology
-Pop Hits - number of genes annotated to this gene set on the background list
-Pop Total - number of genes on the background list mapped to any gene set in this ontology.
-Fold enrichment
-Bonferroni
-Benjamini
-FDR
-"
-
-# [1] "GO.ID"                 "Term"                  "Annotated"             "Significant"           "Expected"             
-# [6] "Rank in classicFisher" "classicFisher"         "classicKS"             "elimKS"                "GO_Genes"             
-# [11] "Description"  
-# Annotated : number of genes in org.Hs.eg.db which are annotated with the GO-term.
-# Significant : number of genes belonging to your input which are annotated with the GO-term.
-# Expected : show an estimate of the number of genes a node of size Annotated would have if the significant genes were to be randomly selected from the gene universe.
 
 

@@ -9,6 +9,8 @@ knowseqReport(
   labels,
   outdir = "knowSeq-report",
   baseline = "expression",
+  lfc = 2,
+  pvalue = 0.01,
   qualityAnalysis = TRUE,
   batchEffectTreatment = TRUE,
   geneOntology = TRUE,
@@ -16,7 +18,7 @@ knowseqReport(
   getDiseases = TRUE,
   featureSelectionMode = "mrmr",
   disease = "",
-  maxGenes = 12,
+  maxGenes = Inf,
   clasifAlgs = c("knn", "rf", "svm"),
   metrics = c("accuracy", "specificity", "sensitivity")
 )

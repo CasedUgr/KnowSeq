@@ -16,14 +16,14 @@ svm_CV(data, labels, vars_selected, numFold = 10)
 \item{numFold}{The number of folds to carry out in the cross validation process.}
 }
 \value{
-A list that contains four objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes.
+A list that contains five objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes, and a vector with the best parameters found for the SVM algorithm after tuning.
 }
 \description{
 svm_CV allows assessing the final DEGs through a machine learning step by using svm in a cross validation process. This function applies a cross validation of n folds with representation of all classes in each fold. The 80\% of the data are used for training and the 20\% for test. An optimization of C and G hiperparameters is done at the start of the process.
 }
 \examples{
-dir <- system.file("extdata", package="KnowSeq")
-load(paste(dir,"/expressionExample.RData",sep = ""))
+dir <- system.file("extdata", package = "KnowSeq")
+load(paste(dir, "/expressionExample.RData", sep = ""))
 
-svm_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),2)
+svm_CV(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
 }

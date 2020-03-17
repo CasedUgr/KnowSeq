@@ -11,7 +11,7 @@
 #' data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
 #' GOsList <- geneOntologyEnrichment(as.character(data$entrezgene_id),pvalCutOff=0.1)
 
-geneOntologyEnrichment <- function(geneList,ontologies=c('BP','CC','MF'),pvalCutOff=1){
+geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologies=c('BP','CC','MF'), pvalCutOff=1){
   if(!class(geneList)=='character'){stop('The class of geneList must be character')}
   if(!class(geneType)=='character'){stop('The class of geneType must be character')}
   if(!class(ontologies)=='character'){stop('The class of ontologies must be character')}
@@ -27,7 +27,6 @@ geneOntologyEnrichment <- function(geneList,ontologies=c('BP','CC','MF'),pvalCut
   annotations <- substr(annotations,2,nchar(annotations))
   print(annotations)
   geneList <- paste(geneList, collapse=",")
-  geneType <- 'ENTREZ_GENE_ID'
   base  <- 'https://david.ncifcrf.gov/'
   
   url <- paste(base,'api.jsp?type=',geneType,'&ids=',geneList,'&tool=chartReport&annot=',annotations, sep='') # Do not change order

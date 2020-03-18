@@ -31,6 +31,7 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
   
   url <- paste(base,'api.jsp?type=',geneType,'&ids=',geneList,'&tool=chartReport&annot=',annotations, sep='') # Do not change order
   curlHandle <- getCurlHandle(cookiefile = 'CurlHandleCookie.txt')
+  options(rsconnect.http = 'curl')
   response <- RCurl::getURL(url, curl = curlHandle, ssl.verifypeer = FALSE)
   
   rowids <- str_match(response,'document.apiForm.rowids.value=\"(.*?)"')[2]

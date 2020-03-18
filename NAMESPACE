@@ -22,6 +22,7 @@ importFrom(e1071, svm)
 importFrom(pathview, pathview)
 importFrom(topGO, getPvalues, runTest, GenTable, genesInTerm, annFUN.org, groupGOTerms)
 importFrom(httr, GET, content)
+importFrom(rlist,list.map)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getAnnotationFromEnsembl,

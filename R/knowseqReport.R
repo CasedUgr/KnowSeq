@@ -288,17 +288,17 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                    'Finally, the related diseases enrichment is displayed. DEGs related diseases are searched 
                   from *targetValidation* plastform.\n')
 
-      r_Ensembl <- httr::GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
-      respon <- httr::content(r_Ensembl)
+      r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
+      respon <- content(r_Ensembl)
       
       if ( 'size' %in% names(respon) && respon$size == 0){
         markobj  <-  c(markobj,'Disease not found.')
       }else{
         disease.id <- respon$data[[1]]$id
         url  <- paste("https://api.opentargets.io/v3/platform/public/association/filter?disease=",disease.id,"&size=10000",sep='')
-        response <- httr::GET(url)
-        response <- httr::content(response)
-        found.symbols <- unlist(list.map(r$data,target$gene_info$symbol))
+        response <- GET(url)
+        response <- content(response)
+        found.symbols <- unlist(list.map(response$data,target$gene_info$symbol))
         
         found.symbols <- intersect(found.symbols,rownames(DEGsMatrix))
 

@@ -49,5 +49,5 @@ knowseqReport creates a report for a given set of genes which their label. This 
 \examples{
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
-knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='cancer',maxGenes = 9)
+knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)
 }

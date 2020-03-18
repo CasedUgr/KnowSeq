@@ -287,7 +287,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
       markobj <- c(markobj,'## Related diseases\n',
                    'Finally, the related diseases enrichment is displayed. DEGs related diseases are searched 
                   from *targetValidation* plastform.\n')
-      print(0)
+
       r_Ensembl <- httr::GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
       respon <- httr::content(r_Ensembl)
       
@@ -301,7 +301,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
         found.symbols <- unlist(list.map(r$data,target$gene_info$symbol))
         
         found.symbols <- intersect(found.symbols,rownames(DEGsMatrix))
-        print(1)
+
         evidences <- DEGsEvidences(found.symbols,disease)
         
         evidences.frame <- list()
@@ -313,6 +313,15 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
               act.evidences.frame <- c()
               for (act.evidence in evidences[[gene]][[evidence.type]]){
                 act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
+              }
+              remove.cols <- c()
+              for (col in seq(dim(act.evidences.frame)[2])){
+                if (all(act.evidences.frame[,col]=='*')  || all(act.evidences.frame[,col]=='')){
+                  remove.cols <- c(remove.cols,col)
+                }
+              }
+              if (length(remove.cols)>0){
+                act.evidences.frame <-  act.evidences.frame[,-remove.cols]
               }
               evidences.frame[[gene]][[evidence.type]] <- act.evidences.frame
             }
@@ -341,7 +350,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   write(file = "report.Rmd", c(mark.header.html,markobj))
   
   dir <- system.file("extdata", package="KnowSeq")
-  
+
   rmarkdown::render(input = "report.Rmd", output_file = paste(outdir,'report.html',sep='/'),output_format = rmarkdown::html_document(
     theme = "default",
     mathjax = NULL,

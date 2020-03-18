@@ -16,7 +16,7 @@ knn_CV(data, labels, vars_selected, numFold = 10)
 \item{numFold}{The number of folds to carry out in the cross validation process.}
 }
 \value{
-A list that contains four objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes.
+A list that contains four objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes, and the best k found for the knn algorithm after tuning.
 }
 \description{
 knn_CV allows assessing the final DEGs through a machine learning step by using k-NN in a cross validation process. This function applies a cross validation of n folds with representation of all classes in each fold. The 80\% of the data are used for training and the 20\% for test. An optimization of the k neighbours is done at the start of the process.

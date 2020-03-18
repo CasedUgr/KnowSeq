@@ -19,7 +19,6 @@ importFrom(class, knn)
 importFrom(limma, eBayes, topTable, lmFit, makeContrasts, contrasts.fit, decideTests)
 importFrom(e1071, svm)
 importFrom(pathview, pathview)
-importFrom(topGO, getPvalues, runTest, GenTable, genesInTerm, annFUN.org, groupGOTerms)
 importFrom(httr, GET, content)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,

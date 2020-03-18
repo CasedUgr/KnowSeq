@@ -49,7 +49,7 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   }
 
 
-  cat(paste("Downloading annotation ", dataset.name, "...\n"))
+  cat(paste("Downloading annotation ", dataset.name, "...\n", sep = ""))
 
   act.values <- values
   max <- 900

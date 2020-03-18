@@ -25,7 +25,8 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
     else stop(paste('Ontology',ontology,'not found. Ontology values must be contained in the following three: BP, CC, MF'))
   }
   annotations <- substr(annotations,2,nchar(annotations))
-
+  
+  cat('Retrieving Geno Ontologie terms related to the list of DEGs...')
   geneList <- paste(geneList, collapse=",")
   base  <- 'https://david.ncifcrf.gov/'
   

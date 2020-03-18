@@ -17,7 +17,6 @@
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer')
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer',subdiseases=c('breast','colorectal'))
 
-
 featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",subdiseases=c(),maxGenes=ncol(data)){
   
   if(!is.data.frame(data) && !is.matrix(data)){
@@ -225,7 +224,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
                     # Iter on gen evidences
                     for (row2 in evidences[[sel]][[type]]){
                       # Add row to act.total.matrix with boolean values
-                      act.total.matrix <- rbind(act.total.matrix, row1$evidence == row2$evidence)
+                      act.total.matrix <- rbind(act.total.matrix, unlist(row1$evidence) == unlist(row2$evidence))
                       # This row fully coincide with actual evidencie, so we stop searching
                       if (rowSums(tail(act.total.matrix,1) == ncol))  break
                     }

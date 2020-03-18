@@ -8,7 +8,7 @@
 #' @param notHumandataset A dataset identification from biomaRt::listDatasets(useMart("ensembl")).
 #' @return A matrix that contains all the information asked to the attributes parameter.
 #' @examples
-#'myAnnotation <- getAnnotationFromEnsembl(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content"),filter='external_gene_name',notHSapiens=FALSE)
+#' myAnnotation <- getAnnotationFromEnsembl(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content","entrezgene_id"),filter='external_gene_name',notHSapiens=FALSE)
 #' myAnnotation <- getAnnotationFromEnsembl(c("MGP_129S1SvImJ_G0038602", "MGP_129S1SvImJ_G0007718"),attributes=c("percentage_gene_gc_content","ensembl_gene_id"),filter='ensembl_gene_id',notHSapiens = TRUE, notHumandataset = 'mm129s1svimj_gene_ensembl')
 
 
@@ -75,10 +75,9 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     query <- paste(query,'</Dataset></Query>',sep='')
   
     # Download annotation file
-    request <- paste('http://www.ensembl.org/biomart/martservice?query=',query,sep='')
-    download.file(request,method='wget',destfile = filename)
-  
-    act.myAnnotation <- read.csv(filename,header=FALSE)
+    reponse <- POST('http://www.ensembl.org/biomart/martservice',body=paste('query=',query,sep=''))
+    act.myAnnotation <- read.csv(text=content(reponse),sep=',',header=FALSE)
+    
     
     if( grepl('ERROR',act.myAnnotation[1,1]) ){
       
@@ -96,8 +95,6 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   
   colnames(myAnnotation) <- union(attributes,filter)
   myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
-
-  system(paste('rm',filename))
 
   return(myAnnotation)
 }

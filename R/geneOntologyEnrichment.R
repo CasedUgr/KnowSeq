@@ -25,19 +25,21 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
     else stop(paste('Ontology',ontology,'not found. Ontology values must be contained in the following three: BP, CC, MF'))
   }
   annotations <- substr(annotations,2,nchar(annotations))
-  print(annotations)
+
   geneList <- paste(geneList, collapse=",")
   base  <- 'https://david.ncifcrf.gov/'
   
   url <- paste(base,'api.jsp?type=',geneType,'&ids=',geneList,'&tool=chartReport&annot=',annotations, sep='') # Do not change order
-  curlHandle <- getCurlHandle(cookiefile = 'CurlHandleCookie.txt')
-  response <- RCurl::getURL(url, curl = curlHandle, ssl.verifypeer = FALSE)
+  
+  response <- httr::GET(url)
+  response <- content(response,'text')
   
   rowids <- str_match(response,'document.apiForm.rowids.value=\"(.*?)"')[2]
   annotids <- str_match(response,'document.apiForm.annot.value=\"(.*?)"')[2]
 
   url <- paste(base,'chartReport.jsp?rowids=', rowids, '&annot=', annotids,'&count=0&ease=',pvalCutOff, sep='')
-  response <- getURL(url, curl = curlHandle, ssl.verifypeer = FALSE)
+  response <- httr::GET(url)
+  response <- content(response,'text')
   
   downloadFileName <- str_match(response,'<a href="data/download/(.*?)"')[2]
   
@@ -85,5 +87,6 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
   
   return(final.gos)
 }
+
 
 

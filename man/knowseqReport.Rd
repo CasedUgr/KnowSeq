@@ -9,9 +9,16 @@ knowseqReport(
   labels,
   outdir = "knowSeq-report",
   baseline = "expression",
+  lfc = 2,
+  pvalue = 0.01,
+  qualityAnalysis = TRUE,
+  batchEffectTreatment = TRUE,
+  geneOntology = TRUE,
+  getPathways = TRUE,
+  getDiseases = TRUE,
   featureSelectionMode = "mrmr",
   disease = "",
-  maxGenes = 12,
+  maxGenes = Inf,
   clasifAlgs = c("knn", "rf", "svm"),
   metrics = c("accuracy", "specificity", "sensitivity")
 )
@@ -42,5 +49,5 @@ knowseqReport creates a report for a given set of genes which their label. This 
 \examples{
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
-knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='cancer',maxGenes = 9)
+knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)
 }

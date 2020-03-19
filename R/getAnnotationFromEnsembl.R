@@ -61,7 +61,8 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   }
 
   cat(paste("Downloading annotation ", dataset.name, "...\n", sep = ""))
-
+  
+  
   act.values <- values
   max <- 900
   max.values <- min(length(values),900)
@@ -73,11 +74,13 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     query = paste('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE Query>
                     <Query  virtualSchemaName = "default" formatter = "CSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >
                     <Dataset name = "',dataset.name,'" interface = "default" >',sep='')
-    query <- paste(query,'<Filter name = "',filter,'" value = "',sep='')
     
-    for ( value in act.values[1:max.values]) query <- paste(query,value,',',sep='')
-    query <- str_sub(query, 1, nchar(query)-1)
-    query <- paste(query,'"/>',sep='')
+    if ( length(values)>1 || values != 'allGenome'){
+      query <- paste(query,'<Filter name = "',filter,'" value = "',sep='')
+      for ( value in act.values[1:max.values]) query <- paste(query,value,',',sep='')
+      query <- str_sub(query, 1, nchar(query)-1)
+      query <- paste(query,'"/>',sep='')
+    }
     
     for (attribute in attributes)
       query <- paste(query,'<Attribute name = "',attribute,'" />',sep='')
@@ -105,8 +108,10 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   }
   
   colnames(myAnnotation) <- union(attributes,filter)
-  myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
+  if (length(values)>1 || values != 'allGenome')
+    myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
 
   return(myAnnotation)
 }
 
+myAnnotation <- getAnnotationFromEnsembl('allGenome',attributes=c("ensembl_gene_id","percentage_gene_gc_content","entrezgene_id"),filter='external_gene_name',notHSapiens=FALSE)

@@ -8,15 +8,20 @@ geneOntologyEnrichment(
   geneList,
   geneType = "ENTREZ_GENE_ID",
   ontologies = c("BP", "CC", "MF"),
-  pvalCutOff = 1
+  pvalCutOff = 1,
+  returnGeneSymbols = FALSE
 )
 }
 \arguments{
 \item{geneList}{A list that contains entrez gene id of the DEGs. Entrez gene id can be obtained using getAnnotationFromEnsembl function.}
 
+\item{geneType}{A string indicating the type of genes in geneList, it must be one of indicated in DAVIDs API documentation.}
+
 \item{ontologies}{A list that contains ontologies to be searchs. Values must be contained in the following three: BP, CC, MF.}
 
 \item{pvalCutOff}{The maximum p-value to considers that a genes is related with a GO term.}
+
+\item{returnGeneSymbols}{A boolean that indicates if gene symbols must be added to the ontolgies matrix.}
 }
 \value{
 A list that contains a matrix for each of the possible ontologies and a matrix with the GOs for the three ontologies together.
@@ -28,5 +33,5 @@ The function obtains the information about GO terms from the three differents on
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
-GOsList <- geneOntologyEnrichment(as.character(data$entrezgene_id),pvalCutOff=0.1)
+GOsList <- geneOntologyEnrichment(as.character(data$ensembl_gene_id),geneType='ENSEMBL_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
 }

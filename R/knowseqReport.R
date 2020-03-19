@@ -182,32 +182,65 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   markobj <- c(markobj,paste('To this effect,',clasifNames,'classification algorithms will be trained using 5-Fold Cross Validation.
                     To evaluate obtained results the this metrics will be shown in the following plots:\n'))
   
-  #if ('accuracy' %in% metrics) markobj <- c(markobj,)
-  
   for (clasifAlg in clasifAlgs){
-    if (clasifAlg == 'knn') results_cv <- knn_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
-    else if (clasifAlg == 'rf') results_cv <- rf_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
-    else if (clasifAlg == 'svm') results_cv <- svm_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
-    
-    markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
-    
-    for (metric in metrics){
-      if (metric == 'accuracy') act.metric = 'accMatrix'
-      else if (metric == 'specificity') act.metric = 'specMatrix'
-      else if (metric == 'sensitivity') act.metric = 'sensMatrix'
-      markobj <- c(markobj,'```{r echo = FALSE}',
-                   paste('dataPlot(results_cv[["',act.metric,'"]],
+    if (clasifAlg == 'knn'){ 
+      results_cv_knn <- knn_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
+      markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
+      
+      for (metric in metrics){
+        if (metric == 'accuracy') act.metric = 'accMatrix'
+        else if (metric == 'specificity') act.metric = 'specMatrix'
+        else if (metric == 'sensitivity') act.metric = 'sensMatrix'
+        markobj <- c(markobj,'```{r echo = FALSE}',
+                     paste('dataPlot(results_cv_knn[["',act.metric,'"]],
                        mode = "classResults",
                        main = "',metric,' for each fold with ',clasifAlg,'",
                        xlab = "Genes", ylab ="',metric,'")',sep=''),'```\n')
+      }
+      allCfMats_knn <- results_cv_knn$cfMats[[1]]$table + results_cv_knn$cfMats[[2]]$table + results_cv_knn$cfMats[[3]]$table + results_cv_knn$cfMats[[4]]$table + results_cv_knn$cfMats[[5]]$table
+      markobj <- c(markobj,'```{r echo = FALSE}',
+                   paste('dataPlot(allCfMats_knn, labels,
+                       mode = "confusionMatrix")',sep=''),'```\n')
+      
+    }else if (clasifAlg == 'rf'){
+      results_cv_rf <- rf_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
+      markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
+      
+      for (metric in metrics){
+        if (metric == 'accuracy') act.metric = 'accMatrix'
+        else if (metric == 'specificity') act.metric = 'specMatrix'
+        else if (metric == 'sensitivity') act.metric = 'sensMatrix'
+        markobj <- c(markobj,'```{r echo = FALSE}',
+                     paste('dataPlot(results_cv_rf[["',act.metric,'"]],
+                       mode = "classResults",
+                       main = "',metric,' for each fold with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',metric,'")',sep=''),'```\n')
+      }
+      allCfMats_rf <- results_cv_rf$cfMats[[1]]$table + results_cv_rf$cfMats[[2]]$table + results_cv_rf$cfMats[[3]]$table + results_cv_rf$cfMats[[4]]$table + results_cv_rf$cfMats[[5]]$table
+      markobj <- c(markobj,'```{r echo = FALSE}',
+                   paste('dataPlot(allCfMats_rf, labels,
+                       mode = "confusionMatrix")',sep=''),'```\n')
+      
+    }else if (clasifAlg == 'svm'){
+      results_cv_svm <- svm_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
+      markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
+      
+      for (metric in metrics){
+        if (metric == 'accuracy') act.metric = 'accMatrix'
+        else if (metric == 'specificity') act.metric = 'specMatrix'
+        else if (metric == 'sensitivity') act.metric = 'sensMatrix'
+        markobj <- c(markobj,'```{r echo = FALSE}',
+                     paste('dataPlot(results_cv_svm[["',act.metric,'"]],
+                       mode = "classResults",
+                       main = "',metric,' for each fold with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',metric,'")',sep=''),'```\n')
+      }
+      allCfMats_svm <- results_cv_svm$cfMats[[1]]$table + results_cv_svm$cfMats[[2]]$table + results_cv_svm$cfMats[[3]]$table + results_cv_svm$cfMats[[4]]$table + results_cv_svm$cfMats[[5]]$table
+      markobj <- c(markobj,'```{r echo = FALSE}',
+                   paste('dataPlot(allCfMats_svm, labels,
+                       mode = "confusionMatrix")',sep=''),'```\n')
     }
-    allCfMats <- results_cv$cfMats[[1]]$table + results_cv$cfMats[[2]]$table + results_cv$cfMats[[3]]$table + results_cv$cfMats[[4]]$table + results_cv$cfMats[[5]]$table
-    markobj <- c(markobj,'```{r echo = FALSE}',
-                 paste('dataPlot(allCfMats, labels,
-                       mode = "confusionMatrix",
-                       main = "Confusion Matrix for CV results using ',clasifAlg,'",
-                       )',sep=''),'```\n')
-    #dataPlot(allCfMats,labels,mode = "confusionMatrix")
+    
   }
   # --- DEGs enrichment methodology --- #
   markobj <- c(markobj,'\n# DEGs enrichment\n',
@@ -228,6 +261,9 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
       labelsGo <- gsub(unique(labels)[i],i-1,labelsGo) 
     }
     
+    data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
+    GOsMatrix <- geneOntologyEnrichment(as.character(data$ensembl_gene_id),geneType='ENSEMBL_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
+    
     GOsMatrix <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
     GOsMatrix$`BP Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`BP Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
     bp.frame <- data.frame(GOsMatrix$`BP Ontology GOs`)
@@ -247,8 +283,8 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   
   # --- Pathways Visualization --- #
   if(getPathways){
-    DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"))
-    genomeAnnotation <- getAnnotationFromEnsembl('allGenome',notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"))
+    DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"), filter = "external_gene_name")
+    genomeAnnotation <- getAnnotationFromEnsembl('allGenome',notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"), filter = "external_gene_name")
     markobj <- c(markobj,'\n## Pathways visualization\n','```{r echo=FALSE}','DEGsPathwayVisualization(DEGsMatrix,DEGsAnnotation,expressionMatrix,genomeAnnotation)','```\n')
   }
   

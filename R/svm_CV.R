@@ -101,6 +101,9 @@ svm_CV <- function(data, labels, vars_selected, numFold = 10) {
       acc_cv[i, j] <- confusionMatrix(predicts, labelsTest)$overall[[1]]
       sens_cv[i, j] <- confusionMatrix(predicts, labelsTest)$byClass[[1]]
       spec_cv[i, j] <- confusionMatrix(predicts, labelsTest)$byClass[[2]]
+      
+      if(is.na(sens_cv[i,j])) sens_cv[i,j] <- 0
+      if(is.na(spec_cv[i,j])) spec_cv[i,j] <- 0
     }
   }
   rownames(acc_cv) <- paste("Fold", seq(numFold), sep = "")

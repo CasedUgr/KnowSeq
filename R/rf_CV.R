@@ -51,32 +51,29 @@ rf_CV<-function(data,labels,vars_selected,numFold=10){
   spec_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
 
   cfMatList  <- list()
-
+  # compute size of val fold
+  lengthValFold <- dim(data)[1]/numFold
+  
+  # reorder the data matrix in order to have more
+  # balanced folds
+  set.seed(69)
+  positions <- rep(1:dim(data)[1])
+  randomPositions <- sample(positions)
+  data <- data[randomPositions,]
+  labels <- labels[randomPositions]
+  
   for(i in seq_len(numFold)){
 
     cat(paste("Training fold ", i,"...\n",sep=""))
-    trainingDataset <- setNames(data.frame(matrix(ncol = ncol(data), nrow = 0)),
-                                colnames(data))
-    testDataset <- setNames(data.frame(matrix(ncol = ncol(data), nrow = 0)),
-                            colnames(data))
-    labelsTrain <- factor(0L)
-    labelsTest <- factor(0L)
-
-    for(class in names(table(labels))){
-
-      classPos <- which(labels == class)
-      classPos <- sample(classPos)
-      trainingPos <- round(length(classPos)*0.8)
-      testPos <- round(length(classPos)*0.2)
-      trainingDataset <- rbind(trainingDataset,data[classPos[seq_len(trainingPos)],])
-      testDataset <- rbind(testDataset,data[classPos[(trainingPos+1):(trainingPos+testPos)],])
-      labelsTrain <- unlist(list(labelsTrain, labels[classPos[seq_len(trainingPos)]]))
-      labelsTest <- unlist(list(labelsTest, labels[classPos[(trainingPos+1):(trainingPos+testPos)]]))
-
-    }
-
-    labelsTrain <- factor(labelsTrain[-1])
-    labelsTest <- factor(labelsTest[-1])
+    
+    # obtain validation and training folds
+    valFold <- seq(round((i-1)*lengthValFold + 1 ), round(i*lengthValFold))
+    trainDataCV <- setdiff(seq(1:dim(data)[1]), valFold)
+    testDataset<- data[valFold,]
+    trainingDataset <- data[trainDataCV,]
+    labelsTrain <- labels[trainDataCV]
+    labelsTest <- labels[valFold]
+    
     # first iteration is performed outside of the foor lopp
     # in order to avoid having a if inside
     rf_mod = randomForest(x = trainingDataset[, 1, drop=FALSE], y = labelsTrain, ntree = 100)

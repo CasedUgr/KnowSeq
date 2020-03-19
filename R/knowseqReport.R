@@ -1,24 +1,22 @@
-#' getReport creates a report for a given set of genes which their label
+#' knowseqReport creates a report for a given set of genes which their label.
 #'
-#' getReport creates a report for a given set of genes which their label. This provide an html and/or pdf file with all the information that can be obtained for a certain set of genes (as GO, pathway visualization, associated diseases) and their labels (machine learning process)
+#' knowseqReport creates a report for a given set of genes which their label. This provide an html file with all the information that can be obtained for a certain set of genes (as GO, pathway visualization, associated diseases) and their labels (machine learning process).
 #' @param data A matrix that contains the gene expression or counts values.
 #' @param labels A vector or factor that contains the labels for each of the samples in the data object.
-#' @param outdir The output directory to store the report
+#' @param outdir The output directory to store the report.
 #' @param baseline A string that indicates the start point. This will be 'expression' if data contains genes expression values or 'counts' if data contains genes counts values.
-#' @param outputFormat String to indicate in which formar will be the report saved. There are two ossible values: pdf or hmtl.
 #' @param featureSelectionMode String that indicates which feature selection algorithm is going to be used. Possible values are: mrmr, rf or da.
 #' @param disease String that indicates from which disease wants the user to know if selected genes are related to. Found evidences will be shown. Default empty, this means that all related diseases, and found evidences, will be shown.
-#' @param maxGenes Integer that indicates the maximun number of genes which information will be shown and that will be used to train models
+#' @param maxGenes Integer that indicates the maximun number of genes which information will be shown and that will be used to train models.
 #' @param clasifAlgs A vector with including algorithms names that will be used in training cv.
 #' @return Nothing to return.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#' getReport(expressionMatrix,labels,'pdf-report',outputFormat='pdf',clasifAlgs=c('rf'),disease='cancer',maxGenes = 9)
+#' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='cancer',maxGenes = 9)
 
 
-getReport <- function(data,labels,outdir,baseline='expression',
-                      outputFormat='pdf',
+knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expression',
                       featureSelectionMode = 'mrmr',
                       disease = '',
                       maxGenes = 12,
@@ -45,9 +43,9 @@ getReport <- function(data,labels,outdir,baseline='expression',
     expressionMatrix <- calculateGeneExpressionValues(data,myAnnotation, genesNames = TRUE)
     
   }
-  if ( outputFormat == 'html') table.format <- 'html'
-  else table.format = 'pandoc'
   
+  table.format <- 'html'
+
   # Create output's directory if it doesn't exists
   if (! dir.exists(outdir)) dir.create(outdir)
   if (substr(outdir,nchar(outdir),nchar(outdir)) != '/') outdir <- paste(outdir,'/',sep='')
@@ -57,12 +55,12 @@ getReport <- function(data,labels,outdir,baseline='expression',
   
   
   #cat("Performing the quality analysis of the samples\n")
-  #RNAseqQA(expressionMatrix)
+  RNAseqQA(expressionMatrix)
   
   
   # --- Differencia Expressed Genes --- #
-  markobj <- c(markobj,'## Differential Expressed Genes extraction and visualization',
-               '### Remove Batch Effect\n',
+  markobj <- c(markobj,'# Differential Expressed Genes extraction and visualization',
+               '## Remove Batch Effect\n',
               'It is widely known that this is a crucial step in the omics data processing due to the intrinsic 
               deviations that the data can present due to its origin, sequencing design, etc...\n',
               'In this section, batch effect will be removed by using surrogate variable analysis or sva.\n',
@@ -75,14 +73,14 @@ getReport <- function(data,labels,outdir,baseline='expression',
   topTable <- DEGsInformation$Table
   DEGsMatrix <- DEGsInformation$DEGsMatrix
   
-  markobj <- c(markobj,'### Differential Expressed Genes extraction using *Limma*',
+  markobj <- c(markobj,'## Differential Expressed Genes extraction using *Limma*',
                'limmaDEGsExtraction performs the analysis to extract the Differentially Expressed Genes (DEGs) 
                among the classes to compare. This method is used setting LFC param to 2 and p-value to 0.01.\n',
                'Finnally',paste(dim(DEGsMatrix)[1],'genes have been keeped after using limma DEGs extraction with *sva* method. \n'))
     
   
   # --- Feature Selection --- #
-  markobj <- c(markobj,'### Feature Selection',
+  markobj <- c(markobj,'## Feature Selection',
                paste('With the purpose of ﬁnding the best DEGs order to assess the data, the',featureSelectionMode,'method
                      will be used in order to select the',maxGenes,'most relevant genes for the machine learning process.\n'))
   DEGsMatrixML <- t(DEGsMatrix)
@@ -95,7 +93,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
   for (gene in ranking[1:maxGenes]) genes <- paste(genes,gene,sep=', ')
   markobj <- c(markobj,paste('First',maxGenes,'selected genes are:'),sub(".","",genes),'.\n')
   
-  markobj <- c(markobj,'### Visualization\n',
+  markobj <- c(markobj,'## Visualization\n',
                 'DEGs are genes that have a truly diﬀerent expression among the studied classes, 
                for that it is important to try to see graphically if those DEGs comply with this requirement. 
                In order to provide a tool to perform this task, the function dataPlot encapsulate a set of 
@@ -123,7 +121,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
   
   # --- Machine learning --- #
   # --- ---  Training --- --- #
-  markobj <- c(markobj,'### Training \n',
+  markobj <- c(markobj,'# Machine Learning Assessment \n',
                'With the purpose of evaluate the robustness of the DEGs in the discernment among the studied pathologies.\n')
   clasifNames <- paste(clasifAlgs,collapse = ',')
   clasifNames <- str_replace(clasifNames,'knn','K-Nearest Neighbors (K-NN)')
@@ -156,7 +154,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
     #dataPlot(allCfMats,labels,mode = "confusionMatrix")
   }
   # --- DEGs enrichment methodology --- #
-  markobj <- c(markobj,'\n## DEGs enrichment\n',
+  markobj <- c(markobj,'\n# DEGs enrichment\n',
                'The main goal of the this process is the extraction of biological relevant information from the DEGs,
                and this enrichment has three different points of view:\n
                \t- The gene ontology information.\n
@@ -164,7 +162,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
                \t- The relationship between the DEGs and diseases related to the studied pathologies.\n')
   
   # --- Gene Ontology --- #
-  markobj <- c(markobj,'### Gene Ontology\n',
+  markobj <- c(markobj,'## Gene Ontology\n',
                'Gene ontology (GO) provides information about the biological functions of the genes. 
               The following, information from the three different ontologies (BP, MF and CC) will be shown.\n')
   labelsGo <- labels
@@ -176,17 +174,17 @@ getReport <- function(data,labels,outdir,baseline='expression',
   GOsMatrix$`BP Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`BP Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
   bp.frame <- data.frame(GOsMatrix$`BP Ontology GOs`)
   bp.frame <- bp.frame[,c("GO.ID","Term","Description","GO_Genes")]
-  markobj <- c(markobj,'#### BP Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(bp.frame,"',table.format,'")',sep=''),'```\n')
+  markobj <- c(markobj,'### BP Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(bp.frame,"',table.format,'")',sep=''),'```\n')
   
   GOsMatrix$`MF Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`MF Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
   mf.frame <- data.frame(GOsMatrix$`MF Ontology GOs`)
   mf.frame <- mf.frame[,c("GO.ID","Term","Description","GO_Genes")]
-  markobj <- c(markobj,'#### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(mf.frame,"',table.format,'")',sep=''),'```\n')
+  markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(mf.frame,"',table.format,'")',sep=''),'```\n')
 
   GOsMatrix$`CC Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`CC Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
   cc.frame <- data.frame(GOsMatrix$`CC Ontology GOs`)
   cc.frame <- cc.frame[,c("GO.ID","Term","Description","GO_Genes")]
-  markobj <- c(markobj,'#### CC Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(cc.frame,"',table.format,'")',sep=''),'```\n')
+  markobj <- c(markobj,'### CC Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(cc.frame,"',table.format,'")',sep=''),'```\n')
   
   # --- Pathways Visualization --- #
   #DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE)
@@ -194,7 +192,7 @@ getReport <- function(data,labels,outdir,baseline='expression',
   #markobj <- c(markobj,'\n### Pathways visualization\n','```{r echo=FALSE}','DEGsPathwayVisualization(DEGsMatrix,DEGsAnnotation,expressionMatrix,genomeAnnotation)','```\n')
   
   # --- Related Diseases --- #
-  markobj <- c(markobj,'### Related diseases\n',
+  markobj <- c(markobj,'## Related diseases\n',
             'Finally, the related diseases enrichment is displayed. DEGs related diseases are searched 
             from *targetValidation* plastform.\n')
 
@@ -226,31 +224,18 @@ getReport <- function(data,labels,outdir,baseline='expression',
       }
     }
     if (length(act.markobj) > 0)
-      markobj <- c(markobj,paste('\n####',gene,sep=' '),act.markobj)
+      markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
   }
   
   # --- Save Report --- #
-  if ( outputFormat == 'html' ){
-    mark.header.html <- c('---',
+  mark.header.html <- c('---',
                           'title: "Genes Report"',
                           'output: html_document',
+                          'number_sections: yes',
+                          'toc: yes',
                           '---',
                           '')
-    markdown::markdownToHTML(text = knitr::knit(text = c(mark.header.html,markobj)), output =paste(outdir,'report.html',sep='/'))
-    browseURL('report.html')
-  }
-  else{
-    mark.header.pdf <- c('---',
-                         'title: "Genes Report"',
-                         'output: pdf_document',
-                         '---','')#, '```{r}','library(knitr)','```')
-    file.create(paste(outdir,'report.rmd',sep='/'))
-    fileConn<-file(paste(outdir,'report.rmd',sep='/'))
-    writeLines(c(mark.header.pdf,markobj), fileConn)
-    close(fileConn)
-    render(paste(outdir,'report.rmd',sep='/'))
-    file.remove(paste(outdir,'report.rmd',sep='/'))
-    file.remove(paste(outdir,'report.tex',sep='/'))
-    file.remove(paste(outdir,'report.log',sep='/'))
-  }
+  markdown::markdownToHTML(text = knitr::knit(text = c(mark.header.html,markobj)), output =paste(outdir,'report.html',sep='/'))
+  browseURL('report.html')
+ 
 }

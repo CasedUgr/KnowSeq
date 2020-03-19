@@ -71,8 +71,11 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
     if(disease == ""){
       stop("Please, indicate a disease name to acquire the Disease Association Score and Feature selection.")
     }
-    
-    cat("Calculating ranking of biological relevant genes by using DA implementation...\n")
+    if(mode == "da"){
+      cat("Calculating ranking of biological relevant genes by using DA implementation...\n")
+    }else if(mode == 'daRed'){
+      cat("Calculating ranking of biological relevant genes by using DA-Red implementation...\n")
+    }
     
     relatedDiseases <- DEGsToDiseases(vars_selected, size = 100)
     

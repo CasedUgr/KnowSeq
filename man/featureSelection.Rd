@@ -4,7 +4,14 @@
 \alias{featureSelection}
 \title{featureSelection function calculates the optimal order of DEGs to achieve the best result in the posterior machine learning process by using mRMR algorithm or Random Forest.}
 \usage{
-featureSelection(data, labels, vars_selected, mode = "mrmr", disease = "")
+featureSelection(
+  data,
+  labels,
+  vars_selected,
+  mode = "mrmr",
+  disease = "",
+  subdiseases = c()
+)
 }
 \arguments{
 \item{data}{The data parameter is an expression matrix or data.frame that contains the genes in the columns and the samples in the rows.}
@@ -16,6 +23,8 @@ featureSelection(data, labels, vars_selected, mode = "mrmr", disease = "")
 \item{mode}{The algorithm used to calculate the genes ranking. The possibilities are two: mrmr, rf and da.}
 
 \item{disease}{The name of a disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.}
+
+\item{subdiseases}{Vector with the name of the particular subdiseases from disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.}
 }
 \value{
 A vector that contains the ranking of genes.
@@ -26,6 +35,7 @@ featureSelection function calculates the optimal order of DEGs to achieve the be
 \examples{
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
-
-featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix))
+featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='mrmr')
+featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer')
+featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer',subdiseases=c('breast','colorectal'))
 }

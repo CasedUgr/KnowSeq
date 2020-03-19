@@ -74,7 +74,22 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   sensVector <- double()
   specVector <- double()
   cfMatList  <- list()
-
+  
+  # Firstly with 1 variable
+  cat(paste("Testing with ", 1," variables...\n",sep=""))
+  rf_mod = randomForest(x = train[, 1, drop=FALSE], y = labelsTrain, ntree = 100)
+  predicts <- predict(rf_mod , test[, 1, drop=FALSE])
+  
+  cfMat<-confusionMatrix(predicts,labelsTest)
+  acc<-confusionMatrix(predicts,labelsTest)$overall[[1]]
+  sens<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
+  spec<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
+  
+  cfMatList[[1]] <- cfMat
+  accVector[1] <- acc
+  sensVector[1] <- sens
+  specVector[1] <- spec
+  
   for(i in c(2:dim(train)[2])){
 
     cat(paste("Testing with ", i," variables...\n",sep=""))

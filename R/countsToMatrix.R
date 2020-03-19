@@ -3,6 +3,7 @@
 #' The function merges in a matrix the information in the count files. It can be used from 1 to N count files. These count files can be created by using the function \code{\link{rawAlignment}} with the raw files of RNA-seq.
 #' @param csvFile The csv that contains the name and the path to each of the count files. The column of the name of the file must be named Run and the column that contains the paths must be named Path. Furthermore, to facilitate the posterior steps, a column named Class that contains the classes for the samples must be required.
 #' @param sep The separator character of the csvFile or tsvFile.
+#' @param extension The extension of the count file. Set to count by default.
 #' @return A matrix with the ensembl ID in the rows and all the samples of each count files in the columns.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
@@ -19,7 +20,7 @@
 #'
 #' file.remove("countsInfo.csv")
 
-countsToMatrix <- function(csvFile,sep=','){
+countsToMatrix <- function(csvFile,sep=',',extension='count'){
 
     if(!file.exists(csvFile)){
       stop("Unable to find the CSV file. Please check the path to the file.")
@@ -34,7 +35,7 @@ countsToMatrix <- function(csvFile,sep=','){
     countf <- vector(mode="character", length=0)
     for(i in seq_len(dim(countsData)[1])){
       dir = paste(countsData$Path[i], countsData$Run[i], sep = "/")
-      countf[i] = paste(dir, "count", sep = ".")
+      countf[i] = paste(dir, extension, sep = ".")
       cat(paste("\n",countf[i],sep = ""))
     }
     

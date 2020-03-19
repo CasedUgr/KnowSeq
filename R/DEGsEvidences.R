@@ -131,9 +131,6 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
               }
             }
             # Save actual evidence if it is not empty and if it is not repeated
-            if (type == 'affected_pathway'){
-              a <- 0
-            }
             if (length(act.evidence) > 0){
               if (! type %in% names(evidences)){
                 evidences[[type]] <- c()

@@ -1,7 +1,7 @@
 #' getAnnotationFromEnsembl returns the required information about a list of genes from Ensembl biomart.
 #'
 #' The function returns the required information about a list of genes from Ensembl biomart. This list of genes can be Ensembl ID, gene names or either of the possible values admited by Ensembl biomart. Furthermore, the reference genome can be chosen depending on the necessity of the user.
-#' @param values A list of genes that contains the names or IDs.
+#' @param values A list of genes that contains the names or IDs or "allGenome" string, which indicates that all genome will be  returned.
 #' @param attributes A vector which contains the different information attributes that the Ensembl biomart admit.
 #' @param filter The attribute used as filter to return the rest of the attributes.
 #' @param notHSapiens A boolean value that indicates if the user wants the human annotation or another annotation available in BiomaRt. The possible not human dataset can be consulted by calling the following function: biomaRt::listDatasets(useMart("ensembl")).
@@ -11,7 +11,6 @@
 #' @examples
 #' myAnnotation <- getAnnotationFromEnsembl(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content","entrezgene_id"),filter='external_gene_name',notHSapiens=FALSE)
 #' myAnnotation <- getAnnotationFromEnsembl(c("MGP_129S1SvImJ_G0038602", "MGP_129S1SvImJ_G0007718"),attributes=c("percentage_gene_gc_content","ensembl_gene_id"),filter='ensembl_gene_id',notHSapiens = TRUE, notHumandataset = 'mm129s1svimj_gene_ensembl')
-
 
 getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content"), filter="ensembl_gene_id", notHSapiens = FALSE, notHumandataset = "",referenceGenome=38){
   
@@ -72,25 +71,25 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     
     # Create query
     query = paste('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE Query>
-                    <Query  virtualSchemaName = "default" formatter = "CSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >
-                    <Dataset name = "',dataset.name,'" interface = "default" >',sep='')
+                  <Query virtualSchemaName = "default" formatter = "CSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6">
+                  <Dataset name="',dataset.name,'" interface="default">',sep='')
     
     if ( length(values)>1 || values != 'allGenome'){
-      query <- paste(query,'<Filter name = "',filter,'" value = "',sep='')
+      query <- paste(query,'<Filter name="',filter,'" value = "',sep='')
       for ( value in act.values[1:max.values]) query <- paste(query,value,',',sep='')
       query <- str_sub(query, 1, nchar(query)-1)
       query <- paste(query,'"/>',sep='')
     }
     
     for (attribute in attributes)
-      query <- paste(query,'<Attribute name = "',attribute,'" />',sep='')
+      query <- paste(query,'<Attribute name="',attribute,'" />',sep='')
     if (! filter %in% attributes ) 
-      query <- paste(query,'<Attribute name = "',filter,'" />',sep='')
+      query <- paste(query,'<Attribute name="',filter,'" />',sep='')
     query <- paste(query,'</Dataset></Query>',sep='')
     
     # Download annotation file
-    reponse <- POST('http://www.ensembl.org/biomart/martservice',body=paste('query=',query,sep=''))
-    act.myAnnotation <- read.csv(text=content(reponse,'text'),sep=',',header=FALSE)
+    response <- GET(URLencode(paste(base,'?query=',query,sep='')))
+    act.myAnnotation <- read.csv(text=content(response,'text'),sep=',',header=FALSE)
 
     
     if( grepl('ERROR',act.myAnnotation[1,1]) ){
@@ -113,5 +112,3 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
 
   return(myAnnotation)
 }
-
-myAnnotation <- getAnnotationFromEnsembl('allGenome',attributes=c("ensembl_gene_id","percentage_gene_gc_content","entrezgene_id"),filter='external_gene_name',notHSapiens=FALSE)

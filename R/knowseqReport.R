@@ -41,7 +41,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     expressionMatrix <- calculateGeneExpressionValues(data,myAnnotation, genesNames = TRUE)
     
   }
-  
+  disease <- gsub(' ','-',disease)
   table.format <- 'html'
   
   # Create output's directory if it doesn't exists

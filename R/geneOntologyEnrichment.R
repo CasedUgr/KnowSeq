@@ -4,14 +4,16 @@
 #' @param geneList A list that contains entrez gene id of the DEGs. Entrez gene id can be obtained using getAnnotationFromEnsembl function.
 #' @param ontologies A list that contains ontologies to be searchs. Values must be contained in the following three: BP, CC, MF.
 #' @param pvalCutOff The maximum p-value to considers that a genes is related with a GO term.
+#' @param geneType A string indicating the type of genes in geneList, it must be one of indicated in DAVIDs API documentation.
+#' @param returnGeneSymbols A boolean that indicates if gene symbols must be added to the ontolgies matrix.
 #' @return A list that contains a matrix for each of the possible ontologies and a matrix with the GOs for the three ontologies together.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
-#' GOsList <- geneOntologyEnrichment(as.character(data$entrezgene_id),pvalCutOff=0.1)
+#' GOsList <- geneOntologyEnrichment(as.character(data$ensembl_gene_id),geneType='ENSEMBL_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
 
-geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologies=c('BP','CC','MF'), pvalCutOff=1){
+geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologies=c('BP','CC','MF'), pvalCutOff=1,returnGeneSymbols=FALSE){
   if(!class(geneList)=='character'){stop('The class of geneList must be character')}
   if(!class(geneType)=='character'){stop('The class of geneType must be character')}
   if(!class(ontologies)=='character'){stop('The class of ontologies must be character')}
@@ -26,6 +28,14 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
   }
   annotations <- substr(annotations,2,nchar(annotations))
   
+  if (returnGeneSymbols){
+    if ( geneType == 'ENTREZ_GENE_ID') gene.type <- 'entrezgene_id'
+    else if (geneType == 'GENE_SYMBOL') gene.type <- 'external_gene_name'
+    else gene.type <- tolower(geneType)
+    cat('Getting gene symbols...')
+    genes.annotations <- getAnnotationFromEnsembl(geneList,attributes=c("external_gene_name",gene.type),filter=gene.type)
+  }
+
   cat('Retrieving Geno Ontologie terms related to the list of DEGs...')
   geneList <- paste(geneList, collapse=",")
   base  <- 'https://david.ncifcrf.gov/'
@@ -47,7 +57,7 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
   if (grepl(".txt", downloadFileName)){
     downloadFileName <- paste(base,"data/download/", downloadFileName, sep="")
   }else{
-    stop(str_match(response,'<div class="error">"(.*?)"')[2])
+    stop('Error in request. Please check parameters or use geneType as ENTREZ_GENE_ID or ENSEMBL_GENE_ID.')
   }
 
   response <- httr::GET(downloadFileName)
@@ -66,6 +76,16 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
       act.gos[['GO.ID']] <- tmp[,1]
       act.gos[['Term']] <- tmp[,2]
       
+      # Add column with gene symbols
+      if (returnGeneSymbols){
+        gene.names <- act.gos$Genes
+        for ( gen in seq(dim(genes.annotations)[1])){
+          gene.names <- str_replace(gene.names,as.character(genes.annotations[gen,gene.type]),
+                                    as.character(genes.annotations[gen,'external_gene_name']))
+        }
+        act.gos['Gene Symbols'] <- gene.names
+      }
+
       descriptions <- c()
       for (go in act.gos[['GO.ID']]){
         go <- gsub(':','%3A',go)
@@ -88,6 +108,4 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
   
   return(final.gos)
 }
-
-
 

@@ -89,6 +89,10 @@ knn_CV<-function(data,labels,vars_selected,numFold=10){
     acc_cv[i,1]<-confusionMatrix(predicts,labelsTest)$overall[[1]]
     sens_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
     spec_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
+    
+    if(is.na(sens_cv[i,1])) sens_cv[i,1] <- 0
+    if(is.na(spec_cv[i,1])) spec_cv[i,1] <- 0
+    
     for(j in 2:length(vars_selected)){
       knn_mod = knn3(x = trainingDataset[,seq(j)], y = labelsTrain, k = bestK)
       predicts <- predict(knn_mod, testDataset[,seq(j)], type = "class")
@@ -97,6 +101,9 @@ knn_CV<-function(data,labels,vars_selected,numFold=10){
       acc_cv[i,j]<-confusionMatrix(predicts,labelsTest)$overall[[1]]
       sens_cv[i,j]<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
       spec_cv[i,j]<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
+      
+      if(is.na(sens_cv[i,j])) sens_cv[i,j] <- 0
+      if(is.na(spec_cv[i,j])) spec_cv[i,j] <- 0
       
     }
   }

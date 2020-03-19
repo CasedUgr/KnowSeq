@@ -87,7 +87,7 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     
     # Download annotation file
     reponse <- POST('http://www.ensembl.org/biomart/martservice',body=paste('query=',query,sep=''))
-    act.myAnnotation <- read.csv(text=content(reponse),sep=',',header=FALSE)
+    act.myAnnotation <- read.csv(text=content(reponse,'text'),sep=',',header=FALSE)
 
     
     if( grepl('ERROR',act.myAnnotation[1,1]) ){
@@ -109,5 +109,4 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
 
   return(myAnnotation)
 }
-
 

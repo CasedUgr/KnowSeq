@@ -6,34 +6,46 @@
 #' @param filter The attribute used as filter to return the rest of the attributes.
 #' @param notHSapiens A boolean value that indicates if the user wants the human annotation or another annotation available in BiomaRt. The possible not human dataset can be consulted by calling the following function: biomaRt::listDatasets(useMart("ensembl")).
 #' @param notHumandataset A dataset identification from biomaRt::listDatasets(useMart("ensembl")).
+#' @param referenceGenome Integer that indicates used reference genome. It must be 37 or 38.
 #' @return A matrix that contains all the information asked to the attributes parameter.
 #' @examples
-#' myAnnotation <- getAnnotationFromEnsembl(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content","entrezgene_id"),filter='external_gene_name',notHSapiens=FALSE)
+#' myAnnotation <- getAnnotationFromEnsembl(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content"),filter='external_gene_name',notHSapiens=FALSE)
 #' myAnnotation <- getAnnotationFromEnsembl(c("MGP_129S1SvImJ_G0038602", "MGP_129S1SvImJ_G0007718"),attributes=c("percentage_gene_gc_content","ensembl_gene_id"),filter='ensembl_gene_id',notHSapiens = TRUE, notHumandataset = 'mm129s1svimj_gene_ensembl')
 
 
-getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content"), filter="ensembl_gene_id", notHSapiens = FALSE, notHumandataset = ""){
+getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content"), filter="ensembl_gene_id", notHSapiens = FALSE, notHumandataset = "",referenceGenome=38){
   
   if(typeof(attributes) != "character"){stop("The parameter attributes must be a character vector that contains the wanted ensembl attributes.")}
   if(typeof(values) != "character"){stop("The parameter values must be a character vector that contains the genes IDs.")}
   if(typeof(filter) != "character"){stop("The parameter filter must be a character that contains one attribute used as filter.")}
   if(!is.logical(notHSapiens)){stop("notHSapiens parameter can only takes the values TRUE or FALSE.")}
+  if(! referenceGenome %in% c(37,38)){stop('Introduced referenceGenome is not available, it must be 37 or 38')}
   
   dir <- system.file("extdata", package="KnowSeq")
-  
+
+  base  <- 'http://www.ensembl.org/biomart/martservice'
   if(!notHSapiens){
     
     cat("Getting annotation of the Homo Sapiens...\n")
-    cat(paste("Using reference genome 38.\n"))
-    
-    myAnnotation <- read.csv(paste(dir,"GRCh38Annotation.csv",sep = "/"))
-    
-    if (filter %in% colnames(myAnnotation) && length(intersect(attributes,colnames(myAnnotation))) == length(attributes)){
-      myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
-      myAnnotation <- myAnnotation[,union(attributes,filter)]
-      return(myAnnotation)
+    if(referenceGenome == 38){
+      cat(paste("Using reference genome 38.\n"))
+      
+      myAnnotation <- read.csv(paste(dir,"GRCh38Annotation.csv",sep = "/"))
+      
+      if (filter %in% colnames(myAnnotation) && length(intersect(attributes,colnames(myAnnotation))) == length(attributes)){
+        myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
+        myAnnotation <- myAnnotation[,union(attributes,filter)]
+        return(myAnnotation)
+      }
+      else{
+        dataset.name <- 'hsapiens_gene_ensembl'
+        filename <- paste(dataset.name,'.csv',sep='')
+      }
     }
     else{
+      cat(paste("Using reference genome 37.\n"))
+      
+      base <- 'https://grch37.ensembl.org/biomart/martservice/'
       dataset.name <- 'hsapiens_gene_ensembl'
       filename <- paste(dataset.name,'.csv',sep='')
     }
@@ -75,8 +87,8 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     query <- paste(query,'</Dataset></Query>',sep='')
     
     # Download annotation file
-    reponse <- POST('http://www.ensembl.org/biomart/martservice',body=paste('query=',query,sep=''))
-    act.myAnnotation <- read.csv(text=content(reponse),sep=',',header=FALSE)
+    response <- POST(base,body=paste('query=',query,sep=''))
+    act.myAnnotation <- read.csv(text=content(response),sep=',',header=FALSE)
     
     
     if( grepl('ERROR',act.myAnnotation[1,1]) ){
@@ -98,6 +110,5 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   
   return(myAnnotation)
 }
-
 
 

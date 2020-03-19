@@ -9,7 +9,8 @@ getAnnotationFromEnsembl(
   attributes = c("ensembl_gene_id", "external_gene_name", "percentage_gene_gc_content"),
   filter = "ensembl_gene_id",
   notHSapiens = FALSE,
-  notHumandataset = ""
+  notHumandataset = "",
+  referenceGenome = 38
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ getAnnotationFromEnsembl(
 \item{notHSapiens}{A boolean value that indicates if the user wants the human annotation or another annotation available in BiomaRt. The possible not human dataset can be consulted by calling the following function: biomaRt::listDatasets(useMart("ensembl")).}
 
 \item{notHumandataset}{A dataset identification from biomaRt::listDatasets(useMart("ensembl")).}
+
+\item{referenceGenome}{Integer that indicates used reference genome. It must be 37 or 38.}
 }
 \value{
 A matrix that contains all the information asked to the attributes parameter.

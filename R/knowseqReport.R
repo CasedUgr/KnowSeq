@@ -247,8 +247,8 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   
   # --- Pathways Visualization --- #
   if(getPathways){
-    DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE)
-    genomeAnnotation <- getAnnotationFromEnsembl('allGenome',notHSapiens=FALSE)
+    DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"))
+    genomeAnnotation <- getAnnotationFromEnsembl('allGenome',notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"))
     markobj <- c(markobj,'\n## Pathways visualization\n','```{r echo=FALSE}','DEGsPathwayVisualization(DEGsMatrix,DEGsAnnotation,expressionMatrix,genomeAnnotation)','```\n')
   }
   

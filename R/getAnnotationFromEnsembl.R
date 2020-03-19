@@ -9,7 +9,7 @@
 #' @param referenceGenome Integer that indicates used reference genome. It must be 37 or 38.
 #' @return A matrix that contains all the information asked to the attributes parameter.
 #' @examples
-#' myAnnotation <- getAnnotationFromEnsembl(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content"),filter='external_gene_name',notHSapiens=FALSE)
+#' myAnnotation <- getAnnotationFromEnsembl(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content","entrezgene_id"),filter='external_gene_name',notHSapiens=FALSE)
 #' myAnnotation <- getAnnotationFromEnsembl(c("MGP_129S1SvImJ_G0038602", "MGP_129S1SvImJ_G0007718"),attributes=c("percentage_gene_gc_content","ensembl_gene_id"),filter='ensembl_gene_id',notHSapiens = TRUE, notHumandataset = 'mm129s1svimj_gene_ensembl')
 
 
@@ -59,10 +59,9 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     dataset.name <- notHumandataset
     filename <- paste(notHumandataset,'.csv',sep='')
   }
-  
-  
+
   cat(paste("Downloading annotation ", dataset.name, "...\n", sep = ""))
-  
+
   act.values <- values
   max <- 900
   max.values <- min(length(values),900)
@@ -87,9 +86,9 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     query <- paste(query,'</Dataset></Query>',sep='')
     
     # Download annotation file
-    response <- POST(base,body=paste('query=',query,sep=''))
-    act.myAnnotation <- read.csv(text=content(response),sep=',',header=FALSE)
-    
+    reponse <- POST('http://www.ensembl.org/biomart/martservice',body=paste('query=',query,sep=''))
+    act.myAnnotation <- read.csv(text=content(reponse),sep=',',header=FALSE)
+
     
     if( grepl('ERROR',act.myAnnotation[1,1]) ){
       
@@ -107,7 +106,7 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
   
   colnames(myAnnotation) <- union(attributes,filter)
   myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
-  
+
   return(myAnnotation)
 }
 

@@ -324,7 +324,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
       respon <- content(r_Ensembl)
       
       if ( 'size' %in% names(respon) && respon$size == 0){
-        markobj  <-  c(markobj,'Disease not found.')
+        markobj  <-  c(markobj,'\nDisease not found.')
       }else{
         disease.id <- respon$data[[1]]$id
         url  <- paste("https://api.opentargets.io/v3/platform/public/association/filter?disease=",disease.id,"&size=10000",sep='')
@@ -364,6 +364,9 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
             if (length(act.markobj) > 0)
               markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
           }
+        }
+        else{
+          markobj <- c(markobj,paste('\nNo introduced gene is related with',disease,sep=' '))
         }
       }
     }

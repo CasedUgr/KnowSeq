@@ -41,7 +41,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     expressionMatrix <- calculateGeneExpressionValues(data,myAnnotation, genesNames = TRUE)
     
   }
-  
+  disease <- gsub(' ','-',disease)
   table.format <- 'html'
   
   # Create output's directory if it doesn't exists
@@ -256,29 +256,25 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     markobj <- c(markobj,'## Gene Ontology\n',
                  'Gene ontology (GO) provides information about the biological functions of the genes. 
                   The following, information from the three different ontologies (BP, MF and CC) will be shown.\n')
-    labelsGo <- labels
-    for (i in seq(length(unique(labels)))){
-      labelsGo <- gsub(unique(labels)[i],i-1,labelsGo) 
-    }
-    
+
     data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
     GOsMatrix <- geneOntologyEnrichment(as.character(data$ensembl_gene_id),geneType='ENSEMBL_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
     
-    GOsMatrix <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
-    GOsMatrix$`BP Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`BP Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
-    bp.frame <- data.frame(GOsMatrix$`BP Ontology GOs`)
-    bp.frame <- bp.frame[,c("GO.ID","Term","Description","GO_Genes")]
+    GOsMatrix$`BP Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`BP Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
+    bp.frame <- GOsMatrix$`BP Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
+    rownames(bp.frame) <- NULL
     markobj <- c(markobj,'### BP Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(bp.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
     
-    GOsMatrix$`MF Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`MF Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
-    mf.frame <- data.frame(GOsMatrix$`MF Ontology GOs`)
-    mf.frame <- mf.frame[,c("GO.ID","Term","Description","GO_Genes")]
+    GOsMatrix$`MF Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`MF Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
+    mf.frame <- GOsMatrix$`MF Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
+    rownames(mf.frame) <- NULL
     markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(mf.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
     
-    GOsMatrix$`CC Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`CC Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
-    cc.frame <- data.frame(GOsMatrix$`CC Ontology GOs`)
-    cc.frame <- cc.frame[,c("GO.ID","Term","Description","GO_Genes")]
-    markobj <- c(markobj,'### CC Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(cc.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
+    GOsMatrix$`CC Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`CC Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
+    cc.frame <- GOsMatrix$`CC Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
+    rownames(cc.frame) <- NULL
+    markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(cc.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
+    
   }
   
   # --- Pathways Visualization --- #
@@ -335,38 +331,39 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
         response <- GET(url)
         response <- content(response)
         found.symbols <- unlist(list.map(response$data,target$gene_info$symbol))
-        
         found.symbols <- intersect(found.symbols,rownames(DEGsMatrix))
 
-        evidences <- DEGsEvidences(found.symbols,disease)
-        
-        evidences.frame <- list()
-        for (gene in names(evidences)){
-          act.markobj <- c()
-          if (class(evidences[[gene]])=='list'){
-            evidences.frame[[gene]] = list()
-            for ( evidence.type in names(evidences[[gene]]) ){
-              act.evidences.frame <- c()
-              for (act.evidence in evidences[[gene]][[evidence.type]]){
-                act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
-              }
-              remove.cols <- c()
-              for (col in seq(dim(act.evidences.frame)[2])){
-                if (all(act.evidences.frame[,col]=='*')  || all(act.evidences.frame[,col]=='')){
-                  remove.cols <- c(remove.cols,col)
+        if(length(found.symbols) > 0){
+          evidences <- DEGsEvidences(found.symbols,disease)
+          
+          evidences.frame <- list()
+          for (gene in names(evidences)){
+            act.markobj <- c()
+            if (class(evidences[[gene]])=='list'){
+              evidences.frame[[gene]] = list()
+              for ( evidence.type in names(evidences[[gene]]) ){
+                act.evidences.frame <- c()
+                for (act.evidence in evidences[[gene]][[evidence.type]]){
+                  act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
                 }
+                remove.cols <- c()
+                for (col in seq(dim(act.evidences.frame)[2])){
+                  if (all(act.evidences.frame[,col]=='*')  || all(act.evidences.frame[,col]=='')){
+                    remove.cols <- c(remove.cols,col)
+                  }
+                }
+                if (length(remove.cols)>0){
+                  act.evidences.frame <-  act.evidences.frame[,-remove.cols]
+                }
+                evidences.frame[[gene]][[evidence.type]] <- act.evidences.frame
               }
-              if (length(remove.cols)>0){
-                act.evidences.frame <-  act.evidences.frame[,-remove.cols]
-              }
-              evidences.frame[[gene]][[evidence.type]] <- act.evidences.frame
+              for ( evidence.type in names(evidences.frame[[gene]]))
+                act.markobj <- c(act.markobj,'```{r echo=FALSE}',
+                                 paste('knitr::kable(data.frame(evidences.frame[["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
             }
-            for ( evidence.type in names(evidences.frame[[gene]]))
-              act.markobj <- c(act.markobj,'```{r echo=FALSE}',
-                               paste('knitr::kable(data.frame(evidences.frame[["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
+            if (length(act.markobj) > 0)
+              markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
           }
-          if (length(act.markobj) > 0)
-            markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
         }
       }
     }
@@ -401,3 +398,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   file.remove("report.Rmd")
   browseURL(paste(outdir,'report.html',sep='/'))
 }
+
+
+
+

@@ -223,12 +223,9 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     markobj <- c(markobj,'## Gene Ontology\n',
                  'Gene ontology (GO) provides information about the biological functions of the genes. 
                   The following, information from the three different ontologies (BP, MF and CC) will be shown.\n')
-    labelsGo <- labels
-    for (i in seq(length(unique(labels)))){
-      labelsGo <- gsub(unique(labels)[i],i-1,labelsGo) 
-    }
-    
-    GOsMatrix <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
+
+    degsEntrezId <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
+    GOsMatrix <- geneOntologyEnrichment(as.character(degsEntrezId),returnGeneSymbols = F)
     GOsMatrix$`BP Ontology GOs`[,10] <- as.character(lapply(GOsMatrix$`BP Ontology GOs`[,10], function(x) {gsub(",", ", ", x)}))
     bp.frame <- data.frame(GOsMatrix$`BP Ontology GOs`)
     bp.frame <- bp.frame[,c("GO.ID","Term","Description","GO_Genes")]

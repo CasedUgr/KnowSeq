@@ -4,7 +4,6 @@
 \alias{knn_test}
 \title{knn_test allows assessing the final DEGs through a machine learning step by using k-NN with a test dataset.}
 \usage{
-
 knn_test(train, labelsTrain, test, labelsTest, vars_selected, bestK)
 }
 \arguments{
@@ -30,10 +29,10 @@ knn_test allows assessing the final DEGs through a machine learning step by usin
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 
+trainingMatrix <- t(DEGsMatrix)[c(1:4,6:9),]
+trainingLabels <- labels[c(1:4,6:9)]
 testMatrix <- t(DEGsMatrix)[c(5,10),]
 testLabels <- labels[c(5,10)]
-
 bestK <- 3 # the one that has been selected
-
 results_test_knn <- knn_test(testMatrix, testLabels, rownames(DEGsMatrix)[1:10], bestK)
 }

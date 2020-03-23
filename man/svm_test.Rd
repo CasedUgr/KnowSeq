@@ -29,9 +29,10 @@ svm_test allows assessing the final DEGs through a machine learning step by usin
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 
+trainingMatrix <- t(DEGsMatrix)[c(1:4,6:9),]
+trainingLabels <- labels[c(1:4,6:9)]
 testMatrix <- t(DEGsMatrix)[c(5,10),]
 testLabels <- labels[c(5,10)]
-
 # previously trained svm model
 bestParameters <- results_svm_cv$bestParameters
 svm_test(testMatrix,testLabels,rownames(DEGsMatrix)[1:10], bestParameters)

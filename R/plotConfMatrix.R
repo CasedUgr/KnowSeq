@@ -39,24 +39,24 @@ plotConfMatrix <- function(data){
   # add in the specifics
   plot(c(100, 0),c(0, 50),  type = "n", xlab="", ylab="", main = "DETAILS", xaxt='n', yaxt='n')
   text(20, 35, names(res$overall[1]), cex=1.2, font=2)
-  text(20, 25, round(as.numeric(res$overall[1])*100, 3), cex=1.4)
+  text(20, 15, round(as.numeric(res$overall[1])*100, 3), cex=1.4)
 
   if(ncol(x) > 2){
 
       text(40, 35, colnames(res$byClass)[7], cex=1.2, font=2)
       res$byClass[is.na(res$byClass[,7]),7] <- 0
-      text(40, 25, round(mean(as.numeric(res$byClass[,7]))*100, 3), cex=1.4)
+      text(40, 15, round(mean(as.numeric(res$byClass[,7]))*100, 3), cex=1.4)
       text(60, 35, colnames(res$byClass)[1], cex=1.2, font=2)
-      text(60, 25, round(mean(as.numeric(res$byClass[,1]))*100, 3), cex=1.4)
+      text(60, 15, round(mean(as.numeric(res$byClass[,1]))*100, 3), cex=1.4)
       text(80, 35, colnames(res$byClass)[2], cex=1.2, font=2)
-      text(80, 25, round(mean(as.numeric(res$byClass[,2]))*100, 3), cex=1.4)
+      text(80, 15, round(mean(as.numeric(res$byClass[,2]))*100, 3), cex=1.4)
 
   }else{
 
     text(50, 35, names(res$byClass)[1], cex=1.2, font=2)
-    text(50, 25, round(mean(as.numeric(res$byClass[1]))*100, 3), cex=1.4)
+    text(50, 15, round(mean(as.numeric(res$byClass[1]))*100, 3), cex=1.4)
     text(80, 35, names(res$byClass)[2], cex=1.2, font=2)
-    text(80, 25, round(mean(as.numeric(res$byClass[2]))*100, 3), cex=1.4)
+    text(80, 15, round(mean(as.numeric(res$byClass[2]))*100, 3), cex=1.4)
 
   }
 

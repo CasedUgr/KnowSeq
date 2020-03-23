@@ -10,7 +10,8 @@ featureSelection(
   vars_selected,
   mode = "mrmr",
   disease = "",
-  subdiseases = c()
+  subdiseases = c(),
+  maxGenes = ncol(data)
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ featureSelection(
 \item{disease}{The name of a disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.}
 
 \item{subdiseases}{Vector with the name of the particular subdiseases from disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.}
+
+\item{maxGenes}{Integer that indicated the maximun number of genes to be returned.}
 }
 \value{
 A vector that contains the ranking of genes.

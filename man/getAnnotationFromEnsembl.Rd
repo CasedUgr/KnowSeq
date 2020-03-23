@@ -14,7 +14,7 @@ getAnnotationFromEnsembl(
 )
 }
 \arguments{
-\item{values}{A list of genes that contains the names or IDs.}
+\item{values}{A list of genes that contains the names or IDs or "allGenome" string, which indicates that all genome will be  returned.}
 
 \item{attributes}{A vector which contains the different information attributes that the Ensembl biomart admit.}
 

@@ -83,6 +83,9 @@ rf_CV<-function(data,labels,vars_selected,numFold=10){
     sens_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
     spec_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
     
+    if(is.na(sens_cv[i,1])) sens_cv[i,1] <- 0
+    if(is.na(spec_cv[i,1])) spec_cv[i,1] <- 0
+    
     for(j in 2:length(vars_selected)){
 
       rf_mod = randomForest(x = trainingDataset[,seq(j)], y = labelsTrain, ntree = 100)
@@ -91,6 +94,9 @@ rf_CV<-function(data,labels,vars_selected,numFold=10){
       acc_cv[i,j]<-confusionMatrix(predicts,labelsTest)$overall[[1]]
       sens_cv[i,j]<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
       spec_cv[i,j]<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
+      
+      if(is.na(sens_cv[i,j])) sens_cv[i,j] <- 0
+      if(is.na(spec_cv[i,j])) spec_cv[i,j] <- 0
 
     }
   }

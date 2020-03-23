@@ -5,7 +5,7 @@
 #' @param size The number of diseases to retrieve from targetValidation
 #' @param verbose Boolean that indicates if progress messages are printed to stdout
 #' @return A list which names are genes from geneList and which contains related evidences for each gene in geneList and indicated disease.
-#' @example
+#' @examples
 #' evidences <- DEGsEvidences(c("KRT19","BRCA1","TYMP"),'cancer')
 
 DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRUE){
@@ -75,8 +75,8 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
               # Save information depending on evidence type
               if (type == 'known_drug'){
                 act.evidence$evidence <- list(
-                                           'Drug Name'=response.disease$data[[k]]$drug$molecule_name, # Drug name
-                                           'Molecule Type'=response.disease$data[[k]]$drug$molecule_type) # Molecule type
+                  'Drug Name'=response.disease$data[[k]]$drug$molecule_name, # Drug name
+                  'Molecule Type'=response.disease$data[[k]]$drug$molecule_type) # Molecule type
               }
               else if (type == 'literature'){
                 act.evidence$evidence <- list('Url'=response.disease$data[[k]]$evidence$literature_ref$lit_id) # paper url
@@ -96,8 +96,8 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
               }
               else if(type == 'animal_model'){
                 act.evidence$evidence <- list(
-                                           'Is Associated'=response.disease$data[[k]]$evidence$biological_model$is_associated, # Boolean
-                                           'Specie'=response.disease$data[[k]]$evidence$biological_model$species)       # Specie
+                  'Is Associated'=response.disease$data[[k]]$evidence$biological_model$is_associated, # Boolean
+                  'Specie'=response.disease$data[[k]]$evidence$biological_model$species)       # Specie
               }
               else if (type == 'rna_expression'){
                 if(length(response.disease$data[[k]]$literature$references[[1]]$lit_id>0)){
@@ -118,8 +118,8 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
               }
               else if (type == 'somatic_mutation'){
                 act.evidence$evidence <- list(
-                                          'Functional Consequence'=response.disease$data[[k]]$evidence$known_mutations[[1]]$functional_consequence, # url ej: ontobee
-                                          'Name'=response.disease$data[[k]]$evidence$known_mutations[[1]]$preferred_name) # ej: "sequence_alteration"
+                  'Functional Consequence'=response.disease$data[[k]]$evidence$known_mutations[[1]]$functional_consequence, # url ej: ontobee
+                  'Name'=response.disease$data[[k]]$evidence$known_mutations[[1]]$preferred_name) # ej: "sequence_alteration"
                 if (length(response.disease$data[[k]]$evidence$known_mutations[[1]]$role_in_cancer) > 0)
                   act.evidence$evidence <- c(act.evidence$evidence,
                                              list('Role in cancer'=response.disease$data[[k]]$evidence$known_mutations[[1]]$role_in_cancer)) # ej: "oncogene, TSG"
@@ -130,14 +130,18 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
                 cat(paste('Unknown evidence type',response.disease$data[[k]]$type,'\n'))
               }
             }
-            # Save actual evidence if is not empty
+            # Save actual evidence if it is not empty and if it is not repeated
             if (length(act.evidence) > 0){
-              if (! type %in% names(evidences)) evidences[[type]] <- c()
-              evidences[[type]] <- c(evidences[[type]],list(act.evidence))
+              if (! type %in% names(evidences)){
+                evidences[[type]] <- c()
+                evidences[[type]] <- c(evidences[[type]],list(act.evidence))
+              }
+              else if (! any( unlist(lapply(list.map(evidences[[type]],evidence),function(x) identical(x,act.evidence$evidence)))))
+                evidences[[type]] <- c(evidences[[type]],list(act.evidence))
             }
           }
         }
-
+        
         # Save found evidences for gene j (first row is empty)
         info[[geneList[j]]] <- evidences
       }else{

@@ -9,15 +9,17 @@ knowseqReport(
   labels,
   outdir = "knowSeq-report",
   baseline = "expression",
-  lfc = 2,
-  pvalue = 0.01,
   qualityAnalysis = TRUE,
   batchEffectTreatment = TRUE,
   geneOntology = TRUE,
   getPathways = TRUE,
   getDiseases = TRUE,
+  lfc = 2,
+  pvalue = 0.01,
+  cov = 1,
   featureSelectionMode = "mrmr",
   disease = "",
+  subdiseases = c(""),
   maxGenes = Inf,
   clasifAlgs = c("knn", "rf", "svm"),
   metrics = c("accuracy", "specificity", "sensitivity")
@@ -32,13 +34,33 @@ knowseqReport(
 
 \item{baseline}{A string that indicates the start point. This will be 'expression' if data contains genes expression values or 'counts' if data contains genes counts values.}
 
+\item{qualityAnalysis}{A logical parameter that indicates if the user wants to perform the quality anaylisis or not.}
+
+\item{batchEffectTreatment}{A logical parameter that indicates if the user wants to perform the batch effect treatment or not.}
+
+\item{geneOntology}{A logical parameter that indicates if the user wants to show genes ontologies or not.}
+
+\item{getPathways}{A logical parameter that indicates if the user wants to show genes pathways or not.}
+
+\item{getDiseases}{A logical parameter that indicates if the user wants to show genes related diseases or not.}
+
+\item{lfc}{The value of the LFC which determines the DEGs. If one or more genes have a LFC greater or equal to the selected LFC, they would be considered as DEGs.}
+
+\item{pvalue}{The value of the p-value which determines the DEGs. If one or more genes have a p-value lower or equal to the selected p-value, they would be considered as DEGs.}
+
+\item{cov}{This value only works when there are more than two classes in the labels. This parameter stablishs a minimum number of pair of classes combination in which exists differential expression to consider a genes as expressed genes.}
+
 \item{featureSelectionMode}{String that indicates which feature selection algorithm is going to be used. Possible values are: mrmr, rf or da.}
 
-\item{disease}{String that indicates from which disease wants the user to know if selected genes are related to. Found evidences will be shown. Default empty, this means that all related diseases, and found evidences, will be shown.}
+\item{disease}{String that indicates from which disease wants the user wants to know if selected genes are related to. Found evidences will be shown for each subdiseases. Default empty, this means that all related diseases, and found evidences, will be shown.}
+
+\item{subdiseases}{String that indicates the name of a particular subtype from disease, which  the  user to know if selected genes are related to. Found evidences will be shown. Default empty, this means that there are not subtypes of disease to look for, all found evidences for disease will be shown.}
 
 \item{maxGenes}{Integer that indicates the maximun number of genes which information will be shown and that will be used to train models.}
 
 \item{clasifAlgs}{A vector with including algorithms names that will be used in training cv.}
+
+\item{metrics}{A list with metrics that the user wants to be shown in machine learning process. Metrics could be accuracy, specificity and/or sensitivity.}
 }
 \value{
 Nothing to return.
@@ -50,4 +72,5 @@ knowseqReport creates a report for a given set of genes which their label. This 
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)
+knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)
 }

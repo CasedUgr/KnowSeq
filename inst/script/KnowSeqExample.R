@@ -53,7 +53,7 @@ RNAseqQA(expressionMatrix)
 svaMod <- batchEffectRemoval(expressionMatrix, as.factor(labels), method = "sva")
 
 # Extracting DEGs that pass the imposed restrictions
-DEGsInformation <- limmaDEGsExtraction(expressionMatrixCorrected, as.factor(labels), lfc = 1.0, pvalue = 0.01,
+DEGsInformation <- DEGsExtraction(expressionMatrixCorrected, as.factor(labels), lfc = 1.0, pvalue = 0.01,
                                        number = 100, svaCorrection = TRUE, svaMod = svaMod)
 topTable <- DEGsInformation$Table
 DEGsMatrix <- DEGsInformation$DEGsMatrix

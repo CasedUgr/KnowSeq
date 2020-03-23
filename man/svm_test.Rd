@@ -15,7 +15,7 @@ svm_test(train, labelsTrain, test, labelsTest, vars_selected, bestParameters)
 
 \item{labelsTest}{A vector or factor that contains the test labels for each of the samples in the test object.}
 
-\item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
+\item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
 
 \item{bestParameters}{Best values for C and gamma parameters selected during the training phase.}
 }

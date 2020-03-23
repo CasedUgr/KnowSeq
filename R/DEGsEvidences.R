@@ -1,3 +1,6 @@
+#' DEGsEvidences function returns for each DEG a list of evidences that correlate it with the studied disease.
+#'
+#' DEGsEvidences function returns for each DEG a list of evidences that correlate it with the studied disease.
 #' @param geneList A list that contains the gene symbols or gene names of the DEGs.
 #' @param disease The name of a disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.
 #' @param subdisease The name of a particular subdisease from disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.

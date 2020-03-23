@@ -16,7 +16,7 @@ knowseqReport(
   getDiseases = TRUE,
   lfc = 2,
   pvalue = 0.01,
-  cov = 1,
+  cov = 2,
   featureSelectionMode = "mrmr",
   disease = "",
   subdiseases = c(""),

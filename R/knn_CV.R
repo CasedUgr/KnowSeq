@@ -4,7 +4,7 @@
 #'
 #' @param data The data parameter is an expression matrix or data.frame that contains the genes in the columns and the samples in the rows.
 #' @param labels A vector or factor that contains the labels for each of the samples in the data object.
-#' @param vars_selected The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.
+#' @param vars_selected The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.
 #' @param numFold The number of folds to carry out in the cross validation process.
 #' @return A list that contains four objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes, and the best k found for the knn algorithm after tuning.
 #' @examples

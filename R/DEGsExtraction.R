@@ -63,8 +63,9 @@ DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov
         cat("More than two classes detected, applying limma multiclass\n")
 
         condition <- labels
+        condition <- as.factor(condition)
         designMulti <- model.matrix(~0+condition)
-        colnames(designMulti) = levels(condition)
+        colnames(designMulti) = as.character(levels(condition))
         fitmicroMulti <- lmFit(expressionMatrix, designMulti)
 
         contrasts <- as.character()

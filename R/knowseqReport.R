@@ -30,7 +30,7 @@
 
 knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expression', qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
                           geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
-                          lfc=2.0, pvalue=0.01, cov=1, 
+                          lfc=2.0, pvalue=0.01, cov=2, 
                           featureSelectionMode = 'mrmr', disease = '',subdiseases=c(''), maxGenes = Inf, clasifAlgs=c('knn','rf','svm'),
                           metrics=c('accuracy','specificity','sensitivity')){
   

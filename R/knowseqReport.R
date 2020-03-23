@@ -85,7 +85,6 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   markobj <- c()
   
   markobj <- c(markobj,'<img src="https://github.com/CasedUgr/KnowSeq/blob/master/logoKnow.png?raw=true" style="position:absolute;top:0px;right:0px;" width=265px height=200px />\n')
-  
   table.labels <- data.frame(table(labels))
   colnames(table.labels) <- c("Labels", "Freq.")
   
@@ -289,24 +288,27 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     markobj <- c(markobj,'## Gene Ontology\n',
                  'Gene ontology (GO) provides information about the biological functions of the genes. 
                   The following, information from the three different ontologies (BP, MF and CC) will be shown.\n')
-
-
+    amigo.url <- 'http://amigo.geneontology.org/amigo/term/'
     data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
     GOsMatrix <- geneOntologyEnrichment(as.character(data$ensembl_gene_id),geneType='ENSEMBL_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
     
     GOsMatrix$`BP Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`BP Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
     bp.frame <- GOsMatrix$`BP Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
     rownames(bp.frame) <- NULL
+    bp.frame$GO.ID  <- paste('[',bp.frame$GO.ID,'](',amigo.url,bp.frame$GO.ID,')',sep='')
+    
     markobj <- c(markobj,'### BP Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(bp.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
     
     GOsMatrix$`MF Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`MF Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
     mf.frame <- GOsMatrix$`MF Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
     rownames(mf.frame) <- NULL
+    mf.frame$GO.ID  <- paste('[',mf.frame$GO.ID,'](',amigo.url,mf.frame$GO.ID,')',sep='')
     markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(mf.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
     
     GOsMatrix$`CC Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`CC Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
     cc.frame <- GOsMatrix$`CC Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
     rownames(cc.frame) <- NULL
+    cc.frame$GO.ID  <- paste('[',cc.frame$GO.ID,'](',amigo.url,cc.frame$GO.ID,')',sep='')
     markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(cc.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
     
   }
@@ -328,11 +330,11 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
         act.markobj <- c()
         # If user want to see evidences for all diseases or this diseases match with solicitated disease
         check.diseases <- names(diseases[[gene]]$evidences)
-
+        
         for (act.disease in check.diseases){
           if ( class(diseases[[gene]]$evidences[[act.disease]]) == 'list' ){
             if (!gene %in% names(evidences.frame)) evidences.frame[[gene]] <- list()
-
+            
             act.markobj <- c(act.markobj,paste('####',act.disease,sep=' '))
             for ( evidence.type in names(diseases[[gene]]$evidences[[act.disease]]) ){
               act.evidences.frame <- c()
@@ -355,7 +357,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
       markobj <- c(markobj,'## Related diseases\n',
                    'Finally, the related diseases enrichment is displayed. DEGs related diseases are searched 
                   from *targetValidation* plastform.\n')
-
+      
       r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
       respon <- content(r_Ensembl)
       
@@ -368,7 +370,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
         response <- content(response)
         found.symbols <- unlist(list.map(response$data,target$gene_info$symbol))
         found.symbols <- intersect(found.symbols,rownames(DEGsMatrix))
-
+        
         if(length(found.symbols) > 0){
           evidences_ <- c()
           for (subdisease in subdiseases){
@@ -424,7 +426,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   write(file = "report.Rmd", c(mark.header.html,markobj))
   
   dir <- system.file("extdata", package="KnowSeq")
-  
+
   rmarkdown::render(input = "report.Rmd", output_file = paste(outdir,'report.html',sep='/'),output_format = rmarkdown::html_document(
     theme = "default",
     mathjax = NULL,

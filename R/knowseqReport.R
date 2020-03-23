@@ -5,22 +5,55 @@
 #' @param labels A vector or factor that contains the labels for each of the samples in the data object.
 #' @param outdir The output directory to store the report.
 #' @param baseline A string that indicates the start point. This will be 'expression' if data contains genes expression values or 'counts' if data contains genes counts values.
+#' @param qualityAnalysis A logical parameter that indicates if the user wants to perform the quality anaylisis or not.
+#' @param batchEffectTreatment A logical parameter that indicates if the user wants to perform the batch effect treatment or not.
+#' @param geneOntology A logical parameter that indicates if the user wants to show genes ontologies or not.
+#' @param getPathways A logical parameter that indicates if the user wants to show genes pathways or not.
+#' @param getDiseases A logical parameter that indicates if the user wants to show genes related diseases or not.
+#' @param pvalue The value of the p-value which determines the DEGs. If one or more genes have a p-value lower or equal to the selected p-value, they would be considered as DEGs.
+#' @param lfc The value of the LFC which determines the DEGs. If one or more genes have a LFC greater or equal to the selected LFC, they would be considered as DEGs.
+#' @param cov This value only works when there are more than two classes in the labels. This parameter stablishs a minimum number of pair of classes combination in which exists differential expression to consider a genes as expressed genes.
 #' @param featureSelectionMode String that indicates which feature selection algorithm is going to be used. Possible values are: mrmr, rf or da.
-#' @param disease String that indicates from which disease wants the user to know if selected genes are related to. Found evidences will be shown. Default empty, this means that all related diseases, and found evidences, will be shown.
+#' @param disease String that indicates from which disease wants the user wants to know if selected genes are related to. Found evidences will be shown for each subdiseases. Default empty, this means that all related diseases, and found evidences, will be shown.
+#' @param subdiseases String that indicates the name of a particular subtype from disease, which  the  user to know if selected genes are related to. Found evidences will be shown. Default empty, this means that there are not subtypes of disease to look for, all found evidences for disease will be shown.
 #' @param maxGenes Integer that indicates the maximun number of genes which information will be shown and that will be used to train models.
 #' @param clasifAlgs A vector with including algorithms names that will be used in training cv.
+#' @param metrics A list with metrics that the user wants to be shown in machine learning process. Metrics could be accuracy, specificity and/or sensitivity.
 #' @return Nothing to return.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)
+#' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)
 
 
-knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expression', lfc=2.0, pvalue=0.01, qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
+
+knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expression', qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
                           geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
-                          featureSelectionMode = 'mrmr', disease = '', maxGenes = Inf, clasifAlgs=c('knn','rf','svm'),
+                          lfc=2.0, pvalue=0.01, cov=1, 
+                          featureSelectionMode = 'mrmr', disease = '',subdiseases=c(''), maxGenes = Inf, clasifAlgs=c('knn','rf','svm'),
                           metrics=c('accuracy','specificity','sensitivity')){
   
+  removeEmptyColumns <- function(data){
+    remove.cols <- c()
+    for (col in seq(dim(data)[2])){
+      if (all(data[,col]=='*')  || all(data[,col]=='')){
+        remove.cols <- c(remove.cols,col)
+      }
+    }
+    if (length(remove.cols)>0){
+      col.names <- colnames(data)
+      data <-  data[,-remove.cols]
+      col.names <- col.names[-remove.cols]
+      
+      if (class(data) != 'matrix')
+        data <- as.matrix(data)
+      if (dim(data)[2] != length(col.names))
+        data <- t(data)
+      colnames(data) <- col.names
+    }
+    return(data)
+  }
   # --- Check params --- #
   if(baseline == 'expression'){
     if(!is.data.frame(data) && !is.matrix(data)){
@@ -85,10 +118,10 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     
     svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
     
-    DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = lfc, pvalue = pvalue, number = Inf, svaCorrection = TRUE, svaMod = svaMod)
+    DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = lfc, pvalue = pvalue, cov = cov, number = Inf, svaCorrection = TRUE, svaMod = svaMod)
   }else{
     
-    DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = lfc, pvalue = pvalue, number = Inf)
+    DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = lfc, pvalue = pvalue, cov = cov, number = Inf)
   }
   
   topTable <- DEGsInformation$Table
@@ -299,17 +332,19 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
           if ( class(diseases[[gene]]$evidences[[act.disease]]) == 'list' ){
             if (!gene %in% names(evidences.frame)) evidences.frame[[gene]] <- list()
 
-            act.markobj <- c(act.markobj,paste('Found evidences of',gene,'related with',act.disease,sep=' '))
+            act.markobj <- c(act.markobj,paste('####',act.disease,sep=' '))
             for ( evidence.type in names(diseases[[gene]]$evidences[[act.disease]]) ){
               act.evidences.frame <- c()
               for (act.evidence in diseases[[gene]]$evidences[[act.disease]][[evidence.type]]){
                 act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
               }
+              # Remove empty columns
+              act.evidences.frame <- removeEmptyColumns(act.evidences.frame)
               evidences.frame[[gene]][[evidence.type]] <- act.evidences.frame
             }
             for ( evidence.type in names(evidences.frame[[gene]]))
               act.markobj <- c(act.markobj,'```{r echo=FALSE}',
-                               paste('knitr::kable(data.frame(evidences.frame[["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'")',sep=''),'```')
+                               paste('knitr::kable(data.frame(evidences.frame[["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
           }
         }
         if (length(act.markobj) > 0)
@@ -334,32 +369,34 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
         found.symbols <- intersect(found.symbols,rownames(DEGsMatrix))
 
         if(length(found.symbols) > 0){
-          evidences <- DEGsEvidences(found.symbols,disease)
-          
+          evidences_ <- c()
+          for (subdisease in subdiseases){
+            evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,disease,subdisease))
+          }
           evidences.frame <- list()
-          for (gene in names(evidences)){
+          for (gene in found.symbols){
             act.markobj <- c()
-            if (class(evidences[[gene]])=='list'){
-              evidences.frame[[gene]] = list()
-              for ( evidence.type in names(evidences[[gene]]) ){
-                act.evidences.frame <- c()
-                for (act.evidence in evidences[[gene]][[evidence.type]]){
-                  act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
-                }
-                remove.cols <- c()
-                for (col in seq(dim(act.evidences.frame)[2])){
-                  if (all(act.evidences.frame[,col]=='*')  || all(act.evidences.frame[,col]=='')){
-                    remove.cols <- c(remove.cols,col)
+            for (ev.index in seq(dim(evidences_)[1])){
+              if (!as.character(ev.index)  %in% names(evidences.frame))
+                evidences.frame[[as.character(ev.index)]]<-list()
+              evidences <- evidences_[ev.index,]
+              if (class(evidences[[gene]])=='list'){
+                evidences.frame[[as.character(ev.index)]][[gene]] = list()
+                for ( evidence.type in names(evidences[[gene]]) ){
+                  act.evidences.frame <- c()
+                  for (act.evidence in evidences[[gene]][[evidence.type]]){
+                    act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
                   }
+                  # Remove empty columns
+                  act.evidences.frame <- removeEmptyColumns(act.evidences.frame)
+                  evidences.frame[[as.character(ev.index)]][[gene]][[evidence.type]] <- act.evidences.frame
                 }
-                if (length(remove.cols)>0){
-                  act.evidences.frame <-  act.evidences.frame[,-remove.cols]
-                }
-                evidences.frame[[gene]][[evidence.type]] <- act.evidences.frame
+                if (subdisease != '' && length(evidences.frame[[as.character(ev.index)]])>0)
+                  act.markobj <- c(act.markobj,paste('####',subdiseases[ev.index]))
+                for ( evidence.type in names(evidences.frame[[as.character(ev.index)]][[gene]]))
+                  act.markobj <- c(act.markobj,'```{r echo=FALSE}',
+                                   paste('knitr::kable(data.frame(evidences.frame[["',as.character(ev.index),'"]][["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
               }
-              for ( evidence.type in names(evidences.frame[[gene]]))
-                act.markobj <- c(act.markobj,'```{r echo=FALSE}',
-                                 paste('knitr::kable(data.frame(evidences.frame[["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
             }
             if (length(act.markobj) > 0)
               markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
@@ -386,7 +423,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   write(file = "report.Rmd", c(mark.header.html,markobj))
   
   dir <- system.file("extdata", package="KnowSeq")
-
+  
   rmarkdown::render(input = "report.Rmd", output_file = paste(outdir,'report.html',sep='/'),output_format = rmarkdown::html_document(
     theme = "default",
     mathjax = NULL,
@@ -401,7 +438,3 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   file.remove("report.Rmd")
   browseURL(paste(outdir,'report.html',sep='/'))
 }
-
-
-
-

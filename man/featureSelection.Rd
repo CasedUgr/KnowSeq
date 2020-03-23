@@ -19,7 +19,7 @@ featureSelection(
 
 \item{labels}{A vector or factor that contains the labels for each samples in data parameter.}
 
-\item{vars_selected}{The genes selected to use in the feature selection process. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes.}
+\item{vars_selected}{The genes selected to use in the feature selection process. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes.}
 
 \item{mode}{The algorithm used to calculate the genes ranking. The possibilities are two: mrmr, rf and da.}
 

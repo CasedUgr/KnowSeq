@@ -23,7 +23,7 @@
 #'
 #' DEGsMatrix <- DEGsInformation$DEGsMatrix
 
-limmaDEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1,number = Inf, svaCorrection = FALSE, svaMod){
+DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1,number = Inf, svaCorrection = FALSE, svaMod){
 
       if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
       if(!is.character(labels)  && !is.factor(labels)){stop("The class of the labels parameter must be character vector or factor.")}

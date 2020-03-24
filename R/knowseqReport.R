@@ -319,43 +319,92 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                       The following, information from the three different ontologies (BP, MF and CC) will be shown.\n')
         amigo.url <- 'http://amigo.geneontology.org/amigo/term/'
         data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
-        GOsMatrix <- geneOntologyEnrichment(as.character(data$ensembl_gene_id),geneType='ENSEMBL_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
-
-        GOsMatrix$`BP Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`BP Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
-        bp.frame <- GOsMatrix$`BP Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
-        rownames(bp.frame) <- NULL
-        bp.frame$GO.ID  <- paste('[',bp.frame$GO.ID,'](',amigo.url,bp.frame$GO.ID,')',sep='')
-
-        markobj <- c(markobj,'### BP Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(bp.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
-
-        GOsMatrix$`MF Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`MF Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
-        mf.frame <- GOsMatrix$`MF Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
-        rownames(mf.frame) <- NULL
-        mf.frame$GO.ID  <- paste('[',mf.frame$GO.ID,'](',amigo.url,mf.frame$GO.ID,')',sep='')
-        markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(mf.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
-
-        GOsMatrix$`CC Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`CC Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
-        cc.frame <- GOsMatrix$`CC Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
-        rownames(cc.frame) <- NULL
-        cc.frame$GO.ID  <- paste('[',cc.frame$GO.ID,'](',amigo.url,cc.frame$GO.ID,')',sep='')
-        markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(cc.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
-
+        GOsMatrix <- geneOntologyEnrichment(as.character(data$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
+        
+        if(dim(GOsMatrix$`BP Ontology GOs`)[1] != 0){
+          GOsMatrix$`BP Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`BP Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
+          bp.frame <- GOsMatrix$`BP Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
+          rownames(bp.frame) <- NULL
+          bp.frame$GO.ID  <- paste('[',bp.frame$GO.ID,'](',amigo.url,bp.frame$GO.ID,')',sep='')
+  
+          markobj <- c(markobj,'### BP Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(bp.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
+        
+        }else{markobj <- c(markobj,'### BP Ontology GOs\n There are no GO terms related to this set of DEGs for BP ontology\n')}
+        
+        if(dim(GOsMatrix$`MF Ontology GOs`)[1] != 0){
+          GOsMatrix$`MF Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`MF Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
+          mf.frame <- GOsMatrix$`MF Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
+          rownames(mf.frame) <- NULL
+          mf.frame$GO.ID  <- paste('[',mf.frame$GO.ID,'](',amigo.url,mf.frame$GO.ID,')',sep='')
+          
+          markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(mf.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
+  
+        }else{markobj <- c(markobj,'### MF Ontology GOs\n There are no GO terms related to this set of DEGs for MF ontology\n')}
+        
+        if(dim(GOsMatrix$`CC Ontology GOs`)[1] != 0){
+          GOsMatrix$`CC Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`CC Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
+          cc.frame <- GOsMatrix$`CC Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
+          rownames(cc.frame) <- NULL
+          cc.frame$GO.ID  <- paste('[',cc.frame$GO.ID,'](',amigo.url,cc.frame$GO.ID,')',sep='')
+          markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(cc.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
+        }else{markobj <- c(markobj,'### CC Ontology GOs\n There are no GO terms related to this set of DEGs for CC ontology\n')}
+        
       }
 
       # --- Pathways Visualization --- #
       if(getPathways){
         DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"), filter = "external_gene_name")
-        genomeAnnotation <- getAnnotationFromEnsembl('allGenome',notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"), filter = "external_gene_name")
-        DEGsPathwayVisualization(DEGsMatrix,DEGsAnnotation,expressionMatrix,genomeAnnotation)
-        pathway.url  <- 'http://rest.kegg.jp/get/'
+
+        DEGsAnnotation <- DEGsAnnotation[which(!is.na(DEGsAnnotation$entrezgene_id) == TRUE),]
+        
+        commonDEGs <- intersect(rownames(DEGsMatrix),unique(DEGsAnnotation$external_gene_name))
+        posCommonDEGs <- match(rownames(DEGsMatrix[commonDEGs,]),DEGsAnnotation$external_gene_name)
+        pathMatrix <- DEGsMatrix[commonDEGs,]
+        rownames(pathMatrix) <- DEGsAnnotation$entrezgene_id[posCommonDEGs]
+        
+        paths.data <- matrix(ncol = 2)
+        
+        cat("Retrieving DEGs associated pathways...\n")
+        
+        for(gene in DEGsAnnotation$entrezgene_id){
+          
+          if(!is.na(gene)){
+            get_GO <- GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
+            get_GO_text <- content(get_GO, "text")
+            pathway_start <- str_locate_all(pattern = "PATHWAY", get_GO_text)[[1]][2]
+            pathway_end <- str_locate_all(pattern = "BRITE", get_GO_text)[[1]][1]
+            pathways <- substr(get_GO_text,pathway_start+1,pathway_end-1)
+            pathways <- strsplit(pathways,split = "\n")
+            
+            index <- grep("hsa", unlist(pathways))
+            
+            for(i in index){
+              pathway <- as.character(unlist(str_extract_all(unlist(pathways)[i],"hsa[a-zA-Z0-9]{5}")))
+              start <- str_locate_all(pattern = "hsa", unlist(pathways)[i])[[1]][2]
+              name <- substr(unlist(pathways)[i],start+8,nchar(unlist(pathways)[i]))
+              paths.data <- rbind(paths.data,c(as.character(pathway),as.character(name)))
+            }
+  
+          }
+        }
+        paths.data <- paths.data[-1,]
+        paths.data <- as.data.frame(paths.data)
+        names(paths.data) <- c("KEGG_hsa","Name")
+        naPos <- which(is.na(pathways_unique) == TRUE)
+        
+        pathway.url  <- 'https://www.genome.jp/dbget-bin/www_bget?pathway:'
         markobj <- c(markobj,'\n## Pathways Extraction\n',
                      'In this step the pathways in which inserted genes appear are shown.\n')
-        pathways <- list.dirs('Pathways')
-        pathways <- str_sub(pathways,10,nchar(pathways))
-        pathways <-  pathways[pathways!='']
-        for (pathway in pathways){
-          markobj  <- c(markobj,paste('- [',pathway,'](',pathway.url,pathway,')\n',sep=''))
-        }
+        
+        markobj <- c(markobj,'```{r echo=FALSE}',paste('knitr::kable(paths.data,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
+        
+        
+        # pathways <- list.dirs('Pathways')
+        # pathways <- str_sub(pathways,10,nchar(pathways))
+        # pathways <-  pathways[pathways!='']
+        # for (pathway in pathways){
+        #   markobj  <- c(markobj,paste('- [',pathway,'](',pathway.url,pathway,')\n',sep=''))
+        # }
       }
       
       # --- Related Diseases --- #

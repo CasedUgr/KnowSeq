@@ -27,7 +27,6 @@
 #' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)
 
 
-
 knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expression', qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
                           geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
                           lfc=2.0, pvalue=0.01, cov=2, 
@@ -83,7 +82,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   act.folder <- getwd()
   # markobj contain the text that will be displayed in html or pdf file
   markobj <- c()
-  
+
   markobj <- c(markobj,'<img src="https://github.com/CasedUgr/KnowSeq/blob/master/logoKnow.png?raw=true" style="position:absolute;top:0px;right:0px;" width=265px height=200px />\n')
   table.labels <- data.frame(table(labels))
   colnames(table.labels) <- c("Labels", "Freq.")
@@ -104,7 +103,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     #cat("Performing the quality analysis of the samples\n")
     RNAseqQA(expressionMatrix)
   }
-  
+
   # --- Differencia Expressed Genes --- #
   markobj <- c(markobj,'# Differential Expressed Genes extraction')
   
@@ -272,18 +271,18 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                    paste('dataPlot(allCfMats_svm, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')
     }
-    
+
   }
   # --- DEGs enrichment methodology --- #
   markobj <- c(markobj,'\n# DEGs enrichment\n',
                'The main goal of the this process is the extraction of biological relevant information from the DEGs,
-               and this enrichment has three different points of view:\n
-               \t- The gene ontology information.\n
-               \t- The pathway visualization.\n 
-               \t- The relationship between the DEGs and diseases related to the studied pathologies.\n')
-  
+               and this enrichment has three different points of view:\n',
+               '- The gene ontology information.\n',
+               '- The pathway extraction.\n',
+               '- The relationship between the DEGs and diseases related to the studied pathologies.\n')
+
   # --- Gene Ontology --- #
-  
+
   if(geneOntology){
     markobj <- c(markobj,'## Gene Ontology\n',
                  'Gene ontology (GO) provides information about the biological functions of the genes. 
@@ -317,11 +316,24 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   if(getPathways){
     DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"), filter = "external_gene_name")
     genomeAnnotation <- getAnnotationFromEnsembl('allGenome',notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"), filter = "external_gene_name")
-    markobj <- c(markobj,'\n## Pathways visualization\n','```{r echo=FALSE}','DEGsPathwayVisualization(DEGsMatrix,DEGsAnnotation,expressionMatrix,genomeAnnotation)','```\n')
+    DEGsPathwayVisualization(DEGsMatrix,DEGsAnnotation,expressionMatrix,genomeAnnotation)
+    pathway.url  <- 'http://rest.kegg.jp/get/'
+    markobj <- c(markobj,'\n## Pathways Extraction\n',
+                 'In this step the pathways in which inserted genes appear are shown.\n')
+    pathways <- list.dirs('Pathways')
+    pathways <- str_sub(pathways,10,nchar(pathways))
+    pathways <-  pathways[pathways!='']
+    for (pathway in pathways){
+      markobj  <- c(markobj,paste('- [',pathway,'](',pathway.url,pathway,')\n',sep=''))
+    }
   }
   
   # --- Related Diseases --- #
   if(getDiseases){
+    markobj <- c(markobj,'## Related diseases\n',
+                 'Finally, the related diseases enrichment is displayed. DEGs related diseases are searched 
+                  from *targetValidation* plastform.\n')
+
     if (disease == ''){
       diseases <- DEGsToDiseases(rownames(DEGsMatrix), size = 5, getEvidences = TRUE)
       
@@ -354,10 +366,6 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
           markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
       }
     }else{
-      markobj <- c(markobj,'## Related diseases\n',
-                   'Finally, the related diseases enrichment is displayed. DEGs related diseases are searched 
-                  from *targetValidation* plastform.\n')
-      
       r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
       respon <- content(r_Ensembl)
       

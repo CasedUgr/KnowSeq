@@ -353,6 +353,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
 
       # --- Pathways Visualization --- #
       if(getPathways){
+        
         DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"), filter = "external_gene_name")
 
         DEGsAnnotation <- DEGsAnnotation[which(!is.na(DEGsAnnotation$entrezgene_id) == TRUE),]
@@ -390,9 +391,8 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
         paths.data <- paths.data[-1,]
         paths.data <- as.data.frame(paths.data)
         names(paths.data) <- c("KEGG_hsa","Name")
-        naPos <- which(is.na(pathways_unique) == TRUE)
-        
-        pathway.url  <- 'https://www.genome.jp/dbget-bin/www_bget?pathway:'
+        naPos <- which(is.na(paths.data) == TRUE)
+        paths.data$KEGG_hsa <- paste('[',paths.data$KEGG_hsa,'](http://rest.kegg.jp/get/',paths.data$KEGG_hsa,')',sep='')
         markobj <- c(markobj,'\n## Pathways Extraction\n',
                      'In this step the pathways in which inserted genes appear are shown.\n')
         
@@ -527,3 +527,5 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   file.remove("report.Rmd")
   browseURL(paste(outdir,'report.html',sep='/'))
 }
+
+

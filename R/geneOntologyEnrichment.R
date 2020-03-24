@@ -42,14 +42,14 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
   
   url <- paste(base,'api.jsp?type=',geneType,'&ids=',geneList,'&tool=chartReport&annot=',annotations, sep='') # Do not change order
   
-  response <- httr::GET(url)
+  response <- GET(url)
   response <- content(response,'text')
   
   rowids <- str_match(response,'document.apiForm.rowids.value=\"(.*?)"')[2]
   annotids <- str_match(response,'document.apiForm.annot.value=\"(.*?)"')[2]
 
   url <- paste(base,'chartReport.jsp?rowids=', rowids, '&annot=', annotids,'&count=0&ease=',pvalCutOff, sep='')
-  response <- httr::GET(url)
+  response <- GET(url)
   response <- content(response,'text')
   
   downloadFileName <- str_match(response,'<a href="data/download/(.*?)"')[2]
@@ -60,8 +60,8 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
     stop('Error in request. Please check parameters or use geneType as ENTREZ_GENE_ID or ENSEMBL_GENE_ID.')
   }
 
-  response <- httr::GET(downloadFileName)
-  response <- httr::content(response)
+  response <- GET(downloadFileName)
+  response <- content(response)
   
   index <- gregexpr(pattern ='Category',response)[[1]][1]
   response <- substr(response,index,nchar(response))
@@ -89,8 +89,8 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
       descriptions <- c()
       for (go in act.gos[['GO.ID']]){
         go <- gsub(':','%3A',go)
-        get_GO <- httr::GET(paste("https://www.ebi.ac.uk/QuickGO/services/ontology/go/terms/",go,sep=''))
-        get_GO_text <- httr::content(get_GO,'text')
+        get_GO <- GET(paste("https://www.ebi.ac.uk/QuickGO/services/ontology/go/terms/",go,sep=''))
+        get_GO_text <- content(get_GO,'text')
         get_GO_json <- fromJSON(get_GO_text, flatten = TRUE)
         descriptions  <- c(descriptions,as.character(get_GO_json$results$definition.text))
       }

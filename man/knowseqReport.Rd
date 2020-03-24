@@ -17,7 +17,7 @@ knowseqReport(
   lfc = 2,
   pvalue = 0.01,
   cov = 2,
-  featureSelectionMode = "mrmr",
+  featureSelectionMode = "nofs",
   disease = "",
   subdiseases = c(""),
   maxGenes = Inf,
@@ -50,7 +50,7 @@ knowseqReport(
 
 \item{cov}{This value only works when there are more than two classes in the labels. This parameter stablishs a minimum number of pair of classes combination in which exists differential expression to consider a genes as expressed genes.}
 
-\item{featureSelectionMode}{String that indicates which feature selection algorithm is going to be used. Possible values are: mrmr, rf or da.}
+\item{featureSelectionMode}{String that indicates which feature selection algorithm is going to be used. Possible values are: mrmr, rf or da. By default, no feature selection algorithm will be applied.}
 
 \item{disease}{String that indicates from which disease wants the user wants to know if selected genes are related to. Found evidences will be shown for each subdiseases. Default empty, this means that all related diseases, and found evidences, will be shown.}
 

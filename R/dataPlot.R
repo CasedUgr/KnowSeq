@@ -114,6 +114,16 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
     
   }else if(mode == "genesBoxplot"){
     
+    if(length(levels(as.factor(labels))) != 2 && length(levels(as.factor(labels))) != length(colours)){
+      
+      coloursPalette <- c("green","red",sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],length(levels(as.factor(labels))) - 2))
+      
+    }else{
+      
+      coloursPalette <- colours
+      
+    }
+    
     
     meltMatrix <- t(data)
     rownames(meltMatrix) <- labels
@@ -128,18 +138,18 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
     names(xx) <- c("Classes", "Gen", "Value")
     
     print(ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) 
-          + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes"))
+          + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes"))
     
     if(toPNG){
       cat("Creating PNG...\n")
-      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
+      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
       
       ggsave("genesBoxplot.png", width = 15, height = 10)
       
     }
     if(toPDF){
       cat("Creating PDF...\n")
-      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
+      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
       
       ggsave("genesBoxplot.pdf", width = 15, height = 10)
       

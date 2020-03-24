@@ -39,8 +39,8 @@ DEGsPathwayVisualization <- function(DEGsMatrix, DEGsAnnotation, expressionMatri
     for(gene in DEGsAnnotation$entrezgene_id){
 
       if(!is.na(gene)){
-          get_GO <- httr::GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
-          get_GO_text <- httr::content(get_GO, "text")
+          get_GO <- GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
+          get_GO_text <- content(get_GO, "text")
           pathway_start <- str_locate_all(pattern = "PATHWAY", get_GO_text)[[1]][2]
           pathway_end <- str_locate_all(pattern = "BRITE", get_GO_text)[[1]][1]
           pathways <- substr(get_GO_text,pathway_start+1,pathway_end-1)

@@ -26,13 +26,12 @@
 #' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)
 #' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)
 
-
 knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expression', qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
                           geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
                           lfc=2.0, pvalue=0.01, cov=2, 
                           featureSelectionMode = 'nofs', disease = '',subdiseases=c(''), maxGenes = Inf, clasifAlgs=c('knn','rf','svm'),
                           metrics=c('accuracy','specificity','sensitivity')){
-  
+
   removeEmptyColumns <- function(data){
     remove.cols <- c()
     for (col in seq(dim(data)[2])){
@@ -100,8 +99,13 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   
   
   if(qualityAnalysis){
-    #cat("Performing the quality analysis of the samples\n")
-    RNAseqQA(expressionMatrix)
+    cat("Performing the quality analysis of the samples\n")
+    RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA'),sep='')
+    markobj <- c(markobj,'# Quality analysis\n',
+                 'Quality analysis is perform in order to detect any possible outlier that can be present in the samples. ',
+                 'The outliers are samples numerically different with respect to the rest of samples, introducing noise in the study .', 
+                 'For that purpose, arrayQualityMetrics bioc package is used to performs different statiscical tests and detect possible outliers. ',
+                 'arrayQualityMetrics generate a report containing all this information that can be seen [here](RNAseqQA/index.html).\n')
   }
 
   # --- Differencia Expressed Genes --- #
@@ -543,4 +547,3 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   file.remove("report.Rmd")
   browseURL(paste(outdir,'report.html',sep='/'))
 }
-

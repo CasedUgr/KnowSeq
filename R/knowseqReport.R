@@ -99,8 +99,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   
   
   if(qualityAnalysis){
-    cat("Performing the quality analysis of the samples\n")
-    RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA'),sep='')
+    RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA',sep=''))
     markobj <- c(markobj,'# Quality analysis\n',
                  'Quality analysis is perform in order to detect any possible outlier that can be present in the samples. ',
                  'The outliers are samples numerically different with respect to the rest of samples, introducing noise in the study .', 

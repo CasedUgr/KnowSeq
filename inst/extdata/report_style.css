@@ -2,7 +2,6 @@ body {
   font-family: Calibri, helvetica, sans-serif;
 }
 
-
 h1 {
   color: #D95032;
   font-weight: bold;
@@ -65,4 +64,8 @@ table.paleBlueRows thead th:first-child {
 
 table.paleBlueRows tfoot td {
   font-size: 14px;
+}
+
+a:link strong {
+  color: #D95032;
 }

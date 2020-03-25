@@ -363,12 +363,13 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
         pathMatrix <- DEGsMatrix[commonDEGs,]
         rownames(pathMatrix) <- DEGsAnnotation$entrezgene_id[posCommonDEGs]
         
-        paths.data <- matrix(ncol = 2)
+        paths.data <- matrix(ncol = 3)
         
         cat("Retrieving DEGs associated pathways...\n")
         
-        for(gene in DEGsAnnotation$entrezgene_id){
-          
+        for(gene.index in seq(dim(DEGsAnnotation)[1])){
+          gene <- DEGsAnnotation[gene.index,'entrezgene_id']
+          gene.name <- DEGsAnnotation[gene.index,'external_gene_name']
           if(!is.na(gene)){
             get_GO <- GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
             get_GO_text <- content(get_GO, "text")
@@ -376,22 +377,37 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
             pathway_end <- str_locate_all(pattern = "BRITE", get_GO_text)[[1]][1]
             pathways <- substr(get_GO_text,pathway_start+1,pathway_end-1)
             pathways <- strsplit(pathways,split = "\n")
-            
+
             index <- grep("hsa", unlist(pathways))
-            
+
             for(i in index){
               pathway <- as.character(unlist(str_extract_all(unlist(pathways)[i],"hsa[a-zA-Z0-9]{5}")))
+              if (length(pathway) == 0) break
               start <- str_locate_all(pattern = "hsa", unlist(pathways)[i])[[1]][2]
               name <- substr(unlist(pathways)[i],start+8,nchar(unlist(pathways)[i]))
-              paths.data <- rbind(paths.data,c(as.character(pathway),as.character(name)))
+
+              paths.data <- rbind(paths.data,c(as.character(pathway),as.character(name),as.character(gene.name)))
             }
-  
+
           }
         }
         paths.data <- paths.data[-1,]
-        paths.data <- as.data.frame(paths.data)
-        names(paths.data) <- c("KEGG_hsa","Name")
+        paths.data <- as.data.frame(paths.data,stringsAsFactors=FALSE)
+        names(paths.data) <- c("KEGG_hsa","Name","Genes")
         naPos <- which(is.na(paths.data) == TRUE)
+        
+        # Collapse repeated pathways
+        remove.index <- c()
+        repeated.pathways <- names(which(table(paths.data$KEGG_hsa) > 1))
+        for (pathway in repeated.pathways){
+          index <- which(paths.data$KEGG_hsa == pathway,)
+          genes <- paths.data[index,'Genes']
+          paths.data[index[1],'Genes'] <- paste(genes,collapse=', ')
+          remove.index <- c(remove.index,index[-1])
+        }
+        paths.data <- paths.data[-remove.index,]
+        rownames(paths.data) <- NULL
+
         paths.data$KEGG_hsa <- paste('[',paths.data$KEGG_hsa,'](http://rest.kegg.jp/get/',paths.data$KEGG_hsa,')',sep='')
         markobj <- c(markobj,'\n## Pathways Extraction\n',
                      'In this step the pathways in which inserted genes appear are shown.\n')
@@ -527,5 +543,4 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   file.remove("report.Rmd")
   browseURL(paste(outdir,'report.html',sep='/'))
 }
-
 

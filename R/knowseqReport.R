@@ -408,19 +408,12 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
         paths.data <- paths.data[-remove.index,]
         rownames(paths.data) <- NULL
 
-        paths.data$KEGG_hsa <- paste('[',paths.data$KEGG_hsa,'](http://rest.kegg.jp/get/',paths.data$KEGG_hsa,')',sep='')
+        paths.data$KEGG_hsa <- paste('[',paths.data$KEGG_hsa,'](https://www.genome.jp/dbget-bin/www_bget?pathway:',paths.data$KEGG_hsa,')',sep='')
         markobj <- c(markobj,'\n## Pathways Extraction\n',
                      'In this step the pathways in which inserted genes appear are shown.\n')
         
         markobj <- c(markobj,'```{r echo=FALSE}',paste('knitr::kable(paths.data,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
         
-        
-        # pathways <- list.dirs('Pathways')
-        # pathways <- str_sub(pathways,10,nchar(pathways))
-        # pathways <-  pathways[pathways!='']
-        # for (pathway in pathways){
-        #   markobj  <- c(markobj,paste('- [',pathway,'](',pathway.url,pathway,')\n',sep=''))
-        # }
       }
       
       # --- Related Diseases --- #

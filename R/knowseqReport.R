@@ -260,12 +260,12 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   clasifNames <- str_replace(clasifNames,'rf','Random Forest')
   clasifNames <- str_replace(clasifNames,'svm','Support Vector Machine (SVM)')
   
-  markobj <- c(markobj,paste('To this effect,',clasifNames,'classification algorithms will be trained using 5-Fold Cross Validation.
+  markobj <- c(markobj,paste('To this effect,',clasifNames,'classification algorithms will be trained using 10-Fold Cross Validation.
                     To evaluate obtained results the this metrics will be shown in the following plots:\n'))
   
   for (clasifAlg in clasifAlgs){
     if (clasifAlg == 'knn'){ 
-      results_cv_knn <- knn_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
+      results_cv_knn <- knn_CV(DEGsMatrixML,labels,ranking[1:maxGenes],10)
       markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
@@ -278,13 +278,13 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                        main = "',metric,' for each fold with ',clasifAlg,'",
                        xlab = "Genes", ylab ="',metric,'")',sep=''),'```\n')
       }
-      allCfMats_knn <- results_cv_knn$cfMats[[1]]$table + results_cv_knn$cfMats[[2]]$table + results_cv_knn$cfMats[[3]]$table + results_cv_knn$cfMats[[4]]$table + results_cv_knn$cfMats[[5]]$table
+      allCfMats_knn <- results_cv_knn$cfMats[[1]]$table + results_cv_knn$cfMats[[2]]$table + results_cv_knn$cfMats[[3]]$table + results_cv_knn$cfMats[[4]]$table + results_cv_knn$cfMats[[5]]$table + results_cv_knn$cfMats[[6]]$table + results_cv_knn$cfMats[[7]]$table + results_cv_knn$cfMats[[8]]$table + results_cv_knn$cfMats[[9]]$table + results_cv_knn$cfMats[[10]]$table
       markobj <- c(markobj,'```{r echo = FALSE}',
                    paste('dataPlot(allCfMats_knn, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')
       
     }else if (clasifAlg == 'rf'){
-      results_cv_rf <- rf_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
+      results_cv_rf <- rf_CV(DEGsMatrixML,labels,ranking[1:maxGenes],10)
       markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
@@ -297,13 +297,13 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                        main = "',metric,' for each fold with ',clasifAlg,'",
                        xlab = "Genes", ylab ="',metric,'")',sep=''),'```\n')
       }
-      allCfMats_rf <- results_cv_rf$cfMats[[1]]$table + results_cv_rf$cfMats[[2]]$table + results_cv_rf$cfMats[[3]]$table + results_cv_rf$cfMats[[4]]$table + results_cv_rf$cfMats[[5]]$table
+      allCfMats_rf <- results_cv_rf$cfMats[[1]]$table + results_cv_rf$cfMats[[2]]$table + results_cv_rf$cfMats[[3]]$table + results_cv_rf$cfMats[[4]]$table + results_cv_rf$cfMats[[5]]$table + results_cv_rf$cfMats[[6]]$table + results_cv_rf$cfMats[[7]]$table + results_cv_rf$cfMats[[8]]$table + results_cv_rf$cfMats[[9]]$table + results_cv_rf$cfMats[[10]]$table
       markobj <- c(markobj,'```{r echo = FALSE}',
                    paste('dataPlot(allCfMats_rf, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')
       
     }else if (clasifAlg == 'svm'){
-      results_cv_svm <- svm_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
+      results_cv_svm <- svm_CV(DEGsMatrixML,labels,ranking[1:maxGenes],10)
       markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
@@ -316,7 +316,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                        main = "',metric,' for each fold with ',clasifAlg,'",
                        xlab = "Genes", ylab ="',metric,'")',sep=''),'```\n')
       }
-      allCfMats_svm <- results_cv_svm$cfMats[[1]]$table + results_cv_svm$cfMats[[2]]$table + results_cv_svm$cfMats[[3]]$table + results_cv_svm$cfMats[[4]]$table + results_cv_svm$cfMats[[5]]$table
+      allCfMats_svm <- results_cv_svm$cfMats[[1]]$table + results_cv_svm$cfMats[[2]]$table + results_cv_svm$cfMats[[3]]$table + results_cv_svm$cfMats[[4]]$table + results_cv_svm$cfMats[[5]]$table + results_cv_svm$cfMats[[6]]$table + results_cv_svm$cfMats[[7]]$table + results_cv_svm$cfMats[[8]]$table + results_cv_svm$cfMats[[9]]$table + results_cv_svm$cfMats[[10]]$table
       markobj <- c(markobj,'```{r echo = FALSE}',
                    paste('dataPlot(allCfMats_svm, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')

@@ -161,11 +161,14 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   }else if(length(levels(as.factor(labels))) > 2){
     
     DEGsMatrix <- DEGsInformation$DEGsMatrix
-    topTable.dataframe <- data.frame(GeneSymbol=rownames(topTable),B=rowMeans(topTable$lods),t=rowMeans(topTable$t),
-                                     P.Value=formatC(rowMeans(topTable$p.value), format = "e", digits = 2),
-                                     F=topTable$F)
-    colnames(topTable.dataframe) <- c("Gene Symbol","B","t", "P-Value","F")
-    topTable.dataframe <- topTable.dataframe[order(topTable.dataframe$B,decreasing=TRUE),]
+    genes.selected <- rownames(DEGsInformation$MulticlassLFC)
+    
+    topTable.dataframe <- data.frame(GeneSymbol=genes.selected,logFC=rowMeans(abs(DEGsInformation$MulticlassLFC)),
+                                     t=rowMeans(topTable[genes.selected,]$t),
+                                     P.Value=formatC(rowMeans(topTable[genes.selected,]$p.value), format = "e", digits = 2),
+                                     F=topTable[genes.selected,]$F,B=rowMeans(topTable[genes.selected,]$lods))
+    colnames(topTable.dataframe) <- c("Gene Symbol","logFC","t", "P-Value","F","B")
+    topTable.dataframe <- topTable.dataframe[order(topTable.dataframe$logFC,decreasing=TRUE),]
     rownames(topTable.dataframe) <- NULL
     
     markobj <- c(markobj,'## Searching for Multiclass DEGs\n',

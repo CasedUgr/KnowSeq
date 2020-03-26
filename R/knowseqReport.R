@@ -167,20 +167,20 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                                      t=rowMeans(topTable[genes.selected,]$t),
                                      P.Value=formatC(rowMeans(topTable[genes.selected,]$p.value), format = "e", digits = 2),
                                      F=topTable[genes.selected,]$F,B=rowMeans(topTable[genes.selected,]$lods))
-    colnames(topTable.dataframe) <- c("Gene Symbol","logFC","t", "P-Value","F","B")
-    topTable.dataframe <- topTable.dataframe[order(topTable.dataframe$logFC,decreasing=TRUE),]
+    colnames(topTable.dataframe) <- c("Gene Symbol","logFC ($\\mu$)","t ($\\mu$)", "P-Value ($\\mu$)","F","B ($\\mu$)")
+    topTable.dataframe <- topTable.dataframe[order(topTable.dataframe[,2],decreasing=TRUE),]
     rownames(topTable.dataframe) <- NULL
     
     markobj <- c(markobj,'## Searching for Multiclass DEGs\n',
                  paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of analysis. In this 
                    sense, to achieve this extraction, a LFC greater or equal than ', lfc,' along with a P-Value lower or equal than ',pvalue,' are imposed. Furthermore, for multiclass 
-                       assessment a coverage equal or greater than ', cov, ' will be used\n', sep = ""))
+                       assessment a coverage equal or greater than ', cov, ' will be used.\n', sep = ""))
     
     markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'genes have been keeped after using DEGs extraction and can be seen in the table below: \n'))
     
     markobj <- c(markobj,
                  '```{r, echo=FALSE, fig.align="center"}',
-                 paste('knitr::kable(topTable.dataframe,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),
+                 paste('knitr::kable(topTable.dataframe,"',table.format,'", table.attr = "class=\'paleBlueRows\'", escape=FALSE)',sep=''),
                  '```\n')
     
   }

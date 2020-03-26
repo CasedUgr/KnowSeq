@@ -94,8 +94,8 @@ DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov
           multIndMatches <- abs(multIndMatches)
 
           DEGsMultiClass <- expressionMatrix[names(ind),]
-          results <- list(fitmicroMultiContrast,multIndMatches,DEGsMultiClass)
-          names(results) <- c("Table","MulticlassIndex","DEGsMatrix")
+          results <- list(fitmicroMultiContrast,lfcIndmatrix,DEGsMultiClass)
+          names(results) <- c("Table","MulticlassLFC","DEGsMatrix")
 
         }else{
           stop("There are not genes that complains these restrictions, please change the p-value, lfc or cov.")

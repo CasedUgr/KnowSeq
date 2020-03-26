@@ -26,6 +26,7 @@
 #' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)
 #' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)
 
+
 knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expression', qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
                           geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
                           lfc=2.0, pvalue=0.01, cov=2, 
@@ -108,7 +109,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                  'Quality analysis is perform in order to detect any possible outlier that can be present in the samples. ',
                  'The outliers are samples numerically different with respect to the rest of samples, introducing noise in the study .', 
                  'For that purpose, arrayQualityMetrics bioc package is used to performs different statiscical tests and detect possible outliers. ',
-                 'arrayQualityMetrics generate a report containing all this information that can be seen [here](RNAseqQA/index.html).\n')
+                 'arrayQualityMetrics generate a report containing all this information that can be seen [**HERE**](RNAseqQA/index.html).\n')
   }
   
   # --- Differencia Expressed Genes --- #
@@ -160,6 +161,12 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   }else if(length(levels(as.factor(labels))) > 2){
     
     DEGsMatrix <- DEGsInformation$DEGsMatrix
+    topTable.dataframe <- data.frame(GeneSymbol=rownames(topTable),B=rowMeans(topTable$lods),t=rowMeans(topTable$t),
+                                     P.Value=formatC(rowMeans(topTable$p.value), format = "e", digits = 2),
+                                     F=topTable$F)
+    colnames(topTable.dataframe) <- c("Gene Symbol","B","t", "P-Value","F")
+    topTable.dataframe <- topTable.dataframe[order(topTable.dataframe$B,decreasing=TRUE),]
+    rownames(topTable.dataframe) <- NULL
     
     markobj <- c(markobj,'## Searching for Multiclass DEGs\n',
                  paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of analysis. In this 
@@ -170,13 +177,15 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     
     markobj <- c(markobj,
                  '```{r, echo=FALSE, fig.align="center"}',
-                 paste('knitr::kable(DEGsInformation$MulticlassIndex,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),
+                 paste('knitr::kable(topTable.dataframe,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),
                  '```\n')
     
   }
   
-  myAnnotation <- myAnnotation[myAnnotation$external_gene_name %in% rownames(DEGsMatrix),]
-  myAnnotation <- myAnnotation[complete.cases(myAnnotation), ]
+  if(geneOntology || getPathways){
+    myAnnotation <- myAnnotation[myAnnotation$external_gene_name %in% rownames(DEGsMatrix),]
+    myAnnotation <- myAnnotation[complete.cases(myAnnotation), ]
+  }
   
   if(is.infinite(maxGenes)){
     maxGenes <- dim(DEGsMatrix)[1]
@@ -336,7 +345,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
           gene.names <- str_replace(gene.names,as.character(myAnnotation[gen,'entrezgene_id']),
                                     as.character(myAnnotation[gen,'external_gene_name']))
         }
-        print(gene.names)
+
         GOsMatrix$`BP Ontology GOs`['Gene Symbols'] <- gene.names
         GOsMatrix$`BP Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`BP Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
         bp.frame <- GOsMatrix$`BP Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
@@ -571,4 +580,5 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   file.remove("report.Rmd")
   browseURL(paste(outdir,'report.html',sep='/'))
 }
+
 

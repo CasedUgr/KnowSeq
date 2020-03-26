@@ -53,6 +53,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     }
     return(data)
   }
+  
   # --- Check params --- #
   if(baseline == 'expression'){
     if(!is.data.frame(data) && !is.matrix(data)){
@@ -66,10 +67,12 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
       
     }
     expressionMatrix <- data
+    if (geneOntology || getPathways)
+      myAnnotation <- getAnnotationFromEnsembl(rownames(expressionMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter="external_gene_name",notHSapiens = FALSE)
+    
   }
   else if (baseline == 'count'){
-    
-    myAnnotation <- getAnnotationFromEnsembl(rownames(data),notHSapiens = FALSE)
+    myAnnotation <- getAnnotationFromEnsembl(rownames(data),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),notHSapiens = FALSE)
     expressionMatrix <- calculateGeneExpressionValues(data,myAnnotation, genesNames = TRUE)
     
   }
@@ -82,7 +85,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   act.folder <- getwd()
   # markobj contain the text that will be displayed in html or pdf file
   markobj <- c()
-
+  
   markobj <- c(markobj,'<img src="https://github.com/CasedUgr/KnowSeq/blob/master/logoKnow.png?raw=true" style="position:absolute;top:0px;right:0px;" width=265px height=200px />\n')
   table.labels <- data.frame(table(labels))
   colnames(table.labels) <- c("Labels", "Freq.")
@@ -100,19 +103,23 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   
   
   if(qualityAnalysis){
-    #cat("Performing the quality analysis of the samples\n")
-    RNAseqQA(expressionMatrix)
+    cat("Performing the quality analysis of the samples\n")
+    RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA',sep=''))
+    markobj <- c(markobj,'# Quality analysis\n',
+                 'Quality analysis must be performed for detecting and removing any possible outlier that can be present in the samples. ',
+                 'The outliers are samples numerically different with respect to the rest of samples, introducing noise in the study .', 
+                 'For that purpose, arrayQualityMetrics bioc package is used to carry out different statistical tests, detecting possible outliers. ',
+                 'arrayQualityMetrics generates a report containing all this information that can be seen [**HERE**](RNAseqQA/index.html).\n')
   }
-
+  
   # --- Differencia Expressed Genes --- #
-  markobj <- c(markobj,'# Differential Expressed Genes extraction')
+  markobj <- c(markobj,'# Differential Expressed Genes extraction\n')
   
   if(batchEffectTreatment){
     
     markobj <- c(markobj,'## Treating Batch Effect\n',
-                 'It is widely known that this is a crucial step in the omics data processing due to the intrinsic 
-              deviations that the data can present due to its origin, sequencing design, etc...\n',
-                 'Batch effect will be removed by using surrogate variable analysis or sva.\n')
+                 'Batch effect produces a intrinsic deviations inside the data due to its origin, sequencing design, lab, technician, etc... For that, it is crucial 
+                 in this type of analisys the correct treatment of it.','Taking into account that the different Batches are unknown, the effect will be treated by using surrogate variable analysis or sva algorithm.\n')
     
     svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
     
@@ -127,23 +134,23 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   if(dim(topTable)[1] == 0){
     stop("There is no any DEGs for this combination of LFC and P-value. Please, impose less restrictive thressholds.")
   }
-
+  
   
   if(length(levels(as.factor(labels))) == 2){
     
     DEGsMatrix <- DEGsInformation$DEGsMatrix
     
     topTable.dataframe <- data.frame(GeneSymbol=rownames(topTable),logFC=topTable$logFC,AveExpr=topTable$AveExpr,t=topTable$t,
-                                   P.Value=formatC(topTable$P.Value, format = "e", digits = 2),
-                                   adj.P.Val=formatC(topTable$adj.P.Val, format = "e", digits = 2),B=topTable$B)
-  
-    colnames(topTable.dataframe) <- c("Gene Symbol","logFC","AveExpr", "t", "P-Value","adj. P-Value","B")
-  
-    markobj <- c(markobj,'## Searching for DEGs\n',
-                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of analysis. In this 
-                   sense, to achieve this extraction, a LFC greater or equal than ', lfc,' along with a P-Value lower or equal than ',pvalue,' are imposed.\n', sep = ""))
+                                     P.Value=formatC(topTable$P.Value, format = "e", digits = 2),
+                                     adj.P.Val=formatC(topTable$adj.P.Val, format = "e", digits = 2),B=topTable$B)
     
-    markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'genes have been keeped after using DEGs extraction and can be seen in the table below: \n'))
+    colnames(topTable.dataframe) <- c("Gene Symbol","logFC","AveExpr", "t", "P-Value","adj. P-Value","B")
+    
+    markobj <- c(markobj,'## Searching for DEGs\n',
+                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of study. In this 
+                   sense, to achieve a set of possible biomarkers the following thresholds will be imposed: LFC greater or equal than ', lfc,', P-Value lower or equal than ',pvalue,'.\n', sep = ""))
+    
+      markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'DEGs have been keeped after using DEGs extraction and they can be seen in the table below: \n'))
     
     markobj <- c(markobj,
                  '```{r, echo=FALSE, fig.align="center"}',
@@ -153,19 +160,33 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   }else if(length(levels(as.factor(labels))) > 2){
     
     DEGsMatrix <- DEGsInformation$DEGsMatrix
+    genes.selected <- rownames(DEGsInformation$MulticlassLFC)
+    
+    topTable.dataframe <- data.frame(GeneSymbol=genes.selected,logFC=rowMeans(abs(DEGsInformation$MulticlassLFC)),
+                                     t=rowMeans(topTable[genes.selected,]$t),
+                                     P.Value=formatC(rowMeans(topTable[genes.selected,]$p.value), format = "e", digits = 2),
+                                     F=topTable[genes.selected,]$F,B=rowMeans(topTable[genes.selected,]$lods))
+    colnames(topTable.dataframe) <- c("Gene Symbol","logFC ($\\mu$)","t ($\\mu$)", "P-Value ($\\mu$)","F","B ($\\mu$)")
+    topTable.dataframe <- topTable.dataframe[order(topTable.dataframe[,2],decreasing=TRUE),]
+    rownames(topTable.dataframe) <- NULL
     
     markobj <- c(markobj,'## Searching for Multiclass DEGs\n',
-                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of analysis. In this 
-                   sense, to achieve this extraction, a LFC greater or equal than ', lfc,' along with a P-Value lower or equal than ',pvalue,' are imposed. Furthermore, for multiclass 
-                       assessment a coverage equal or greater than ', cov, ' will be used\n', sep = ""))
+                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of study. In this 
+                   sense, to achieve a set of possible biomarkers the following thresholds will be imposed: LFC greater or equal than ', lfc,', P-Value lower or equal than ',pvalue,'. Furthermore, for multiclass 
+                       assessment a coverage equal or greater than ', cov, ' will be used.\n', sep = ""))
     
-    markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'genes have been keeped after using DEGs extraction and can be seen in the table below: \n'))
+    markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'multiclas DEGs have been keeped after using DEGs extraction and they can be seen in the table below: \n'))
     
     markobj <- c(markobj,
                  '```{r, echo=FALSE, fig.align="center"}',
-                 paste('knitr::kable(DEGsInformation$MulticlassIndex,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),
+                 paste('knitr::kable(topTable.dataframe,"',table.format,'", table.attr = "class=\'paleBlueRows\'", escape=FALSE)',sep=''),
                  '```\n')
     
+  }
+  
+  if(geneOntology || getPathways){
+    myAnnotation <- myAnnotation[myAnnotation$external_gene_name %in% rownames(DEGsMatrix),]
+    myAnnotation <- myAnnotation[complete.cases(myAnnotation), ]
   }
   
   if(is.infinite(maxGenes)){
@@ -183,25 +204,27 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   if(featureSelectionMode != 'nofs'){
     
     markobj <- c(markobj,'## Feature Selection',
-                 paste('With the purpose of finding the best DEGs order to assess the data, the',featureSelectionMode,'method
-                     will be used in order to select the',maxGenes,'most relevant genes for the machine learning process.\n'))
+                 paste('With the purpose of finding the best combination of DEGs to assess the data, the',featureSelectionMode,'method
+                     will be used in order to select the',maxGenes,'most relevant genes for the classification process.\n'))
     
     ranking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML), mode = featureSelectionMode)
     if (featureSelectionMode == 'mrmr') ranking <- names(sort(ranking,decreasing = FALSE))
     else if (featureSelectionMode == 'rf') ranking <- names(ranking)
     else if (featureSelectionMode == 'da') ranking <- names(ranking)
     
+    markobj <- c(markobj,paste('First',maxGenes,'selected genes by algorithm',featureSelectionMode,'are:'),ranking[1:maxGenes],'.\n')
+    
+    
   } else{ranking <- rownames(DEGsMatrix)}
   
   
   genes <- ''
   for (gene in ranking[1:maxGenes]) genes <- paste(genes,gene,sep=', ')
-  markobj <- c(markobj,paste('First',maxGenes,'selected genes are:'),sub(".","",genes),'.\n')
   
   markobj <- c(markobj,'## Visualization\n',
                'DEGs are genes that have a truly different expression among the studied classes, 
-               for that it is important to try to see graphically if those DEGs comply with this requirement. 
-               In order to provide a tool to perform this task, the function dataPlot encapsulate a set of 
+               for that it is important to see graphically if those DEGs comply with this requirement. 
+               In order to provide a tool to perform this task, the function dataPlot encapsulates a set of 
                graphs that allows plotting in different ways the expression of the DEGs.\n')
   
   if(maxGenes > 12)
@@ -231,272 +254,335 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   
   # --- Machine learning --- #
   # --- ---  Training --- --- #
-  markobj <- c(markobj,'# Machine Learning Assessment \n',
-               'With the purpose of evaluate the robustness of the DEGs in the discernment among the studied pathologies.\n')
+  markobj <- c(markobj,'# Machine Learning Assessment \n')
   clasifNames <- paste(clasifAlgs,collapse = ',')
   clasifNames <- str_replace(clasifNames,'knn','K-Nearest Neighbors (K-NN)')
   clasifNames <- str_replace(clasifNames,'rf','Random Forest')
   clasifNames <- str_replace(clasifNames,'svm','Support Vector Machine (SVM)')
   
-  markobj <- c(markobj,paste('To this effect,',clasifNames,'classification algorithms will be trained using 5-Fold Cross Validation.
-                    To evaluate obtained results the this metrics will be shown in the following plots:\n'))
+  markobj <- c(markobj,paste('With the purpose of evaluate the robustness of the DEGs in the discernment among the studied pathologies, a supervised classification step will be performed. 
+  To this effect,',clasifNames,'classification algorithms will be trained using 10-Fold Cross Validation.
+                    To evaluate obtained results the Accuracy, Specificity and Sensitivity will be shown in the following plots:\n'))
   
   for (clasifAlg in clasifAlgs){
     if (clasifAlg == 'knn'){ 
-      results_cv_knn <- knn_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
+      results_cv_knn <- knn_CV(DEGsMatrixML,labels,ranking[1:maxGenes],10)
       markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
         if (metric == 'accuracy') act.metric = 'accMatrix'
         else if (metric == 'specificity') act.metric = 'specMatrix'
         else if (metric == 'sensitivity') act.metric = 'sensMatrix'
+        
+        s <- strsplit(metric, " ")[[1]]
+        s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
+                   sep = "", collapse = " ")
+        
         markobj <- c(markobj,'```{r echo = FALSE}',
                      paste('dataPlot(results_cv_knn[["',act.metric,'"]],
                        mode = "classResults",
-                       main = "',metric,' for each fold with ',clasifAlg,'",
-                       xlab = "Genes", ylab ="',metric,'")',sep=''),'```\n')
+                       main = "',s,' for each fold with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',s,'")',sep=''),'```\n')
       }
-      allCfMats_knn <- results_cv_knn$cfMats[[1]]$table + results_cv_knn$cfMats[[2]]$table + results_cv_knn$cfMats[[3]]$table + results_cv_knn$cfMats[[4]]$table + results_cv_knn$cfMats[[5]]$table
+      
+      allCfMats_knn <- results_cv_knn$cfMats[[1]]$table + results_cv_knn$cfMats[[2]]$table + results_cv_knn$cfMats[[3]]$table + results_cv_knn$cfMats[[4]]$table + results_cv_knn$cfMats[[5]]$table + results_cv_knn$cfMats[[6]]$table + results_cv_knn$cfMats[[7]]$table + results_cv_knn$cfMats[[8]]$table + results_cv_knn$cfMats[[9]]$table + results_cv_knn$cfMats[[10]]$table
       markobj <- c(markobj,'```{r echo = FALSE}',
                    paste('dataPlot(allCfMats_knn, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')
       
     }else if (clasifAlg == 'rf'){
-      results_cv_rf <- rf_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
+      results_cv_rf <- rf_CV(DEGsMatrixML,labels,ranking[1:maxGenes],10)
       markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
         if (metric == 'accuracy') act.metric = 'accMatrix'
         else if (metric == 'specificity') act.metric = 'specMatrix'
         else if (metric == 'sensitivity') act.metric = 'sensMatrix'
+        
+        s <- strsplit(metric, " ")[[1]]
+        s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
+                   sep = "", collapse = " ")
+        
         markobj <- c(markobj,'```{r echo = FALSE}',
                      paste('dataPlot(results_cv_rf[["',act.metric,'"]],
                        mode = "classResults",
-                       main = "',metric,' for each fold with ',clasifAlg,'",
-                       xlab = "Genes", ylab ="',metric,'")',sep=''),'```\n')
+                       main = "',s,' for each fold with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',s,'")',sep=''),'```\n')
       }
-      allCfMats_rf <- results_cv_rf$cfMats[[1]]$table + results_cv_rf$cfMats[[2]]$table + results_cv_rf$cfMats[[3]]$table + results_cv_rf$cfMats[[4]]$table + results_cv_rf$cfMats[[5]]$table
+      
+      allCfMats_rf <- results_cv_rf$cfMats[[1]]$table + results_cv_rf$cfMats[[2]]$table + results_cv_rf$cfMats[[3]]$table + results_cv_rf$cfMats[[4]]$table + results_cv_rf$cfMats[[5]]$table + results_cv_rf$cfMats[[6]]$table + results_cv_rf$cfMats[[7]]$table + results_cv_rf$cfMats[[8]]$table + results_cv_rf$cfMats[[9]]$table + results_cv_rf$cfMats[[10]]$table
       markobj <- c(markobj,'```{r echo = FALSE}',
                    paste('dataPlot(allCfMats_rf, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')
       
     }else if (clasifAlg == 'svm'){
-      results_cv_svm <- svm_CV(DEGsMatrixML,labels,ranking[1:maxGenes],5)
+      results_cv_svm <- svm_CV(DEGsMatrixML,labels,ranking[1:maxGenes],10)
       markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
         if (metric == 'accuracy') act.metric = 'accMatrix'
         else if (metric == 'specificity') act.metric = 'specMatrix'
         else if (metric == 'sensitivity') act.metric = 'sensMatrix'
+        
+        s <- strsplit(metric, " ")[[1]]
+        s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
+              sep = "", collapse = " ")
+        
         markobj <- c(markobj,'```{r echo = FALSE}',
                      paste('dataPlot(results_cv_svm[["',act.metric,'"]],
                        mode = "classResults",
-                       main = "',metric,' for each fold with ',clasifAlg,'",
-                       xlab = "Genes", ylab ="',metric,'")',sep=''),'```\n')
+                       main = "',s,' for each fold with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',s,'")',sep=''),'```\n')
       }
-      allCfMats_svm <- results_cv_svm$cfMats[[1]]$table + results_cv_svm$cfMats[[2]]$table + results_cv_svm$cfMats[[3]]$table + results_cv_svm$cfMats[[4]]$table + results_cv_svm$cfMats[[5]]$table
+      
+      allCfMats_svm <- results_cv_svm$cfMats[[1]]$table + results_cv_svm$cfMats[[2]]$table + results_cv_svm$cfMats[[3]]$table + results_cv_svm$cfMats[[4]]$table + results_cv_svm$cfMats[[5]]$table + results_cv_svm$cfMats[[6]]$table + results_cv_svm$cfMats[[7]]$table + results_cv_svm$cfMats[[8]]$table + results_cv_svm$cfMats[[9]]$table + results_cv_svm$cfMats[[10]]$table
       markobj <- c(markobj,'```{r echo = FALSE}',
                    paste('dataPlot(allCfMats_svm, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')
     }
-
+    
   }
   
   if(geneOntology | getPathways | getDiseases){
-      # --- DEGs enrichment methodology --- #
-      markobj <- c(markobj,'\n# DEGs enrichment\n',
-                   'The main goal of the this process is the extraction of biological relevant information from the DEGs,
+    # --- DEGs enrichment methodology --- #
+    markobj <- c(markobj,'\n# DEGs enrichment\n',
+                 'The main goal of the this process is the extraction of biological relevant information from the DEGs,
                    and this enrichment has three different points of view:\n
                    \t- The gene ontology information.\n
                    \t- The pathway visualization.\n 
                    \t- The relationship between the DEGs and diseases related to the studied pathologies.\n')
+    
+    # --- Gene Ontology --- #
+    
+    if(geneOntology){
+      markobj <- c(markobj,'## Gene Ontology\n',
+                   'Gene ontology (GO) provides information about the biological functions of the genes. 
+                      Information from the three different ontologies (BP, MF and CC) will be shown.\n')
+      amigo.url <- 'http://amigo.geneontology.org/amigo/term/'
+      GOsMatrix <- geneOntologyEnrichment(as.character(myAnnotation$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = FALSE)
       
-      # --- Gene Ontology --- #
-      
-      if(geneOntology){
-        markobj <- c(markobj,'## Gene Ontology\n',
-                     'Gene ontology (GO) provides information about the biological functions of the genes. 
-                      The following, information from the three different ontologies (BP, MF and CC) will be shown.\n')
-        amigo.url <- 'http://amigo.geneontology.org/amigo/term/'
-        data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
-        GOsMatrix <- geneOntologyEnrichment(as.character(data$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
-        
-        if(dim(GOsMatrix$`BP Ontology GOs`)[1] != 0){
-          GOsMatrix$`BP Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`BP Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
-          bp.frame <- GOsMatrix$`BP Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
-          rownames(bp.frame) <- NULL
-          bp.frame$GO.ID  <- paste('[',bp.frame$GO.ID,'](',amigo.url,bp.frame$GO.ID,')',sep='')
-  
-          markobj <- c(markobj,'### BP Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(bp.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
-        
-        }else{markobj <- c(markobj,'### BP Ontology GOs\n There are no GO terms related to this set of DEGs for BP ontology\n')}
-        
-        if(dim(GOsMatrix$`MF Ontology GOs`)[1] != 0){
-          GOsMatrix$`MF Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`MF Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
-          mf.frame <- GOsMatrix$`MF Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
-          rownames(mf.frame) <- NULL
-          mf.frame$GO.ID  <- paste('[',mf.frame$GO.ID,'](',amigo.url,mf.frame$GO.ID,')',sep='')
-          
-          markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(mf.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
-  
-        }else{markobj <- c(markobj,'### MF Ontology GOs\n There are no GO terms related to this set of DEGs for MF ontology\n')}
-        
-        if(dim(GOsMatrix$`CC Ontology GOs`)[1] != 0){
-          GOsMatrix$`CC Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`CC Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
-          cc.frame <- GOsMatrix$`CC Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
-          rownames(cc.frame) <- NULL
-          cc.frame$GO.ID  <- paste('[',cc.frame$GO.ID,'](',amigo.url,cc.frame$GO.ID,')',sep='')
-          markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(cc.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
-        }else{markobj <- c(markobj,'### CC Ontology GOs\n There are no GO terms related to this set of DEGs for CC ontology\n')}
-        
-      }
-
-      # --- Pathways Visualization --- #
-      if(getPathways){
-        DEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix),notHSapiens=FALSE, attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"), filter = "external_gene_name")
-
-        DEGsAnnotation <- DEGsAnnotation[which(!is.na(DEGsAnnotation$entrezgene_id) == TRUE),]
-        
-        commonDEGs <- intersect(rownames(DEGsMatrix),unique(DEGsAnnotation$external_gene_name))
-        posCommonDEGs <- match(rownames(DEGsMatrix[commonDEGs,]),DEGsAnnotation$external_gene_name)
-        pathMatrix <- DEGsMatrix[commonDEGs,]
-        rownames(pathMatrix) <- DEGsAnnotation$entrezgene_id[posCommonDEGs]
-        
-        paths.data <- matrix(ncol = 2)
-        
-        cat("Retrieving DEGs associated pathways...\n")
-        
-        for(gene in DEGsAnnotation$entrezgene_id){
-          
-          if(!is.na(gene)){
-            get_GO <- GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
-            get_GO_text <- content(get_GO, "text")
-            pathway_start <- str_locate_all(pattern = "PATHWAY", get_GO_text)[[1]][2]
-            pathway_end <- str_locate_all(pattern = "BRITE", get_GO_text)[[1]][1]
-            pathways <- substr(get_GO_text,pathway_start+1,pathway_end-1)
-            pathways <- strsplit(pathways,split = "\n")
-            
-            index <- grep("hsa", unlist(pathways))
-            
-            for(i in index){
-              pathway <- as.character(unlist(str_extract_all(unlist(pathways)[i],"hsa[a-zA-Z0-9]{5}")))
-              start <- str_locate_all(pattern = "hsa", unlist(pathways)[i])[[1]][2]
-              name <- substr(unlist(pathways)[i],start+8,nchar(unlist(pathways)[i]))
-              paths.data <- rbind(paths.data,c(as.character(pathway),as.character(name)))
-            }
-  
-          }
+      if(dim(GOsMatrix$`BP Ontology GOs`)[1] != 0){
+        gene.names <- as.character(GOsMatrix$`BP Ontology GOs`$Genes)
+        for ( gen in seq(dim(myAnnotation)[1])){
+          gene.names <- str_replace(gene.names,as.character(myAnnotation[gen,'entrezgene_id']),
+                                    as.character(myAnnotation[gen,'external_gene_name']))
         }
-        paths.data <- paths.data[-1,]
-        paths.data <- as.data.frame(paths.data)
-        names(paths.data) <- c("KEGG_hsa","Name")
-        naPos <- which(is.na(pathways_unique) == TRUE)
+
+        GOsMatrix$`BP Ontology GOs`['Gene Symbols'] <- gene.names
+        GOsMatrix$`BP Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`BP Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
+        bp.frame <- GOsMatrix$`BP Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
+        rownames(bp.frame) <- NULL
+        bp.frame$GO.ID  <- paste('[',bp.frame$GO.ID,'](',amigo.url,bp.frame$GO.ID,')',sep='')
         
-        pathway.url  <- 'https://www.genome.jp/dbget-bin/www_bget?pathway:'
-        markobj <- c(markobj,'\n## Pathways Extraction\n',
-                     'In this step the pathways in which inserted genes appear are shown.\n')
+        markobj <- c(markobj,'### BP Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(bp.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
         
-        markobj <- c(markobj,'```{r echo=FALSE}',paste('knitr::kable(paths.data,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
-        
-        
-        # pathways <- list.dirs('Pathways')
-        # pathways <- str_sub(pathways,10,nchar(pathways))
-        # pathways <-  pathways[pathways!='']
-        # for (pathway in pathways){
-        #   markobj  <- c(markobj,paste('- [',pathway,'](',pathway.url,pathway,')\n',sep=''))
-        # }
-      }
+      }else{markobj <- c(markobj,'### BP Ontology GOs\n There are no GO terms related to this set of DEGs for BP ontology\n')}
       
-      # --- Related Diseases --- #
-      if(getDiseases){
-        if (disease == ''){
-          diseases <- DEGsToDiseases(rownames(DEGsMatrix), size = 5, getEvidences = TRUE)
-          evidences.frame <- list()
-          for (gene in names(diseases)){
-            act.markobj <- c()
-            # If user want to see evidences for all diseases or this diseases match with solicitated disease
-            check.diseases <- names(diseases[[gene]]$evidences)
+      if(dim(GOsMatrix$`MF Ontology GOs`)[1] != 0){
+        gene.names <- GOsMatrix$`MF Ontology GOs`$Genes
+        for ( gen in seq(dim(myAnnotation)[1])){
+          gene.names <- str_replace(gene.names,as.character(myAnnotation[gen,'entrezgene_id']),
+                                    as.character(myAnnotation[gen,'external_gene_name']))
+        }
+        GOsMatrix$`MF Ontology GOs`['Gene Symbols'] <- gene.names
+        
+        GOsMatrix$`MF Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`MF Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
+        mf.frame <- GOsMatrix$`MF Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
+        rownames(mf.frame) <- NULL
+        mf.frame$GO.ID  <- paste('[',mf.frame$GO.ID,'](',amigo.url,mf.frame$GO.ID,')',sep='')
+        
+        markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(mf.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
+        
+      }else{markobj <- c(markobj,'### MF Ontology GOs\n There are no GO terms related to this set of DEGs for MF ontology\n')}
+      
+      if(dim(GOsMatrix$`CC Ontology GOs`)[1] != 0){
+        gene.names <- GOsMatrix$`CC Ontology GOs`$Genes
+        for ( gen in seq(dim(myAnnotation)[1])){
+          gene.names <- str_replace(gene.names,as.character(myAnnotation[gen,'entrezgene_id']),
+                                    as.character(myAnnotation[gen,'external_gene_name']))
+        }
+        GOsMatrix$`CC Ontology GOs`['Gene Symbols'] <- gene.names
+        
+        GOsMatrix$`CC Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`CC Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
+        cc.frame <- GOsMatrix$`CC Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
+        rownames(cc.frame) <- NULL
+        cc.frame$GO.ID  <- paste('[',cc.frame$GO.ID,'](',amigo.url,cc.frame$GO.ID,')',sep='')
+        markobj <- c(markobj,'### MF Ontology GOs\n','```{r echo=FALSE}',paste('knitr::kable(cc.frame,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
+      }else{markobj <- c(markobj,'### CC Ontology GOs\n There are no GO terms related to this set of DEGs for CC ontology\n')}
+      
+    }
     
-            for (act.disease in check.diseases){
-              if ( class(diseases[[gene]]$evidences[[act.disease]]) == 'list' ){
-                if (!gene %in% names(evidences.frame)) evidences.frame[[gene]] <- list()
-    
-                act.markobj <- c(act.markobj,paste('####',act.disease,sep=' '))
-                for ( evidence.type in names(diseases[[gene]]$evidences[[act.disease]]) ){
-                  act.evidences.frame <- c()
-                  for (act.evidence in diseases[[gene]]$evidences[[act.disease]][[evidence.type]]){
-                    act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
-                  }
-                  # Remove empty columns
-                  act.evidences.frame <- removeEmptyColumns(act.evidences.frame)
-                  evidences.frame[[gene]][[evidence.type]] <- act.evidences.frame
-                }
-                for ( evidence.type in names(evidences.frame[[gene]]))
-                  act.markobj <- c(act.markobj,'```{r echo=FALSE}',
-                                   paste('knitr::kable(data.frame(evidences.frame[["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
-              }
-            }
-            if (length(act.markobj) > 0)
-              markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
+    # --- Pathways Visualization --- #
+    if(getPathways){
+      
+      myAnnotation <- myAnnotation[which(!is.na(myAnnotation$entrezgene_id) == TRUE),]
+      
+      commonDEGs <- intersect(rownames(DEGsMatrix),unique(myAnnotation$external_gene_name))
+      posCommonDEGs <- match(rownames(DEGsMatrix[commonDEGs,]),myAnnotation$external_gene_name)
+      pathMatrix <- DEGsMatrix[commonDEGs,]
+      rownames(pathMatrix) <- myAnnotation$entrezgene_id[posCommonDEGs]
+      
+      paths.data <- matrix(ncol = 3)
+      
+      cat("Retrieving DEGs associated pathways...\n")
+      
+      for(gene.index in seq(dim(myAnnotation)[1])){
+        gene <- myAnnotation[gene.index,'entrezgene_id']
+        gene.name <- myAnnotation[gene.index,'external_gene_name']
+        if(!is.na(gene)){
+          get_GO <- GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
+          get_GO_text <- content(get_GO, "text")
+          pathway_start <- str_locate_all(pattern = "PATHWAY", get_GO_text)[[1]][2]
+          pathway_end <- str_locate_all(pattern = "BRITE", get_GO_text)[[1]][1]
+          pathways <- substr(get_GO_text,pathway_start+1,pathway_end-1)
+          pathways <- strsplit(pathways,split = "\n")
+          
+          index <- grep("hsa", unlist(pathways))
+          
+          for(i in index){
+            pathway <- as.character(unlist(str_extract_all(unlist(pathways)[i],"hsa[a-zA-Z0-9]{5}")))
+            if (length(pathway) == 0) break
+            start <- str_locate_all(pattern = "hsa", unlist(pathways)[i])[[1]][2]
+            name <- substr(unlist(pathways)[i],start+8,nchar(unlist(pathways)[i]))
+            
+            paths.data <- rbind(paths.data,c(as.character(pathway),as.character(name),as.character(gene.name)))
           }
+          
+        }
+      }
+      paths.data <- paths.data[-1,]
+      paths.data <- as.data.frame(paths.data,stringsAsFactors=FALSE)
+      names(paths.data) <- c("KEGG_hsa","Name","Genes")
+      naPos <- which(is.na(paths.data) == TRUE)
+      
+      # Collapse repeated pathways
+      remove.index <- c()
+      repeated.pathways <- names(which(table(paths.data$KEGG_hsa) > 1))
+      for (pathway in repeated.pathways){
+        index <- which(paths.data$KEGG_hsa == pathway,)
+        genes <- paths.data[index,'Genes']
+        paths.data[index[1],'Genes'] <- paste(genes,collapse=', ')
+        remove.index <- c(remove.index,index[-1])
+      }
+      paths.data <- paths.data[-remove.index,]
+      rownames(paths.data) <- NULL
+      
+      paths.data$KEGG_hsa <- paste('[',paths.data$KEGG_hsa,'](https://www.genome.jp/dbget-bin/www_bget?pathway:',paths.data$KEGG_hsa,')',sep='')
+      markobj <- c(markobj,'\n## Pathways Extraction\n',
+                   'In this step the pathways in which inserted genes appear are shown.\n')
+      
+      markobj <- c(markobj,'```{r echo=FALSE}',paste('knitr::kable(paths.data,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
+      
+      
+      # pathways <- list.dirs('Pathways')
+      # pathways <- str_sub(pathways,10,nchar(pathways))
+      # pathways <-  pathways[pathways!='']
+      # for (pathway in pathways){
+      #   markobj  <- c(markobj,paste('- [',pathway,'](',pathway.url,pathway,')\n',sep=''))
+      # }
+    }
+    
+    # --- Related Diseases --- #
+    if(getDiseases){
+      if (disease == ''){
+        
+        markobj <- c(markobj,'## DEGs Related diseases\n',
+                     'Finally, the related diseases enrichment is displayed. Related diseases to the final set of DEGs are searched 
+                      from *targetValidation* plastform. For each disease it is also showed a list of evidences. \n')
+        
+        diseases <- DEGsToDiseases(rownames(DEGsMatrix), size = 10, getEvidences = TRUE)
+        evidences.frame <- list()
+        for (gene in names(diseases)){
+          act.markobj <- c()
+          # If user want to see evidences for all diseases or this diseases match with solicitated disease
+          check.diseases <- names(diseases[[gene]]$evidences)
+          
+          for (act.disease in check.diseases){
+            if ( class(diseases[[gene]]$evidences[[act.disease]]) == 'list' ){
+              if (!gene %in% names(evidences.frame)) evidences.frame[[gene]] <- list()
+              
+              act.markobj <- c(act.markobj,paste('####',act.disease,sep=' '))
+              for ( evidence.type in names(diseases[[gene]]$evidences[[act.disease]]) ){
+                act.evidences.frame <- c()
+                for (act.evidence in diseases[[gene]]$evidences[[act.disease]][[evidence.type]]){
+                  act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
+                }
+                # Remove empty columns
+                act.evidences.frame <- removeEmptyColumns(act.evidences.frame)
+                evidences.frame[[gene]][[evidence.type]] <- act.evidences.frame
+              }
+              for ( evidence.type in names(evidences.frame[[gene]]))
+                act.markobj <- c(act.markobj,'```{r echo=FALSE}',
+                                 paste('knitr::kable(data.frame(evidences.frame[["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
+            }
+          }
+          if (length(act.markobj) > 0)
+            markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
+        }
+      }else{
+        
+        dis <- gsub("-"," ",disease)
+        dis <- strsplit(dis, " ")[[1]]
+        dis <- paste(toupper(substring(dis, 1, 1)), substring(dis, 2),
+                   sep = "", collapse = " ")
+        
+        markobj <- c(markobj,paste('## DEGs Evidences for ',dis,'\n',sep = ""),
+                     'Finally, the ',dis,' related evidences enrichment is displayed. DEGs related evidences are searched 
+                      from *targetValidation* platform.\n')
+        
+        r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
+        respon <- content(r_Ensembl)
+        
+        if ( 'size' %in% names(respon) && respon$size == 0){
+          markobj  <-  c(markobj,'\nDisease not found.')
         }else{
-          markobj <- c(markobj,'## Related diseases\n',
-                       'Finally, the related diseases enrichment is displayed. DEGs related diseases are searched 
-                      from *targetValidation* plastform.\n')
-    
-          r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
-          respon <- content(r_Ensembl)
+          disease.id <- respon$data[[1]]$id
+          url  <- paste("https://api.opentargets.io/v3/platform/public/association/filter?disease=",disease.id,"&size=10000",sep='')
+          response <- GET(url)
+          response <- content(response)
+          found.symbols <- unlist(list.map(response$data,target$gene_info$symbol))
+          found.symbols <- intersect(found.symbols,rownames(DEGsMatrix))
           
-          if ( 'size' %in% names(respon) && respon$size == 0){
-            markobj  <-  c(markobj,'\nDisease not found.')
-          }else{
-            disease.id <- respon$data[[1]]$id
-            url  <- paste("https://api.opentargets.io/v3/platform/public/association/filter?disease=",disease.id,"&size=10000",sep='')
-            response <- GET(url)
-            response <- content(response)
-            found.symbols <- unlist(list.map(response$data,target$gene_info$symbol))
-            found.symbols <- intersect(found.symbols,rownames(DEGsMatrix))
-    
-            if(length(found.symbols) > 0){
-              evidences_ <- c()
-              for (subdisease in subdiseases){
-                evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,disease,subdisease))
-              }
-              evidences.frame <- list()
-              for (gene in found.symbols){
-                act.markobj <- c()
-                for (ev.index in seq(dim(evidences_)[1])){
-                  if (!as.character(ev.index)  %in% names(evidences.frame))
-                    evidences.frame[[as.character(ev.index)]]<-list()
-                  evidences <- evidences_[ev.index,]
-                  if (class(evidences[[gene]])=='list'){
-                    evidences.frame[[as.character(ev.index)]][[gene]] = list()
-                    for ( evidence.type in names(evidences[[gene]]) ){
-                      act.evidences.frame <- c()
-                      for (act.evidence in evidences[[gene]][[evidence.type]]){
-                        act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
-                      }
-                      # Remove empty columns
-                      act.evidences.frame <- removeEmptyColumns(act.evidences.frame)
-                      evidences.frame[[as.character(ev.index)]][[gene]][[evidence.type]] <- act.evidences.frame
+          if(length(found.symbols) > 0){
+            evidences_ <- c()
+            for (subdisease in subdiseases){
+              evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,disease,subdisease))
+            }
+            evidences.frame <- list()
+            for (gene in found.symbols){
+              act.markobj <- c()
+              for (ev.index in seq(dim(evidences_)[1])){
+                if (!as.character(ev.index)  %in% names(evidences.frame))
+                  evidences.frame[[as.character(ev.index)]]<-list()
+                evidences <- evidences_[ev.index,]
+                if (class(evidences[[gene]])=='list'){
+                  evidences.frame[[as.character(ev.index)]][[gene]] = list()
+                  for ( evidence.type in names(evidences[[gene]]) ){
+                    act.evidences.frame <- c()
+                    for (act.evidence in evidences[[gene]][[evidence.type]]){
+                      act.evidences.frame <- rbind(act.evidences.frame,act.evidence$evidence)
                     }
-                    if (subdisease != '' && length(evidences.frame[[as.character(ev.index)]])>0)
-                      act.markobj <- c(act.markobj,paste('####',subdiseases[ev.index]))
-                    for ( evidence.type in names(evidences.frame[[as.character(ev.index)]][[gene]]))
-                      act.markobj <- c(act.markobj,'```{r echo=FALSE}',
-                                       paste('knitr::kable(data.frame(evidences.frame[["',as.character(ev.index),'"]][["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
+                    # Remove empty columns
+                    act.evidences.frame <- removeEmptyColumns(act.evidences.frame)
+                    evidences.frame[[as.character(ev.index)]][[gene]][[evidence.type]] <- act.evidences.frame
                   }
+                  if (subdisease != '' && length(evidences.frame[[as.character(ev.index)]])>0)
+                    act.markobj <- c(act.markobj,paste('####',subdiseases[ev.index]))
+                  for ( evidence.type in names(evidences.frame[[as.character(ev.index)]][[gene]]))
+                    act.markobj <- c(act.markobj,'```{r echo=FALSE}',
+                                     paste('knitr::kable(data.frame(evidences.frame[["',as.character(ev.index),'"]][["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
                 }
-                if (length(act.markobj) > 0)
-                  markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
               }
+              if (length(act.markobj) > 0)
+                markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
             }
-            else{
-              markobj <- c(markobj,paste('\nNo introduced gene is related with',disease,sep=' '))
-            }
+          }
+          else{
+            markobj <- c(markobj,paste('\nNo introduced gene is related with',disease,sep=' '))
           }
         }
       }
+    }
   }
   # --- Save Report --- #
   mark.header.html <- c('---',
@@ -527,3 +613,5 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   file.remove("report.Rmd")
   browseURL(paste(outdir,'report.html',sep='/'))
 }
+
+

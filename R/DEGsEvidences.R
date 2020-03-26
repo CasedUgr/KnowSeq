@@ -40,7 +40,7 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
   # Iter in genes from geneList
   for(j in seq(length(unique(geneList)))){
     # Get gene id (it's necesary for evidences request)
-    r_Ensembl <- httr::GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",geneList[j],"&size=1&filter=target",sep = ""))
+    r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",geneList[j],"&size=1&filter=target",sep = ""))
     respon <- content(r_Ensembl)
     if( length(respon$data) > 0 )ensembl_id <- respon$data[[1]]$data$ensembl_gene_id
     else ensembl_id <- NULL

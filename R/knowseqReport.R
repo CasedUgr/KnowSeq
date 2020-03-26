@@ -106,21 +106,20 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     cat("Performing the quality analysis of the samples\n")
     RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA',sep=''))
     markobj <- c(markobj,'# Quality analysis\n',
-                 'Quality analysis is perform in order to detect any possible outlier that can be present in the samples. ',
+                 'Quality analysis must be performed for detecting and removing any possible outlier that can be present in the samples. ',
                  'The outliers are samples numerically different with respect to the rest of samples, introducing noise in the study .', 
-                 'For that purpose, arrayQualityMetrics bioc package is used to performs different statiscical tests and detect possible outliers. ',
-                 'arrayQualityMetrics generate a report containing all this information that can be seen [**HERE**](RNAseqQA/index.html).\n')
+                 'For that purpose, arrayQualityMetrics bioc package is used to carry out different statistical tests, detecting possible outliers. ',
+                 'arrayQualityMetrics generates a report containing all this information that can be seen [**HERE**](RNAseqQA/index.html).\n')
   }
   
   # --- Differencia Expressed Genes --- #
-  markobj <- c(markobj,'# Differential Expressed Genes extraction')
+  markobj <- c(markobj,'# Differential Expressed Genes extraction\n')
   
   if(batchEffectTreatment){
     
     markobj <- c(markobj,'## Treating Batch Effect\n',
-                 'It is widely known that this is a crucial step in the omics data processing due to the intrinsic 
-              deviations that the data can present due to its origin, sequencing design, etc...\n',
-                 'Batch effect will be removed by using surrogate variable analysis or sva.\n')
+                 'Batch effect produces a intrinsic deviations inside the data due to its origin, sequencing design, lab, technician, etc... For that, it is crucial 
+                 in this type of analisys the correct treatment of it.','Taking into account that the different Batches are unknown, the effect will be treated by using surrogate variable analysis or sva algorithm.\n')
     
     svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
     
@@ -148,10 +147,10 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     colnames(topTable.dataframe) <- c("Gene Symbol","logFC","AveExpr", "t", "P-Value","adj. P-Value","B")
     
     markobj <- c(markobj,'## Searching for DEGs\n',
-                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of analysis. In this 
-                   sense, to achieve this extraction, a LFC greater or equal than ', lfc,' along with a P-Value lower or equal than ',pvalue,' are imposed.\n', sep = ""))
+                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of study. In this 
+                   sense, to achieve a set of possible biomarkers the following thresholds will be imposed: LFC greater or equal than ', lfc,', P-Value lower or equal than ',pvalue,'.\n', sep = ""))
     
-    markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'genes have been keeped after using DEGs extraction and can be seen in the table below: \n'))
+      markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'DEGs have been keeped after using DEGs extraction and they can be seen in the table below: \n'))
     
     markobj <- c(markobj,
                  '```{r, echo=FALSE, fig.align="center"}',
@@ -172,11 +171,11 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     rownames(topTable.dataframe) <- NULL
     
     markobj <- c(markobj,'## Searching for Multiclass DEGs\n',
-                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of analysis. In this 
-                   sense, to achieve this extraction, a LFC greater or equal than ', lfc,' along with a P-Value lower or equal than ',pvalue,' are imposed. Furthermore, for multiclass 
+                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of study. In this 
+                   sense, to achieve a set of possible biomarkers the following thresholds will be imposed: LFC greater or equal than ', lfc,', P-Value lower or equal than ',pvalue,'. Furthermore, for multiclass 
                        assessment a coverage equal or greater than ', cov, ' will be used.\n', sep = ""))
     
-    markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'genes have been keeped after using DEGs extraction and can be seen in the table below: \n'))
+    markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'multiclas DEGs have been keeped after using DEGs extraction and they can be seen in the table below: \n'))
     
     markobj <- c(markobj,
                  '```{r, echo=FALSE, fig.align="center"}',
@@ -205,25 +204,27 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   if(featureSelectionMode != 'nofs'){
     
     markobj <- c(markobj,'## Feature Selection',
-                 paste('With the purpose of finding the best DEGs order to assess the data, the',featureSelectionMode,'method
-                     will be used in order to select the',maxGenes,'most relevant genes for the machine learning process.\n'))
+                 paste('With the purpose of finding the best combination of DEGs to assess the data, the',featureSelectionMode,'method
+                     will be used in order to select the',maxGenes,'most relevant genes for the classification process.\n'))
     
     ranking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML), mode = featureSelectionMode)
     if (featureSelectionMode == 'mrmr') ranking <- names(sort(ranking,decreasing = FALSE))
     else if (featureSelectionMode == 'rf') ranking <- names(ranking)
     else if (featureSelectionMode == 'da') ranking <- names(ranking)
     
+    markobj <- c(markobj,paste('First',maxGenes,'selected genes by algorithm',featureSelectionMode,'are:'),ranking[1:maxGenes],'.\n')
+    
+    
   } else{ranking <- rownames(DEGsMatrix)}
   
   
   genes <- ''
   for (gene in ranking[1:maxGenes]) genes <- paste(genes,gene,sep=', ')
-  markobj <- c(markobj,paste('First',maxGenes,'selected genes are:'),sub(".","",genes),'.\n')
   
   markobj <- c(markobj,'## Visualization\n',
                'DEGs are genes that have a truly different expression among the studied classes, 
-               for that it is important to try to see graphically if those DEGs comply with this requirement. 
-               In order to provide a tool to perform this task, the function dataPlot encapsulate a set of 
+               for that it is important to see graphically if those DEGs comply with this requirement. 
+               In order to provide a tool to perform this task, the function dataPlot encapsulates a set of 
                graphs that allows plotting in different ways the expression of the DEGs.\n')
   
   if(maxGenes > 12)
@@ -253,15 +254,15 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   
   # --- Machine learning --- #
   # --- ---  Training --- --- #
-  markobj <- c(markobj,'# Machine Learning Assessment \n',
-               'With the purpose of evaluate the robustness of the DEGs in the discernment among the studied pathologies.\n')
+  markobj <- c(markobj,'# Machine Learning Assessment \n')
   clasifNames <- paste(clasifAlgs,collapse = ',')
   clasifNames <- str_replace(clasifNames,'knn','K-Nearest Neighbors (K-NN)')
   clasifNames <- str_replace(clasifNames,'rf','Random Forest')
   clasifNames <- str_replace(clasifNames,'svm','Support Vector Machine (SVM)')
   
-  markobj <- c(markobj,paste('To this effect,',clasifNames,'classification algorithms will be trained using 10-Fold Cross Validation.
-                    To evaluate obtained results the this metrics will be shown in the following plots:\n'))
+  markobj <- c(markobj,paste('With the purpose of evaluate the robustness of the DEGs in the discernment among the studied pathologies, a supervised classification step will be performed. 
+  To this effect,',clasifNames,'classification algorithms will be trained using 10-Fold Cross Validation.
+                    To evaluate obtained results the Accuracy, Specificity and Sensitivity will be shown in the following plots:\n'))
   
   for (clasifAlg in clasifAlgs){
     if (clasifAlg == 'knn'){ 
@@ -356,7 +357,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     if(geneOntology){
       markobj <- c(markobj,'## Gene Ontology\n',
                    'Gene ontology (GO) provides information about the biological functions of the genes. 
-                      The following, information from the three different ontologies (BP, MF and CC) will be shown.\n')
+                      Information from the three different ontologies (BP, MF and CC) will be shown.\n')
       amigo.url <- 'http://amigo.geneontology.org/amigo/term/'
       GOsMatrix <- geneOntologyEnrichment(as.character(myAnnotation$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = FALSE)
       
@@ -484,7 +485,12 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     # --- Related Diseases --- #
     if(getDiseases){
       if (disease == ''){
-        diseases <- DEGsToDiseases(rownames(DEGsMatrix), size = 5, getEvidences = TRUE)
+        
+        markobj <- c(markobj,'## DEGs Related diseases\n',
+                     'Finally, the related diseases enrichment is displayed. Related diseases to the final set of DEGs are searched 
+                      from *targetValidation* plastform. For each disease it is also showed a list of evidences. \n')
+        
+        diseases <- DEGsToDiseases(rownames(DEGsMatrix), size = 10, getEvidences = TRUE)
         evidences.frame <- list()
         for (gene in names(diseases)){
           act.markobj <- c()
@@ -514,9 +520,15 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
             markobj <- c(markobj,paste('\n###',gene,sep=' '),act.markobj)
         }
       }else{
-        markobj <- c(markobj,'## Related diseases\n',
-                     'Finally, the related diseases enrichment is displayed. DEGs related diseases are searched 
-                      from *targetValidation* plastform.\n')
+        
+        dis <- gsub("-"," ",disease)
+        dis <- strsplit(dis, " ")[[1]]
+        dis <- paste(toupper(substring(dis, 1, 1)), substring(dis, 2),
+                   sep = "", collapse = " ")
+        
+        markobj <- c(markobj,paste('## DEGs Evidences for ',dis,'\n',sep = ""),
+                     'Finally, the ',dis,' related evidences enrichment is displayed. DEGs related evidences are searched 
+                      from *targetValidation* platform.\n')
         
         r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
         respon <- content(r_Ensembl)

@@ -34,5 +34,5 @@ trainingLabels <- labels[c(1:4,6:9)]
 testMatrix <- t(DEGsMatrix)[c(5,10),]
 testLabels <- labels[c(5,10)]
 bestK <- 3 # the one that has been selected
-results_test_knn <- knn_test(testMatrix, testLabels, rownames(DEGsMatrix)[1:10], bestK)
+results_test_knn <- knn_test(trainingMatrix, trainingLabels, testMatrix, testLabels, rownames(DEGsMatrix)[1:10], bestK)
 }

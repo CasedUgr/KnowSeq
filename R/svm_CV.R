@@ -12,6 +12,7 @@
 #' load(paste(dir, "/expressionExample.RData", sep = ""))
 #'
 #' svm_CV(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+
 svm_CV <- function(data, labels, vars_selected, numFold = 10) {
   if (!is.data.frame(data) && !is.matrix(data)) {
     stop("The data argument must be a dataframe or a matrix.")
@@ -73,8 +74,7 @@ svm_CV <- function(data, labels, vars_selected, numFold = 10) {
   
   # reorder the data matrix in order to have more
   # balanced folds
-  set.seed(69)
-  positions <- rep(1:dim(data)[1])
+  positions <- rep(seq_len(dim(data)[1]))
   randomPositions <- sample(positions)
   data <- data[randomPositions,]
   labels <- labels[randomPositions]
@@ -84,7 +84,7 @@ svm_CV <- function(data, labels, vars_selected, numFold = 10) {
     
     # obtain validation and training folds
     valFold <- seq(round((i-1)*lengthValFold + 1 ), round(i*lengthValFold))
-    trainDataCV <- setdiff(seq(1:dim(data)[1]), valFold)
+    trainDataCV <- setdiff(seq_len(dim(data)[1]), valFold)
     testDataset<- data[valFold,]
     trainingDataset <- data[trainDataCV,]
     labelsTrain <- labels[trainDataCV]

@@ -6,7 +6,7 @@
 #' @param labels A vector that contains the labels of the samples in expressionMatrix.
 #' @param method The method that will be used to remove the batch effect. The possibilities are "combat" or "sva". Next release will add RUV.
 #' @param batchGroups A numeric vector with the different known batch groups for the samples.
-#' @return A matrix with the batch effect corrected for combat or a model for \code{\link{limmaDEGsExtraction}} function in the case of sva.
+#' @return A matrix with the batch effect corrected for combat or a model for \code{\link{DEGsExtraction}} function in the case of sva.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))

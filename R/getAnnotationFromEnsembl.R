@@ -76,7 +76,7 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     
     if ( length(values)>1 || values != 'allGenome'){
       query <- paste(query,'<Filter name="',filter,'" value = "',sep='')
-      for ( value in act.values[1:max.values]) query <- paste(query,value,',',sep='')
+      for ( value in act.values[seq_len(max.values)]) query <- paste(query,value,',',sep='')
       query <- str_sub(query, 1, nchar(query)-1)
       query <- paste(query,'"/>',sep='')
     }

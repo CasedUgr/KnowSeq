@@ -1,10 +1,12 @@
 #' knowseqReport creates a report for a given set of genes which their label.
 #'
 #' knowseqReport creates a report for a given set of genes which their label. This provide an html file with all the information that can be obtained for a certain set of genes (as GO, pathway visualization, associated diseases) and their labels (machine learning process).
-#' @param data A matrix that contains the gene expression or counts values.
+#' @param data A matrix that contains the gene expression.
 #' @param labels A vector or factor that contains the labels for each of the samples in the data object.
+#' @param MLTest This parameter enables the classification process for a test dataset. 
+#' @param testData A matrix that contains the unseen samples for the test process.
+#' @param testLabels A vector or factor that contains the labels for the unseen samples for the test process.
 #' @param outdir The output directory to store the report.
-#' @param baseline A string that indicates the start point. This will be 'expression' if data contains genes expression values or 'counts' if data contains genes counts values.
 #' @param qualityAnalysis A logical parameter that indicates if the user wants to perform the quality anaylisis or not.
 #' @param batchEffectTreatment A logical parameter that indicates if the user wants to perform the batch effect treatment or not.
 #' @param geneOntology A logical parameter that indicates if the user wants to show genes ontologies or not.
@@ -23,11 +25,11 @@
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)
-#' knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)
+#' \dontrun{knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)}
+#' \dontrun{knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)}
 
 
-knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expression', qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
+knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels="",outdir="knowSeq-report", qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
                           geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
                           lfc=2.0, pvalue=0.01, cov=2, 
                           featureSelectionMode = 'nofs', disease = '',subdiseases=c(''), maxGenes = Inf, clasifAlgs=c('knn','rf','svm'),
@@ -45,7 +47,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
       data <-  data[,-remove.cols]
       col.names <- col.names[-remove.cols]
       
-      if (class(data) != 'matrix')
+      if (is(data) != 'matrix')
         data <- as.matrix(data)
       if (dim(data)[2] != length(col.names))
         data <- t(data)
@@ -55,27 +57,36 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   }
   
   # --- Check params --- #
-  if(baseline == 'expression'){
-    if(!is.data.frame(data) && !is.matrix(data)){
-      
-      stop("The data argument must be a dataframe or a matrix.")
-      
-    }
-    if (dim(data)[2] != length(labels)){
-      
-      stop("The length of the columns of the argument data must be the same than the length of the lables. Please, ensures that the rows are the samples and the columns are the variables.")
-      
-    }
-    expressionMatrix <- data
-    if (geneOntology || getPathways)
-      myAnnotation <- getAnnotationFromEnsembl(rownames(expressionMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter="external_gene_name",notHSapiens = FALSE)
+  if(!is.data.frame(data) && !is.matrix(data)){
+    
+    stop("The data argument must be a dataframe or a matrix.")
     
   }
-  else if (baseline == 'count'){
-    myAnnotation <- getAnnotationFromEnsembl(rownames(data),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),notHSapiens = FALSE)
-    expressionMatrix <- calculateGeneExpressionValues(data,myAnnotation, genesNames = TRUE)
+  if (dim(data)[2] != length(labels)){
+    
+    stop("The length of the columns of the argument data must be the same than the length of the labels. Please, ensures that the rows are the samples and the columns are the variables.")
     
   }
+  
+  if (MLTest == TRUE){
+    
+    if(!is.data.frame(testData) && !is.matrix(testData)){
+      
+      stop("The data for test must be a dataframe or a matrix.")
+      
+    }
+    if (dim(testData)[2] != length(testLabels)){
+      
+      stop("The length of the columns of the argument data for test must be the same than the length of the labels for test. Please, ensures that the rows are the samples and the columns are the variables.")
+      
+    }
+  }
+  
+  expressionMatrix <- data
+  if (geneOntology || getPathways)
+    myAnnotation <- getAnnotationFromEnsembl(rownames(expressionMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter="external_gene_name",notHSapiens = FALSE)
+    
+
   disease <- gsub(' ','-',disease)
   table.format <- 'html'
   
@@ -91,9 +102,8 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   colnames(table.labels) <- c("Labels", "Freq.")
   
   markobj <- c(markobj,'# Summary',
-               paste('This experiment is performed over ',dim(expressionMatrix)[2], ' samples, taking into account an 
-                     inicial number of genes equal to ', dim(expressionMatrix)[1], '.\n','Furthermore, 
-                     information about the different classes and samples per classes is shown herein: \n', sep = ""))
+               paste('This experiment is performed over ',dim(expressionMatrix)[2], ' with an initial number of ', dim(expressionMatrix)[1], ' genes.\n','A summary 
+                     of the classes labels along with the samples per class can be observed below: \n', sep = ""))
   
   markobj <- c(markobj,
                '```{r, echo=FALSE, fig.align="center"}',
@@ -106,8 +116,8 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     cat("Performing the quality analysis of the samples\n")
     RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA',sep=''))
     markobj <- c(markobj,'# Quality analysis\n',
-                 'Quality analysis must be performed for detecting and removing any possible outlier that can be present in the samples. ',
-                 'The outliers are samples numerically different with respect to the rest of samples, introducing noise in the study .', 
+                 'A quality analysis must be performed in order to detect and remove any possible outlier contained within the samples. ',
+                 'Outliers are numerically different samples when compared with the rest of the samples, and this numerical difference might affect study results. ', 
                  'For that purpose, arrayQualityMetrics bioc package is used to carry out different statistical tests, detecting possible outliers. ',
                  'arrayQualityMetrics generates a report containing all this information that can be seen [**HERE**](RNAseqQA/index.html).\n')
   }
@@ -118,8 +128,8 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   if(batchEffectTreatment){
     
     markobj <- c(markobj,'## Treating Batch Effect\n',
-                 'Batch effect produces a intrinsic deviations inside the data due to its origin, sequencing design, lab, technician, etc... For that, it is crucial 
-                 in this type of analisys the correct treatment of it.','Taking into account that the different Batches are unknown, the effect will be treated by using surrogate variable analysis or sva algorithm.\n')
+                 'Batch effect is produced due to intrinsic deviations inside the data due to its origin, sequencing design, lab, technician, etc... Therefore, it is crucial to perform a correct treatment of 
+                 it in this type of analysis.','Taking into account that the different Batches are unknown, the effect will be treated by using surrogate variable analysis or sva algorithm.\n')
     
     svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
     
@@ -147,10 +157,10 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     colnames(topTable.dataframe) <- c("Gene Symbol","logFC","AveExpr", "t", "P-Value","adj. P-Value","B")
     
     markobj <- c(markobj,'## Searching for DEGs\n',
-                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of study. In this 
-                   sense, to achieve a set of possible biomarkers the following thresholds will be imposed: LFC greater or equal than ', lfc,', P-Value lower or equal than ',pvalue,'.\n', sep = ""))
+                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of study. Thus, to achieve a set 
+                       of possible biomarkers the following thresholds will be selected: LFC greater or equal than ', lfc,', P-Value lower or equal than ',pvalue,'.\n', sep = ""))
     
-      markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'DEGs have been keeped after using DEGs extraction and they can be seen in the table below: \n'))
+      markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'DEGs have been kept after using DEGs extraction and they can be seen in the table below: \n'))
     
     markobj <- c(markobj,
                  '```{r, echo=FALSE, fig.align="center"}',
@@ -171,11 +181,11 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     rownames(topTable.dataframe) <- NULL
     
     markobj <- c(markobj,'## Searching for Multiclass DEGs\n',
-                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of study. In this 
-                   sense, to achieve a set of possible biomarkers the following thresholds will be imposed: LFC greater or equal than ', lfc,', P-Value lower or equal than ',pvalue,'. Furthermore, for multiclass 
+                 paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of study. Thus, to achieve a 
+                 set of possible biomarkers the following thresholds will be selected: LFC greater or equal than ', lfc,', P-Value lower or equal than ',pvalue,'. Furthermore, for multiclass 
                        assessment a coverage equal or greater than ', cov, ' will be used.\n', sep = ""))
     
-    markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'multiclas DEGs have been keeped after using DEGs extraction and they can be seen in the table below: \n'))
+    markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'multiclass DEGs have been kept after using DEGs extraction and they can be seen in the table below: \n'))
     
     markobj <- c(markobj,
                  '```{r, echo=FALSE, fig.align="center"}',
@@ -212,18 +222,18 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     else if (featureSelectionMode == 'rf') ranking <- names(ranking)
     else if (featureSelectionMode == 'da') ranking <- names(ranking)
     
-    markobj <- c(markobj,paste('First',maxGenes,'selected genes by algorithm',featureSelectionMode,'are:'),ranking[1:maxGenes],'.\n')
+    markobj <- c(markobj,paste('First',maxGenes,'selected genes by ',featureSelectionMode,' algorithm/method are:'),ranking[seq_len(maxGenes)],'.\n')
     
     
   } else{ranking <- rownames(DEGsMatrix)}
   
   
   genes <- ''
-  for (gene in ranking[1:maxGenes]) genes <- paste(genes,gene,sep=', ')
+  for (gene in ranking[seq_len(maxGenes)]) genes <- paste(genes,gene,sep=', ')
   
   markobj <- c(markobj,'## Visualization\n',
                'DEGs are genes that have a truly different expression among the studied classes, 
-               for that it is important to see graphically if those DEGs comply with this requirement. 
+               so it is important to see graphically if those DEGs comply with this requirement. 
                In order to provide a tool to perform this task, the function dataPlot encapsulates a set of 
                graphs that allows plotting in different ways the expression of the DEGs.\n')
   
@@ -237,8 +247,8 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                paste("dataPlot(DEGsMatrix[ranking[1:",maxGenes,"],],labels,mode = 'orderedBoxplot',toPNG = FALSE,toPDF = FALSE)",sep=''),
                '```\n')
   
-  markobj <- c(markobj,paste("However it is interesting to see the differentiation at gene expression level for each of the top",
-                             boxplotGenes,"genes used before separately. This information is plotted below.\n"))
+  markobj <- c(markobj,paste("However it is of interest to observe the differentiation at gene expression level for each of the top",
+                             boxplotGenes,"genes previously used. This information is plotted below.\n"))
   
   markobj <- c(markobj,
                '```{r echo=FALSE}',
@@ -260,29 +270,45 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   clasifNames <- str_replace(clasifNames,'rf','Random Forest')
   clasifNames <- str_replace(clasifNames,'svm','Support Vector Machine (SVM)')
   
-  markobj <- c(markobj,paste('With the purpose of evaluate the robustness of the DEGs in the discernment among the studied pathologies, a supervised classification step will be performed. 
-  To this effect,',clasifNames,'classification algorithms will be trained using 10-Fold Cross Validation.
-                    To evaluate obtained results the Accuracy, Specificity and Sensitivity will be shown in the following plots:\n'))
+  if(MLTest == FALSE){
+  markobj <- c(markobj,paste('With the purpose of evaluating the robustness of the DEGs for the classification task between the studied pathologies, 
+  a supervised classification step will be performed. 
+  For it,',clasifNames,'classification algorithms will be trained using 10-Fold Cross Validation.
+                    To evaluate obtained results the Mean Accuracy,Mean Specificity, Mean Sensitivity and the Confusion Matrix will be shown in the following plots:\n'))
+  }else{
+    markobj <- c(markobj,paste('With the purpose of evaluating the robustness of the DEGs for the classification task between the studied pathologies, 
+  a supervised classification step will be performed. 
+  For it,',clasifNames,'classification algorithms will be trained using 10-Fold Cross Validation and then, tested in a separated classification step using unseen samples.
+                    To evaluate obtained results the Mean Accuracy,Mean Specificity, Mean Sensitivity and the Confusion Matrix will be shown in the following plots:\n'))
+  }
   
   for (clasifAlg in clasifAlgs){
     if (clasifAlg == 'knn'){ 
-      results_cv_knn <- knn_CV(DEGsMatrixML,labels,ranking[1:maxGenes],10)
-      markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
+      results_cv_knn <- knn_CV(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
+      markobj <- c(markobj,paste('## Results for 10-CV implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
-        if (metric == 'accuracy') act.metric = 'accMatrix'
-        else if (metric == 'specificity') act.metric = 'specMatrix'
-        else if (metric == 'sensitivity') act.metric = 'sensMatrix'
+        if (metric == 'accuracy'){
+          act.metric = 'accMatrix'
+          colour = "red"
+        }else if (metric == 'specificity'){
+          act.metric = 'specMatrix'
+          colour = "blue"
+        }else if (metric == 'sensitivity'){
+          act.metric = 'sensMatrix'
+          colour = "green"
+        }
         
         s <- strsplit(metric, " ")[[1]]
         s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
                    sep = "", collapse = " ")
         
         markobj <- c(markobj,'```{r echo = FALSE}',
-                     paste('dataPlot(results_cv_knn[["',act.metric,'"]],
+                     paste('dataPlot(colMeans(results_cv_knn[["',act.metric,'"]]),
                        mode = "classResults",
-                       main = "',s,' for each fold with ',clasifAlg,'",
-                       xlab = "Genes", ylab ="',s,'")',sep=''),'```\n')
+                       main = "Mean ',s,' results for 10-CV with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
+        
       }
       
       allCfMats_knn <- results_cv_knn$cfMats[[1]]$table + results_cv_knn$cfMats[[2]]$table + results_cv_knn$cfMats[[3]]$table + results_cv_knn$cfMats[[4]]$table + results_cv_knn$cfMats[[5]]$table + results_cv_knn$cfMats[[6]]$table + results_cv_knn$cfMats[[7]]$table + results_cv_knn$cfMats[[8]]$table + results_cv_knn$cfMats[[9]]$table + results_cv_knn$cfMats[[10]]$table
@@ -290,24 +316,65 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                    paste('dataPlot(allCfMats_knn, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')
       
+      if(MLTest == TRUE){
+        
+        results_test_knn <- knn_test(DEGsMatrixML,labels,t(testData),testLabels,ranking[seq_len(maxGenes)],bestK = results_cv_knn$bestK)
+        markobj <- c(markobj,paste('## Test Results implementing ',clasifAlg),'\n')
+        
+        for (metric in metrics){
+          if (metric == 'accuracy'){
+            test.metric = 'accVector'
+            colour = "red"
+          }else if (metric == 'specificity'){
+            test.metric = 'specVector'
+            colour = "blue"
+          }else if (metric == 'sensitivity'){
+            test.metric = 'sensVector'
+            colour = "green"
+          }
+          
+          s <- strsplit(metric, " ")[[1]]
+          s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
+                     sep = "", collapse = " ")
+          
+          markobj <- c(markobj,'```{r echo = FALSE}',
+                       paste('dataPlot(results_test_knn[["',test.metric,'"]],
+                       mode = "classResults",
+                       main = "',s,' test results with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
+        }
+      
+      
+        testConfMatrixknn <- results_test_knn$cfMats[[maxGenes]]$table
+        markobj <- c(markobj,'```{r echo = FALSE}',
+                   paste('dataPlot(testConfMatrixknn, testLabels, mode = "confusionMatrix")',sep=''),'```\n')
+      }
+      
     }else if (clasifAlg == 'rf'){
-      results_cv_rf <- rf_CV(DEGsMatrixML,labels,ranking[1:maxGenes],10)
-      markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
+      results_cv_rf <- rf_CV(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
+      markobj <- c(markobj,paste('## Results for 10-CV implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
-        if (metric == 'accuracy') act.metric = 'accMatrix'
-        else if (metric == 'specificity') act.metric = 'specMatrix'
-        else if (metric == 'sensitivity') act.metric = 'sensMatrix'
+        if (metric == 'accuracy'){
+          act.metric = 'accMatrix'
+          colour = "red"
+        }else if (metric == 'specificity'){
+          act.metric = 'specMatrix'
+          colour = "blue"
+        }else if (metric == 'sensitivity'){
+          act.metric = 'sensMatrix'
+          colour = "green"
+        }
         
         s <- strsplit(metric, " ")[[1]]
         s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
                    sep = "", collapse = " ")
         
         markobj <- c(markobj,'```{r echo = FALSE}',
-                     paste('dataPlot(results_cv_rf[["',act.metric,'"]],
+                     paste('dataPlot(colMeans(results_cv_rf[["',act.metric,'"]]),
                        mode = "classResults",
-                       main = "',s,' for each fold with ',clasifAlg,'",
-                       xlab = "Genes", ylab ="',s,'")',sep=''),'```\n')
+                       main = "Mean ',s,' results for 10-CV with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
       }
       
       allCfMats_rf <- results_cv_rf$cfMats[[1]]$table + results_cv_rf$cfMats[[2]]$table + results_cv_rf$cfMats[[3]]$table + results_cv_rf$cfMats[[4]]$table + results_cv_rf$cfMats[[5]]$table + results_cv_rf$cfMats[[6]]$table + results_cv_rf$cfMats[[7]]$table + results_cv_rf$cfMats[[8]]$table + results_cv_rf$cfMats[[9]]$table + results_cv_rf$cfMats[[10]]$table
@@ -315,30 +382,105 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                    paste('dataPlot(allCfMats_rf, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')
       
+      if(MLTest == TRUE){
+        
+        results_test_rf <- rf_test(DEGsMatrixML,labels,t(testData),testLabels,ranking[seq_len(maxGenes)])
+        markobj <- c(markobj,paste('## Test Results implementing ',clasifAlg),'\n')
+        
+        for (metric in metrics){
+          if (metric == 'accuracy'){
+            test.metric = 'accVector'
+            colour = "red"
+          }else if (metric == 'specificity'){
+            test.metric = 'specVector'
+            colour = "blue"
+          }else if (metric == 'sensitivity'){
+            test.metric = 'sensVector'
+            colour = "green"
+          }
+          
+          s <- strsplit(metric, " ")[[1]]
+          s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
+                     sep = "", collapse = " ")
+          
+          markobj <- c(markobj,'```{r echo = FALSE}',
+                       paste('dataPlot(results_test_rf[["',test.metric,'"]],
+                       mode = "classResults",
+                       main = "',s,' test results with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
+        }
+        
+        
+        testConfMatrixrf <- results_test_rf$cfMats[[maxGenes]]$table
+        markobj <- c(markobj,'```{r echo = FALSE}',
+                     paste('dataPlot(testConfMatrixrf, testLabels, mode = "confusionMatrix")',sep=''),'```\n')
+      }
+      
     }else if (clasifAlg == 'svm'){
-      results_cv_svm <- svm_CV(DEGsMatrixML,labels,ranking[1:maxGenes],10)
-      markobj <- c(markobj,paste('## CV Results implementing ',clasifAlg),'\n')
+      results_cv_svm <- svm_CV(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
+      markobj <- c(markobj,paste('## Results for 10-CV implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
-        if (metric == 'accuracy') act.metric = 'accMatrix'
-        else if (metric == 'specificity') act.metric = 'specMatrix'
-        else if (metric == 'sensitivity') act.metric = 'sensMatrix'
+        if (metric == 'accuracy'){
+          act.metric = 'accMatrix'
+          colour = "red"
+        }else if (metric == 'specificity'){
+          act.metric = 'specMatrix'
+          colour = "blue"
+        }else if (metric == 'sensitivity'){
+          act.metric = 'sensMatrix'
+          colour = "green"
+        }
         
         s <- strsplit(metric, " ")[[1]]
         s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
               sep = "", collapse = " ")
         
         markobj <- c(markobj,'```{r echo = FALSE}',
-                     paste('dataPlot(results_cv_svm[["',act.metric,'"]],
+                     paste('dataPlot(colMeans(results_cv_svm[["',act.metric,'"]]),
                        mode = "classResults",
-                       main = "',s,' for each fold with ',clasifAlg,'",
-                       xlab = "Genes", ylab ="',s,'")',sep=''),'```\n')
+                       main = "Mean ',s,' results for 10-CV with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
       }
       
       allCfMats_svm <- results_cv_svm$cfMats[[1]]$table + results_cv_svm$cfMats[[2]]$table + results_cv_svm$cfMats[[3]]$table + results_cv_svm$cfMats[[4]]$table + results_cv_svm$cfMats[[5]]$table + results_cv_svm$cfMats[[6]]$table + results_cv_svm$cfMats[[7]]$table + results_cv_svm$cfMats[[8]]$table + results_cv_svm$cfMats[[9]]$table + results_cv_svm$cfMats[[10]]$table
       markobj <- c(markobj,'```{r echo = FALSE}',
                    paste('dataPlot(allCfMats_svm, labels,
                        mode = "confusionMatrix")',sep=''),'```\n')
+      
+      if(MLTest == TRUE){
+        
+        results_test_svm <- svm_test(DEGsMatrixML,labels,t(testData),testLabels,ranking[seq_len(maxGenes)], bestParameters = results_cv_svm$bestParameters)
+        markobj <- c(markobj,paste('## Test Results implementing ',clasifAlg),'\n')
+        
+        for (metric in metrics){
+          if (metric == 'accuracy'){
+            test.metric = 'accVector'
+            colour = "red"
+          }else if (metric == 'specificity'){
+            test.metric = 'specVector'
+            colour = "blue"
+          }else if (metric == 'sensitivity'){
+            test.metric = 'sensVector'
+            colour = "green"
+          }
+          
+          s <- strsplit(metric, " ")[[1]]
+          s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
+                     sep = "", collapse = " ")
+          
+          markobj <- c(markobj,'```{r echo = FALSE}',
+                       paste('dataPlot(results_test_svm[["',test.metric,'"]],
+                       mode = "classResults",
+                       main = "',s,' test results with ',clasifAlg,'",
+                       xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
+        }
+        
+        
+        testConfMatrixsvm <- results_test_svm$cfMats[[maxGenes]]$table
+        markobj <- c(markobj,'```{r echo = FALSE}',
+                     paste('dataPlot(testConfMatrixsvm, testLabels, mode = "confusionMatrix")',sep=''),'```\n')
+      }
     }
     
   }
@@ -346,8 +488,8 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   if(geneOntology | getPathways | getDiseases){
     # --- DEGs enrichment methodology --- #
     markobj <- c(markobj,'\n# DEGs enrichment\n',
-                 'The main goal of the this process is the extraction of biological relevant information from the DEGs,
-                   and this enrichment has three different points of view:\n
+                 'The main goal of the this process is the extraction of biological relevant information from the DEGs.
+                   The enrichment process has three different approaches:\n
                    \t- The gene ontology information.\n
                    \t- The pathway visualization.\n 
                    \t- The relationship between the DEGs and diseases related to the studied pathologies.\n')
@@ -498,7 +640,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
           check.diseases <- names(diseases[[gene]]$evidences)
           
           for (act.disease in check.diseases){
-            if ( class(diseases[[gene]]$evidences[[act.disease]]) == 'list' ){
+            if ( is(diseases[[gene]]$evidences[[act.disease]]) == 'list' ){
               if (!gene %in% names(evidences.frame)) evidences.frame[[gene]] <- list()
               
               act.markobj <- c(act.markobj,paste('####',act.disease,sep=' '))
@@ -555,7 +697,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
                 if (!as.character(ev.index)  %in% names(evidences.frame))
                   evidences.frame[[as.character(ev.index)]]<-list()
                 evidences <- evidences_[ev.index,]
-                if (class(evidences[[gene]])=='list'){
+                if (is(evidences[[gene]])=='list'){
                   evidences.frame[[as.character(ev.index)]][[gene]] = list()
                   for ( evidence.type in names(evidences[[gene]]) ){
                     act.evidences.frame <- c()
@@ -599,7 +741,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
   
   dir <- system.file("extdata", package="KnowSeq")
 
-  rmarkdown::render(input = "report.Rmd", output_file = paste(outdir,'report.html',sep='/'),output_format = rmarkdown::html_document(
+  render(input = "report.Rmd", output_file = paste(outdir,'report.html',sep='/'),output_format = rmarkdown::html_document(
     theme = "default",
     mathjax = NULL,
     highlight = NULL,
@@ -611,7 +753,7 @@ knowseqReport <- function(data,labels,outdir="knowSeq-report",baseline='expressi
     css = paste(dir,"/report_style.css",sep = "")
   ))
   file.remove("report.Rmd")
-  browseURL(paste(outdir,'report.html',sep='/'))
+
 }
 
 

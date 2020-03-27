@@ -22,5 +22,5 @@ A list which contains the information about the diseases associated to each gene
 The function obtains the information about what diseases are related to the DEGs indicated by parameter. For that, the function makes use of the web platforms gene2Diseases and targetValidation.
 }
 \examples{
-diseases <- DEGsToDiseases(c("KRT19","BRCA1"),getEvidences = TRUE)
+diseases <- DEGsToDiseases(c("KRT19","BRCA1"),getEvidences = FALSE)
 }

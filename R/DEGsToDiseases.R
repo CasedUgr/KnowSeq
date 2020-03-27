@@ -7,7 +7,7 @@
 #' @param getEvidences Boolean. If true, for each gene, a list of found evidences for each disease will be returned.
 #' @return A list which contains the information about the diseases associated to each genes or to a set of genes. If getEvidences is TRUE, found evidences for each case will be returned too.
 #' @examples
-#' diseases <- DEGsToDiseases(c("KRT19","BRCA1"),getEvidences = TRUE)
+#' diseases <- DEGsToDiseases(c("KRT19","BRCA1"),getEvidences = FALSE)
 
 DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, getEvidences = FALSE){
 

@@ -17,7 +17,7 @@
 #' testMatrix <- t(DEGsMatrix)[c(5,10),]
 #' testLabels <- labels[c(5,10)]
 #'
-#' rf_test(trainingMatrix,trainingLabels,testMatrix,testLabels,rownames(DEGsMatrix)[1:10])
+#' rf_test(trainingMatrix, trainingLabels, testMatrix, testLabels,rownames(DEGsMatrix)[1:10])
 
 rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
 

@@ -21,7 +21,7 @@ batchEffectRemoval(
 \item{batchGroups}{A numeric vector with the different known batch groups for the samples.}
 }
 \value{
-A matrix with the batch effect corrected for combat or a model for \code{\link{limmaDEGsExtraction}} function in the case of sva.
+A matrix with the batch effect corrected for combat or a model for \code{\link{DEGsExtraction}} function in the case of sva.
 }
 \description{
 This function corrects the batch effect of the expression matrix indicated by parameter. There are two method to choose such as ComBat or SVA.

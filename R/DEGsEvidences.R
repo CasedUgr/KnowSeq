@@ -4,7 +4,6 @@
 #' @param geneList A list that contains the gene symbols or gene names of the DEGs.
 #' @param disease The name of a disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.
 #' @param subdisease The name of a particular subdisease from disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.
-#' @param minCitation Minimum number of citations of each genes in a disease to consider the genes related with the disease.
 #' @param size The number of diseases to retrieve from targetValidation
 #' @param verbose Boolean that indicates if progress messages are printed to stdout
 #' @return A list which names are genes from geneList and which contains related evidences for each gene in geneList and indicated disease.

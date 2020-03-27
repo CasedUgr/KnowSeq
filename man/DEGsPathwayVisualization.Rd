@@ -13,7 +13,7 @@ DEGsPathwayVisualization(
 )
 }
 \arguments{
-\item{DEGsMatrix}{A matrix that contains the expression of the DEGs for each samples. This matrix can be achieved by calling the function \code{\link{limmaDEGsExtraction}}. If the samples are more than 24, only the first 24 will be used to colour the pathways.}
+\item{DEGsMatrix}{A matrix that contains the expression of the DEGs for each samples. This matrix can be achieved by calling the function \code{\link{DEGsExtraction}}. If the samples are more than 24, only the first 24 will be used to colour the pathways.}
 
 \item{DEGsAnnotation}{A matrix that contains the gene names and the entrez IDs for the genes available in the DEGs matrix. This annotation can be obtained from the function \code{\link{getAnnotationFromEnsembl}}.}
 

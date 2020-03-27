@@ -14,8 +14,6 @@
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='mrmr')
-#' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer')
-#' featureRanking <- featureSelection(t(DEGsMatrix),labels,rownames(DEGsMatrix),mode='daRed',disease='cancer',subdiseases=c('breast','colorectal'))
 
 featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",subdiseases=c(),maxGenes=ncol(data)){
   
@@ -140,7 +138,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
         all = TRUE
         for (subdisease in subdiseases){
           if (! subdisease %in% names(evidences)) evidences[[subdisease]] <- c()
-          if (class(evidences[[subdisease]][[gen]]) == 'character') remove[[subdisease]] <- c(remove[[subdisease]],gen)
+          if (is(evidences[[subdisease]][[gen]]) == 'character') remove[[subdisease]] <- c(remove[[subdisease]],gen)
           else all = FALSE
         }
         if ( all ) remove[['global']] <- c(remove[['global']],gen)
@@ -155,13 +153,13 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       
       final.evidences <- evidences[[subdiseases[1]]]
       for (gen in names(final.evidences)){
-        if ( class(evidences[[subdiseases[2]]][[gen]]) == 'list'){
+        if ( is(evidences[[subdiseases[2]]][[gen]]) == 'list'){
           for (type in names(evidences[[subdiseases[2]]][[gen]])){
             if (type %in% names(final.evidences[[gen]])){
               final.evidences[[gen]][[type]] <- append(final.evidences[[gen]][[type]],evidences[[subdiseases[2]]][[gen]][[type]])
             }
             else{
-              if (class(final.evidences[[gen]]) != 'list') final.evidences[[gen]]  <-  list()
+              if (is(final.evidences[[gen]]) != 'list') final.evidences[[gen]]  <-  list()
               final.evidences[[gen]][[type]] <- evidences[[subdiseases[2]]][[gen]][[type]]
             }
           }
@@ -211,7 +209,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
           # Calculate and save redudance 
           if (redundances[gen,sel] == -1){
             redundances[gen,sel] = 0
-            if ( class(evidences[[gen]]) == 'list' && class(evidences[[sel]]) == 'list'){
+            if ( is(evidences[[gen]]) == 'list' && is(evidences[[sel]]) == 'list'){
               gen.nevs <- 0
               for (type in names(evidences[[gen]])){
                 if (type %in% names(evidences[[gen]])){

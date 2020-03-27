@@ -7,8 +7,8 @@ importFrom(gplots, heatmap.2, redgreen)
 importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal,scale_fill_manual,ggtitle, ylab, xlab, labs)
 importFrom(grDevices, colorRampPalette, dev.off, hsv, pdf, png)
 importFrom(graphics, abline, axis, box, boxplot, image, layout, lines, par, text, title, grid)
-importFrom(stats, model.matrix, p.adjust, setNames)
-importFrom(utils, read.csv, untar, write.csv, write.table, download.file, capture.output)
+importFrom(stats, model.matrix, p.adjust, setNames, complete.cases)
+importFrom(utils, read.csv, untar, write.csv, write.table, download.file, capture.output, tail, read.table, URLencode)
 importFrom(cqn, cqn)
 importFrom(Biobase, ExpressionSet)
 importFrom(edgeR, readDGE, cpm)
@@ -22,6 +22,7 @@ importFrom(e1071, svm)
 importFrom(pathview, pathview)
 importFrom(httr, GET, content, POST)
 importFrom(rlist,list.map)
+importFrom(rmarkdown, render)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getAnnotationFromEnsembl,

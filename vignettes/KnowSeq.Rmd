@@ -40,7 +40,7 @@ Docker run -it casedugr/knowseq
 
 # Introduction
 
-KnowSeq proposes a whole pipeline that comprises the most relevant steps in the RNA-seq gene expression analysis, with the main goal of extracting biological knowledge from raw data (Differential Expressed Genes, Gene Ontology enrichment, pathway visualization and related diseases). In this sense, KnowSeq allows aligning raw data from the original fastq or sra files, by using the most renowned aligners such as tophat2, hisat2, salmon and kallisto. Nowadays, there is no package that only from the information of the samples to align -included in a text file-, automatically performs the download and alignment of all of the samples. Furthermore, the package includes functions to: calculate the gene expression values; remove batch effect; calculate the Differentially Expressed Genes (DEGs); plot different graphs; and perform the DEGs enrichment with the GO information, pathways visualization and related diseases information retrieval. Moreover, KnowSeq is the only package that allows applying both a machine learning and DEGs enrichment processes just after the DEGs extraction. To achieve these objectives, there are functions that allows performing a feature selection process as well as a machine learning process using k-NN, RF or SVM algorithms. Similarly, there are functions allowing the retrieval of biological knowledge of the DEGs candidates. This idea emerged with the aim of proposing a complete tool to the research community containing all the necessary steps to carry out complete studies in a simple and fast way. To achieve this goal, the package uses the most relevant and widespread tools in the scientific community for the aforementioned tasks. The current version of the aligner functions works under Unix, but further version will be extended to MAC_OS and to Windows (if the tools were available). This pipeline has been used in our previous publications for processing raw RNA-seq data and to perform the DEGs extraction and the machine learning classifier design steps, also for their integration with microarray data [1,2,3].
+KnowSeq proposes a whole pipeline that comprises the most relevant steps in the RNA-seq gene expression analysis, with the main goal of extracting biological knowledge from raw data (Differential Expressed Genes, Gene Ontology enrichment, pathway visualization and related diseases). In this sense, KnowSeq allows aligning raw data from the original fastq or sra files, by using the most renowned aligners such as hisat2, salmon and kallisto. Nowadays, there is no package that only from the information of the samples to align -included in a text file-, automatically performs the download and alignment of all of the samples. Furthermore, the package includes functions to: calculate the gene expression values; remove batch effect; calculate the Differentially Expressed Genes (DEGs); plot different graphs; and perform the DEGs enrichment with the GO information, pathways visualization and related diseases information retrieval. Moreover, KnowSeq is the only package that allows applying both a machine learning and DEGs enrichment processes just after the DEGs extraction. To achieve these objectives, there are functions that allows performing a feature selection process as well as a machine learning process using k-NN, RF or SVM algorithms. Similarly, there are functions allowing the retrieval of biological knowledge of the DEGs candidates. This idea emerged with the aim of proposing a complete tool to the research community containing all the necessary steps to carry out complete studies in a simple and fast way. To achieve this goal, the package uses the most relevant and widespread tools in the scientific community for the aforementioned tasks. The current version of the aligner functions works under Unix, but further version will be extended to MAC_OS and to Windows (if the tools were available). This pipeline has been used in our previous publications for processing raw RNA-seq data and to perform the DEGs extraction and the machine learning classifier design steps, also for their integration with microarray data [1,2,3].
 
 ![](KnowSeqPipeline.png)
 
@@ -66,7 +66,6 @@ In order to avoid version incompatibilities with the aligners and the installati
 - Salmon [10].
 - Samtools [11].
 - Sratoolkit [12].
-- Tophat2 [13].
 - GDC-client.
 
 ## Launching Raw Alignment step <a name="rawStep"></a>
@@ -499,7 +498,7 @@ Finally, the last enrichment method implemented is the related diseases enrichme
 ```{r Downloading_diseases}
 # Downloading the information about the DEGs related diseases
 
-diseasesTargetValidation <- DEGsToDiseases(rownames(DEGsMatrix), method = "targetValidation", size = 5)
+diseasesTargetValidation <- DEGsToDiseases(rownames(DEGsMatrix), size = 5)
 
 ``` 
 <!--
@@ -508,14 +507,19 @@ For example, the image below shows the diseases related only with KRT19 gene tha
 ![](diseaseKRT19.png)
 -->
 
-# Report
-Most of these steps can be displayed using a single function, *knowseqReport*, that starting from an expression matrix, or counts matrix, and the labels of the samples, will follow part of the pipeline explained above and display the result in a report which format can be html of pdf, depending on outputFormat parameter.
+# Gene Expression Intelligent Report
+Most of these steps can be displayed using a single function, *knowseqReport*, that starting from an expression matrix, or counts matrix, and the labels of the samples, will follow part of the pipeline explained above and display the result in a report which output format is html.
 
 This report will contain DEGs extraction using limma package, a feature selection process, where the used algorithm can be set by the featureSelectionMode param, and the visualization steps described above are shown.
 
 Then, machine learning process starts, where the classification algorithms and the classification metrics to me displayed can be chossen by the user by clasifAlgs and metrics params. 
 
 Finally DEGs enrichment is obtained, showing Gene Ontologies and found evidences for related diseases with each gene. It is possible to obtain evidences for a certain disease, specifying it by the disease parameter.
+
+```{r, eval=FALSE} 
+# Performing the automatic and intelligent KnowSeq report 
+knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('knn','svm','rf'),disease='breast-cancer', lfc = 2, pvalue = 0.001)
+```
 
 
 # Session Info
@@ -549,32 +553,30 @@ sessionInfo()
 
 12. Sherry, S., & Xiao, C. (2012, January). Ncbi sra toolkit technology for next generation sequence data. In Plant and Animal Genome XX Conference (January 14-18, 2012). Plant and Animal Genome.
 
-13. Kim, D., Pertea, G., Trapnell, C., Pimentel, H., Kelley, R., & Salzberg, S. L. (2013). TopHat2: accurate alignment of transcriptomes in the presence of insertions, deletions and gene fusions. Genome biology, 14(4), R36.
+13.Soneson, C., Love, M. I., & Robinson, M. D. (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. F1000Research, 4.
 
-14.Soneson, C., Love, M. I., & Robinson, M. D. (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. F1000Research, 4.
+14. Robinson, M. D., McCarthy, D. J., & Smyth, G. K. (2010). edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics, 26(1), 139-140.
 
-15. Robinson, M. D., McCarthy, D. J., & Smyth, G. K. (2010). edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics, 26(1), 139-140.
+15. Cunningham,  F., Achuthan, P., Akanni, W., Allen, J., ... , & Huber, W. (2018). Ensembl 2019. Nucleic Acids Research, 47(D1), D745–D751.
 
-16. Cunningham,  F., Achuthan, P., Akanni, W., Allen, J., ... , & Huber, W. (2018). Ensembl 2019. Nucleic Acids Research, 47(D1), D745–D751.
+16. Hansen, K. D., Irizarry, R. A., & Wu, Z. (2012). Removing technical variability in RNA-seq data using conditional quantile normalization. Biostatistics, 13(2), 204-216.
 
-17. Hansen, K. D., Irizarry, R. A., & Wu, Z. (2012). Removing technical variability in RNA-seq data using conditional quantile normalization. Biostatistics, 13(2), 204-216.
+17. Leek JT, Johnson WE, Parker HS, Fertig EJ, Jaffe AE, Storey JD, Zhang Y, Torres LC (2019). sva: Surrogate Variable Analysis. R package version 3.34.0.
 
-18. Leek JT, Johnson WE, Parker HS, Fertig EJ, Jaffe AE, Storey JD, Zhang Y, Torres LC (2019). sva: Surrogate Variable Analysis. R package version 3.34.0.
+18. Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. Nucleic acids research, 43(7), e47-e47.
 
-19. Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. Nucleic acids research, 43(7), e47-e47.
+19. Alexa A, Rahnenfuhrer J (2019). topGO: Enrichment Analysis for Gene Ontology. R package version 2.37.0.
 
-20. Alexa A, Rahnenfuhrer J (2019). topGO: Enrichment Analysis for Gene Ontology. R package version 2.37.0.
+20. Luo, W., & Brouwer, C. (2013). Pathview: an R/Bioconductor package for pathway-based data integration and visualization. Bioinformatics, 29(14), 1830-1831.
 
-21. Luo, W., & Brouwer, C. (2013). Pathview: an R/Bioconductor package for pathway-based data integration and visualization. Bioinformatics, 29(14), 1830-1831.
+21. Goh, W. W. B., Wang, W., & Wong, L. (2017). Why batch effects matter in omics data, and how to avoid them. Trends in biotechnology, 35(6), 498-507.
 
-22. Goh, W. W. B., Wang, W., & Wong, L. (2017). Why batch effects matter in omics data, and how to avoid them. Trends in biotechnology, 35(6), 498-507.
+22. Fontaine, J. F., & Andrade-Navarro, M. A. (2016). Gene set to diseases (gs2d): Disease enrichment analysis on human gene sets with literature data. Genomics and Computational Biology, 2(1), e33-e33.
 
-23. Fontaine, J. F., & Andrade-Navarro, M. A. (2016). Gene set to diseases (gs2d): Disease enrichment analysis on human gene sets with literature data. Genomics and Computational Biology, 2(1), e33-e33.
+23. Ding, C., & Peng, H. (2005). Minimum redundancy feature selection from microarray gene expression data. Journal of bioinformatics and computational biology, 3(02), 185-205.
 
-24. Ding, C., & Peng, H. (2005). Minimum redundancy feature selection from microarray gene expression data. Journal of bioinformatics and computational biology, 3(02), 185-205.
+24. Noble, W. S. (2006). What is a support vector machine?. Nature biotechnology, 24(12), 1565.
 
-25. Noble, W. S. (2006). What is a support vector machine?. Nature biotechnology, 24(12), 1565.
+25. Parry, R. M., Jones, W., Stokes, T. H., Phan, J. H., Moffitt, R. A., Fang, H., ... & Wang, M. D. (2010). k-Nearest neighbor models for microarray gene expression analysis and clinical outcome prediction. The pharmacogenomics journal, 10(4), 292.
 
-26. Parry, R. M., Jones, W., Stokes, T. H., Phan, J. H., Moffitt, R. A., Fang, H., ... & Wang, M. D. (2010). k-Nearest neighbor models for microarray gene expression analysis and clinical outcome prediction. The pharmacogenomics journal, 10(4), 292.
-
-27. Koscielny, G., An, P., Carvalho-Silva, D., Cham, J. A., Fumis, L., Gasparyan, R., ... & Pierleoni, A. (2016). Open Targets: a platform for therapeutic target identification and validation. Nucleic acids research, 45(D1), D985-D994.
+26. Koscielny, G., An, P., Carvalho-Silva, D., Cham, J. A., Fumis, L., Gasparyan, R., ... & Pierleoni, A. (2016). Open Targets: a platform for therapeutic target identification and validation. Nucleic acids research, 45(D1), D985-D994.

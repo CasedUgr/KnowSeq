@@ -21,7 +21,7 @@ geneOntologyEnrichment(
 
 \item{pvalCutOff}{The maximum p-value to considers that a genes is related with a GO term.}
 
-\item{returnGeneSymbols}{A boolean that indicates if gene symbols must be added to the ontolgies matrix.}
+\item{returnGeneSymbols}{A boolean that indicates if gene symbols must be added to the ontologies matrix.}
 }
 \value{
 A list that contains a matrix for each of the possible ontologies and a matrix with the GOs for the three ontologies together.
@@ -33,5 +33,5 @@ The function obtains the information about GO terms from the three differents on
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
-GOsList <- geneOntologyEnrichment(as.character(data$ensembl_gene_id),geneType='ENSEMBL_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
+GOsList <- geneOntologyEnrichment(as.character(data$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
 }

@@ -1,12 +1,16 @@
 ---
 subtitle: "KnowSeq: R/Bioconductor package"
-title: "From RAW to Knowledge: The KnowSeq user guide"
-author: "Daniel Castillo-Secilla, Juan Manuel Galvez,  Francisco Carrillo-Perez, Marta Verona Almeida, Francisco Manuel Ortuno, Luis Javier Herrera and Ignacio Rojas"
-date: "february, 18 of 2020"
+title: "Transcriptomic Intelligent Pipeline: The KnowSeq user guide <img src='https://github.com/CasedUgr/KnowSeq/blob/master/logoKnow.png?raw=true' style='position:absolute;top:0px;right:0px;' width=265px height=200px />"
+author: "Daniel Castillo-Secilla, Juan Manuel Galvez, Marta Verona-Almeida, Francisco <br> Carrillo-Perez, Francisco Manuel Ortuno, Luis Javier Herrera and Ignacio Rojas"
+date: "march, 29 of 2020"
 output:
   html_document: 
     number_sections: yes
     toc: yes
+    toc_depth: 3
+    toc_float: yes
+    highlight: tango
+    css: vignette_style.css
 header-includes:
   - \pdfminorversion=5
   - \pdfcompresslevel=9
@@ -34,43 +38,45 @@ BiocManager::install("KnowSeq")
 library(KnowSeq)
 ```
 
-KnowSeq is now available on Docker by running the next command:
+KnowSeq is now available also on Docker by running the next command, allowing the use of KnowSeq without a previous installation:
 
+```{bash, eval=FALSE}
 Docker run -it casedugr/knowseq
+```
 
 # Introduction
 
-KnowSeq proposes a whole pipeline that comprises the most relevant steps in the RNA-seq gene expression analysis, with the main goal of extracting biological knowledge from raw data (Differential Expressed Genes, Gene Ontology enrichment, pathway visualization and related diseases). In this sense, KnowSeq allows aligning raw data from the original fastq or sra files, by using the most renowned aligners such as hisat2, salmon and kallisto. Nowadays, there is no package that only from the information of the samples to align -included in a text file-, automatically performs the download and alignment of all of the samples. Furthermore, the package includes functions to: calculate the gene expression values; remove batch effect; calculate the Differentially Expressed Genes (DEGs); plot different graphs; and perform the DEGs enrichment with the GO information, pathways visualization and related diseases information retrieval. Moreover, KnowSeq is the only package that allows applying both a machine learning and DEGs enrichment processes just after the DEGs extraction. To achieve these objectives, there are functions that allows performing a feature selection process as well as a machine learning process using k-NN, RF or SVM algorithms. Similarly, there are functions allowing the retrieval of biological knowledge of the DEGs candidates. This idea emerged with the aim of proposing a complete tool to the research community containing all the necessary steps to carry out complete studies in a simple and fast way. To achieve this goal, the package uses the most relevant and widespread tools in the scientific community for the aforementioned tasks. The current version of the aligner functions works under Unix, but further version will be extended to MAC_OS and to Windows (if the tools were available). This pipeline has been used in our previous publications for processing raw RNA-seq data and to perform the DEGs extraction and the machine learning classifier design steps, also for their integration with microarray data [1,2,3].
+KnowSeq proposes a novel methodology that comprises the most relevant steps in the Transcriptomic gene expression analysis. KnowSeq expects to serve as an integrative tool that allows to process and extract relevant biomarkers, as well as to assess them through a Machine Learning approaches. Finally, the last objective of KnowSeq is the biological knowledge extraction from the biomarkers (Gene Ontology enrichment, Pathway listing and Visualization and Evidences related to the addressed disease). Although the package allows analyzing all the data manually, the main strenght of KnowSeq is the possibilty of carrying out an automatic and intelligent HTML report that collect all the involved steps in one document. Nowadays, there is no package that only from the information of the samples to align -included in a text file-, automatically performs the download and alignment of all of the samples. Furthermore, KnowSeq is the only package that allows applying both a machine learning and biomarkers enrichment processes just after the biomarkers extraction. It is important to highligh that the pipeline is totally modular and flexible, hence it can be started from whichever of the different steps. This pipeline has been used in our previous publications for processing raw RNA-seq data and to perform the biomarkers extraction along with the machine learning classifier design steps, also for their integration with microarray data [1,2,3,4].
 
 ![](KnowSeqPipeline.png)
 
-The whole pipeline included in KnowSeq has been designed carefully with the purpose of achieving a great quality and robustness in each of the steps that conform the pipeline. For that, the pipeline has three fundamental processes:
+The whole pipeline included in KnowSeq has been designed carefully with the purpose of achieving a great quality and robustness in each of the steps that conform the pipeline. For that, the pipeline has four fundamental processes:
 
-- RNA-seq RAW data processing.
+- Transcriptomic RAW data processing.
 - Biomarkers identification & assessment.
 - DEGs enrichment methodology.
+- Intelligent Automatic Report.
 
-The first process is focused on the RNA-seq RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO [4] ArrayExpress [5] and GDC-Portal). The second one englobes the Differential Expressed Genes (DEGs) identification and extraction, and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). The last process, once the DEGs were assessed, is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the related diseases to the DEGs.
-With the pipeline designed and addressed by KnowSeq, researchers can convert the RAW data of RNA-seq into real knowledge on the identification of possible gene signatures about the studied diseases.
+The first process is focused on the Transcriptomic RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO [5] ArrayExpress [6] and GDC-Portal). The second one englobes the Differential Expressed Genes (DEGs) identification and extraction by using a novel parameter (Specifically for multiclass studies) defined as Coverage [3], and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). Once the DEGs were assessed, the next step is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the Evidences related to the addressed disease from the final set of DEGs. Finally, all of this information can be shaped on an automatic and intelligent HTML report that contains the results of the complete study for the tackled disease or diseases.
 
 
-# RNA-seq RAW data processing
+# Transcriptomic RAW data processing
 ## Aligners preparation
 
 In order to avoid version incompatibilities with the aligners and the installation of the required tools, pre-compiled versions will be used to run the R functions. Consequently, all the tools were compressed and stored in an external server to be downloaded whenever it is required (http://iwbbio.ugr.es/utils/unixUtils.tar.gz). If the tools are directly downloaded from the link, the compressed files must be decompressed in the current project folder in R or RStudio. The name of the resultant folder must be *"utils"*. Nevertheless, this file can be downloaded automatically by just calling the function *rawAlignment*, in case the folder utils is not detected in the project folder. This is all needed to run the different aligners through the function *rawAlignment*. It is not possible to run the alignment without the utils folder. It must be mentioned too that the different files included in the compressed *.tar.gz* are not only the aligners but also functions needed in the raw alignment process. The tools included are the following:
 
-- Bowtie2 [6].
-- Hisat2 [7].
-- Htseq-count [8].
-- Kallisto [9].
-- Salmon [10].
-- Samtools [11].
-- Sratoolkit [12].
+- Bowtie2 [7].
+- Hisat2 [8].
+- Htseq-count [9].
+- Kallisto [10].
+- Salmon [11].
+- Samtools [12].
+- Sratoolkit [13].
 - GDC-client.
 
 ## Launching Raw Alignment step <a name="rawStep"></a>
 
-The *rawAlignment* function allows running different aligners, chosen by the user. The function takes as single input a CSV from GEO or ArrayExpress loaded in R. There is the possibility to process data from GDC-portal, but a previous authorization (token file) from this platform is required. Then, the user has to select with the parameter seq which aligner he wants to use, by default this parameter runs tophat2. Furthermore, there is a set of logical parameters to edit the default pipeline followed for the function. With the parameters the user can select if the BAM/SAM/Count files are created. The user can choose if wants to download the reference genome, the GTF, and which version. Even if the user has custom FASTA and GTF files, this can be specified by setting the parameter *referenceGenome* to *"custom"* and using the parameters *customFA* and *customGTF* to indicates the paths to the custom files. Other functionality is the possibility to process BAM files from the GDC Portal database by setting to *TRUE* the parameter *fromGDC*. Then the function will download the specific genome reference of GDC and process the BAM files to Count files. Furthermore, if the user has access to the controlled data, with the token and the manifest acquired from GDC Portal web platform, the samples can be downloaded automatically. An example to run the function with hisat2 aligner is showed below:
+The *rawAlignment* function allows running different aligners, chosen by the user. The function takes as single input a CSV from GEO or ArrayExpress loaded in R. There is the possibility to process data from GDC-portal, but a previous authorization (token file) from this platform is required. Then, the user has to select with the parameter seq which aligner he wants to use, by default this parameter runs hisat2. Furthermore, there is a set of logical parameters to edit the default pipeline followed for the function. With the parameters the user can select if the BAM/SAM/Count files are created. The user can choose if wants to download the reference genome, the GTF, and which version. Even if the user has custom FASTA and GTF files, this can be specified by setting the parameter *referenceGenome* to *"custom"* and using the parameters *customFA* and *customGTF* to indicates the paths to the custom files. Other functionality is the possibility to process BAM files from the GDC Portal database by setting to *TRUE* the parameter *fromGDC*. Then the function will download the specific genome reference of GDC and process the BAM files to Count files. Furthermore, if the user has access to the controlled data, with the token and the manifest acquired from GDC Portal web platform, the samples can be downloaded automatically. An example to run the function with hisat2 aligner is showed below:
 
 ```{r, eval=FALSE} 
 # Downloading one series from NCBI/GEO and one series from ArrayExpress
@@ -294,13 +300,15 @@ svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 
 ## Differential Expressed Genes extraction and visualization
 
-There is a long way between the raw data and the DEGs extraction, for that in this step the samples have to have had a strong pre-processing step applied. At this point of the pipeline the DEGs existing among two or more classes will be extracted using the most extended library for that called limma. The function *DEGsExtraction* receives an expression matrix, the labels of the samples and the restriction imposed for considering a gene as differential expressed gene. The function returns a list containing the table with statistical values of each DEGs and the expression matrix of the DEGs instead all of the genes. The well-known limma package is used internally to perform the DEGs extraction [20]. The call to the function is listed below:
+There is a long way between the raw data and the DEGs extraction, for that in this step the samples have to have had a strong pre-processing step applied. At this point of the pipeline the DEGs existing among two or more classes will be extracted by using the novel parameter coverage (cov) along with limma R-bioc package [20]. The parameter cov represents the number of different pathologies that a certain gen is able to discern. By default, the parameter is set to *1*, so all genes that has the capability to discern among the comparison of two classes would be selected as DEGs. To understand better this parameter, our multiclass study applied to different leukemia sub-types introduces it, and it’s publicly available [3]. 
+
+The function *DEGsExtraction* receives an expression matrix, the labels of the samples and the restriction imposed for considering a gene as differential expressed gene. The function returns a list containing the table with statistical values of each DEGs and the expression matrix of the DEGs instead all of the genes. The call to the function is listed below:
 
 ```{r, eval=FALSE}
 # Extracting DEGs that pass the imposed restrictions
 
 DEGsInformation <- DEGsExtraction(expressionMatrixCorrected, labels,
-lfc = 1.0, pvalue = 0.01, number = 100)
+lfc = 1.0, pvalue = 0.01, number = 100, cov = 1)
 
 topTable <- DEGsInformation$Table
 
@@ -314,14 +322,12 @@ Furthermore, if in the batch effect step the method used was sva, this function 
 # calculated before to remove batch effect
 
 DEGsInformation <- DEGsExtraction(expressionMatrix, labels, lfc = 2.0,
-pvalue = 0.01, number = Inf, svaCorrection = TRUE, svaMod = svaMod)
+pvalue = 0.01, number = Inf, svaCorrection = TRUE, svaMod = svaMod, cov = 1)
 
 topTable <- DEGsInformation$Table
 
 DEGsMatrix <- DEGsInformation$DEGsMatrix
 ```
-
-The function also detects automatically if the labels have more than two classes and calculates the limma multiclass DEGs extraction in this case. In order to do that correctly, there is a parameter called cov that represents the number of different pathologies that a certain gen is able to discern. By default, the parameter is set to *1*, so all genes that has the capability to discern among the comparison of two classes would be selected as DEGs. To understand better this parameter, our multiclass study applied to different leukemia sub-types introduces it, and it’s publicly available [3].
 
 DEGs are genes that have a truly different expression among the studied classes, for that it is important to try to see graphically if those DEGs comply with this requirement. In order to provide a tool to perform this task, the function dataPlot encapsulate a set of graphs that allows plotting in different ways the expression of the DEGs.
 
@@ -355,7 +361,7 @@ Normally, in the literature, the last step in the pipeline for differential gene
 
 The second one is to assess a specific test dataset by using a classifier trained using the training dataset separately. Moreover, the function featureSelection allows performing a feature selection process by using, mRMR [24], Random Forest (as feature selector instead of classifier) or Disease Association based algorithms with the purpose of finding the best DEGs order to assess the data. Da-FS is a new novel method designed in KnowSeq with the purpose of giving to the expert a biological based feature selection method. This method makes use of targetValidation webplatform to acquire an association score for each DEGs with the required genetic disease, breast cancer in the example. This score takes values between 1 and 0, meaning 1 a total association and 0 no association. Therefore, the DEGs are sorted by this score, achieving a ranking in which in the first positions those DEGs with more biological relation to breast cancer are placed. 
 
-Moreover, targetValidation webplatform allow to acquire evidences that tie a gene with a certain disease. DA-RED-FS is an iterative method based on DA-FS that use these evidences to calculate the redundance between genes. This redundances take values between 1 and 0. For example, if gene A  has a redundance  of 1 with gene B, means  that all found evidences for gene A and a certain disease are also found in gene B and the disease. Likewise, if this redundance is 0, means that there are not any gene A evidences in gene B evidences. DA-RED-FS starts with an empty set of selected genes, $S_G$, and a set of possible genes $G$. In the first step, the gene with the highest DA score is selected. In the following steps, genes that verify the following equation are added to selected genes set.
+Moreover, targetValidation webplatform allows acquiring evidences that tie a gene with a certain disease. DA-RED-FS is a novel iterative method based on DA-FS that use these evidences to calculate the redundance between genes based on biological information. This redundances take values between 1 and 0. For example, if gene A  has a redundance  of 1 with gene B, means  that all found evidences for gene A and a certain disease are also found in gene B and the disease. Likewise, if this redundance is 0, means that there are not any gene A evidences in gene B evidences. DA-RED-FS starts with an empty set of selected genes, $S_G$, and a set of possible genes $G$. In the first step, the gene with the highest DA score is selected. In the following steps, genes that verify the following equation are added to selected genes set.
 
 $$
 max_{g \in G - S_G}  DA(g) - \frac{\sum_{g_i \in S_g} RED(g,g_i)}{|S_G|} \times DA(g)
@@ -374,11 +380,11 @@ rfRanking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML), mode =
 daRanking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML), mode = "da", disease = "breast")
 
 # CV functions with k-NN, SVM and RF
-results_cv_knn <- knn_CV(DEGsMatrixML,labels,colnames(DEGsMatrixML)[1:10],5)
+results_cv_knn <- knn_CV(DEGsMatrixML,labels,colnames(DEGsMatrixML)[1:10],2)
 
-results_cv_svm <- svm_CV(DEGsMatrixML,labels,rfRanking[1:10],5)
+results_cv_svm <- svm_CV(DEGsMatrixML,labels,rfRanking[1:10],2)
 
-results_cv_rf <- rf_CV(DEGsMatrixML,labels,names(mrmrRanking)[1:10],5)
+results_cv_rf <- rf_CV(DEGsMatrixML,labels,names(daRanking)[1:10],2)
 
 ```
 
@@ -428,10 +434,10 @@ testMatrix <- DEGsMatrixML[c(5,10),]
 testLabels <- labels[c(5,10)]
 
 results_test_knn <- knn_test(trainingMatrix, trainingLabels, testMatrix,
-testLabels, names(mrmrRanking)[1:10])
+testLabels, names(mrmrRanking)[1:10], bestK = results_cv_knn$bestK)
 
 results_test_svm <- svm_test(trainingMatrix, trainingLabels, testMatrix,
-testLabels, rfRanking[1:10])
+testLabels, rfRanking[1:10], bestParameters = results_cv_svm$bestParameters)
 
 results_test_rf <- rf_test(trainingMatrix, trainingLabels, testMatrix,
 testLabels, colnames(DEGsMatrixML)[1:10])
@@ -454,16 +460,13 @@ main = "Accuracy with RF", xlab = "Genes", ylab = "Accuracy")
 The main goal of the previous pipeline is the extraction of biological relevant information from the DEGs. For that, this package provides a set of tools that allows doing it. The last step of the pipeline englobes all the available tools in KnowSeq for DEGs enrichment, where three different approaches can be taken. The gene ontology information, the pathway visualization and the relationship between the DEGs and diseases related to the studied pathologies.
 
 ## Gene Ontology
-Gene ontology (GO) provides information about the biological functions of the genes. In order to complete this pipeline, it is important to know if the DEGs have functions related with the studied pathologies. In this sense, this package brings the possibility to know the GOs from the three different ontologies (BP, MF and CC) by using the function *geneOntologyEnrichment* that internally used the packaged *topGO* [25]. The only requirement is to put the label of first class to *1* and the label of the second class to *0*. Furthermore, with the parameter *nGOs*, the number of resultant GOs that are returned can be modified. The function returns a list that contains a matrix for each ontology and a matrix with the GOs of the three ontologies together. Moreover, the matrices have different statistical measures and the description of the functionality of each GO.
+Gene ontology (GO) provides information about the biological functions of the genes. In order to complete this pipeline, it is important to know if the DEGs have functions related with the studied pathologies. In this sense, this package brings the possibility to know the GOs from the three different ontologies (BP, MF and CC) by using the function *geneOntologyEnrichment* that internally uses information from *DAVID* web-platform [20]. The function returns a list that contains a matrix for each ontology and a matrix with the GOs of the three ontologies together. Moreover, the matrices have different statistical measures and the description of the functionality of each GO.
 
 ```{r Retrieving_GOs, message=FALSE}
 # Retrieving the GO information from the three different ontologies
 
-labelsGo <- gsub("Control",0,labels)
-
-labelsGo <- gsub("Tumor",1,labelsGo)
-
-GOsMatrix <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
+data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
+GOsList <- geneOntologyEnrichment(as.character(data$entrezgene_id), geneType='ENTREZ_GENE_ID', pvalCutOff=0.1, returnGeneSymbols = FALSE)
 ``` 
 
 For example, in this example, the top 10 GOs from the BP ontology for the extracted DEGs are shown in the following image.
@@ -498,14 +501,10 @@ Finally, the last enrichment method implemented is the related diseases enrichme
 ```{r Downloading_diseases}
 # Downloading the information about the DEGs related diseases
 
-diseasesTargetValidation <- DEGsToDiseases(rownames(DEGsMatrix), size = 5)
+diseasesTargetValidation <- DEGsToDiseases(rownames(DEGsMatrix), getEvidences = FALSE)
 
 ``` 
-<!--
-For example, the image below shows the diseases related only with KRT19 gene that the function returns with the method parameter setted to genes2Diseases.
 
-![](diseaseKRT19.png)
--->
 
 # Gene Expression Intelligent Report
 Most of these steps can be displayed using a single function, *knowseqReport*, that starting from an expression matrix, or counts matrix, and the labels of the samples, will follow part of the pipeline explained above and display the result in a report which output format is html.
@@ -535,43 +534,43 @@ sessionInfo()
 
 3. Castillo, D., Galvez, J. M., Herrera, L. J., Rojas, F., Valenzuela, O., Caba, O., ... & Rojas, I. (2019). Leukemia multiclass assessment and classification from Microarray and RNA-seq technologies integration at gene expression level. PloS one, 14(2), e0212127.
 
-4. Barrett, T., Wilhite, S. E., Ledoux, P., Evangelista, C., Kim, I. F., Tomashevsky, M., ... & Yefanov, A. (2012). NCBI GEO: archive for functional genomics data sets—update. Nucleic acids research, 41(D1), D991-D995.
+4. Gálvez, J. M., Castillo, D., Herrera, L. J., Valenzuela, O., Caba, O., Prados, J. C., ... & Rojas, I. (2019). Towards Improving Skin Cancer Diagnosis by Integrating Microarray and RNA-seq Datasets. IEEE Journal of Biomedical and Health Informatics.
 
-5. Kolesnikov, N., Hastings, E., Keays, M., Melnichuk, O., Tang, Y. A., Williams, E., ... & Megy, K. (2014). ArrayExpress update—simplifying data submissions. Nucleic acids research, 43(D1), D1113-D1116.
+5. Barrett, T., Wilhite, S. E., Ledoux, P., Evangelista, C., Kim, I. F., Tomashevsky, M., ... & Yefanov, A. (2012). NCBI GEO: archive for functional genomics data sets—update. Nucleic acids research, 41(D1), D991-D995.
 
-6. Langmead, B., & Salzberg, S. L. (2012). Fast gapped-read alignment with Bowtie 2. Nature methods, 9(4), 357.
+6. Kolesnikov, N., Hastings, E., Keays, M., Melnichuk, O., Tang, Y. A., Williams, E., ... & Megy, K. (2014). ArrayExpress update—simplifying data submissions. Nucleic acids research, 43(D1), D1113-D1116.
 
-7. Kim, D., Langmead, B., & Salzberg, S. L. (2015). HISAT: a fast spliced aligner with low memory requirements. Nature methods, 12(4), 357.
+7. Langmead, B., & Salzberg, S. L. (2012). Fast gapped-read alignment with Bowtie 2. Nature methods, 9(4), 357.
 
-8. Anders, S., Pyl, P. T., & Huber, W. (2015). HTSeq—a Python framework to work with high-throughput sequencing data. Bioinformatics, 31(2), 166-169.
+8. Kim, D., Langmead, B., & Salzberg, S. L. (2015). HISAT: a fast spliced aligner with low memory requirements. Nature methods, 12(4), 357.
 
-9. Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L. (2016). Near-optimal probabilistic RNA-seq quantification. Nature biotechnology, 34(5), 525.
+9. Anders, S., Pyl, P. T., & Huber, W. (2015). HTSeq—a Python framework to work with high-throughput sequencing data. Bioinformatics, 31(2), 166-169.
 
-10. Patro, R., Duggal, G., Love, M. I., Irizarry, R. A., & Kingsford, C. (2017). Salmon provides fast and bias-aware quantification of transcript expression. Nature methods, 14(4), 417.
+10. Bray, N. L., Pimentel, H., Melsted, P., & Pachter, L. (2016). Near-optimal probabilistic RNA-seq quantification. Nature biotechnology, 34(5), 525.
 
-11. Li, H. (2011). A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics, 27(21), 2987-2993.
+11. Patro, R., Duggal, G., Love, M. I., Irizarry, R. A., & Kingsford, C. (2017). Salmon provides fast and bias-aware quantification of transcript expression. Nature methods, 14(4), 417.
 
-12. Sherry, S., & Xiao, C. (2012, January). Ncbi sra toolkit technology for next generation sequence data. In Plant and Animal Genome XX Conference (January 14-18, 2012). Plant and Animal Genome.
+12. Li, H. (2011). A statistical framework for SNP calling, mutation discovery, association mapping and population genetical parameter estimation from sequencing data. Bioinformatics, 27(21), 2987-2993.
 
-13.Soneson, C., Love, M. I., & Robinson, M. D. (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. F1000Research, 4.
+13. Sherry, S., & Xiao, C. (2012, January). Ncbi sra toolkit technology for next generation sequence data. In Plant and Animal Genome XX Conference (January 14-18, 2012). Plant and Animal Genome.
 
-14. Robinson, M. D., McCarthy, D. J., & Smyth, G. K. (2010). edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics, 26(1), 139-140.
+14. Soneson, C., Love, M. I., & Robinson, M. D. (2015). Differential analyses for RNA-seq: transcript-level estimates improve gene-level inferences. F1000Research, 4.
 
-15. Cunningham,  F., Achuthan, P., Akanni, W., Allen, J., ... , & Huber, W. (2018). Ensembl 2019. Nucleic Acids Research, 47(D1), D745–D751.
+15. Robinson, M. D., McCarthy, D. J., & Smyth, G. K. (2010). edgeR: a Bioconductor package for differential expression analysis of digital gene expression data. Bioinformatics, 26(1), 139-140.
 
-16. Hansen, K. D., Irizarry, R. A., & Wu, Z. (2012). Removing technical variability in RNA-seq data using conditional quantile normalization. Biostatistics, 13(2), 204-216.
+16. Cunningham,  F., Achuthan, P., Akanni, W., Allen, J., ... , & Huber, W. (2018). Ensembl 2019. Nucleic Acids Research, 47(D1), D745–D751.
 
-17. Leek JT, Johnson WE, Parker HS, Fertig EJ, Jaffe AE, Storey JD, Zhang Y, Torres LC (2019). sva: Surrogate Variable Analysis. R package version 3.34.0.
+17. Hansen, K. D., Irizarry, R. A., & Wu, Z. (2012). Removing technical variability in RNA-seq data using conditional quantile normalization. Biostatistics, 13(2), 204-216.
 
-18. Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. Nucleic acids research, 43(7), e47-e47.
+18. Leek JT, Johnson WE, Parker HS, Fertig EJ, Jaffe AE, Storey JD, Zhang Y, Torres LC (2019). sva: Surrogate Variable Analysis. R package version 3.34.0.
 
-19. Alexa A, Rahnenfuhrer J (2019). topGO: Enrichment Analysis for Gene Ontology. R package version 2.37.0.
+19. Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. Nucleic acids research, 43(7), e47-e47.
 
-20. Luo, W., & Brouwer, C. (2013). Pathview: an R/Bioconductor package for pathway-based data integration and visualization. Bioinformatics, 29(14), 1830-1831.
+20. X Jiao, BT Sherman, R Stephens, MW Baseler, HC Lane, RA Lempicki. DAVID-WS: a stateful web service to facilitate gene/protein list analysis. Bioinformatics (2012) 28 (13): 1805-1806. doi: 10.1093/bioinformatics/bts251
 
-21. Goh, W. W. B., Wang, W., & Wong, L. (2017). Why batch effects matter in omics data, and how to avoid them. Trends in biotechnology, 35(6), 498-507.
+21. Luo, W., & Brouwer, C. (2013). Pathview: an R/Bioconductor package for pathway-based data integration and visualization. Bioinformatics, 29(14), 1830-1831.
 
-22. Fontaine, J. F., & Andrade-Navarro, M. A. (2016). Gene set to diseases (gs2d): Disease enrichment analysis on human gene sets with literature data. Genomics and Computational Biology, 2(1), e33-e33.
+22. Goh, W. W. B., Wang, W., & Wong, L. (2017). Why batch effects matter in omics data, and how to avoid them. Trends in biotechnology, 35(6), 498-507.
 
 23. Ding, C., & Peng, H. (2005). Minimum redundancy feature selection from microarray gene expression data. Journal of bioinformatics and computational biology, 3(02), 185-205.
 

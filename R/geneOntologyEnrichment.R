@@ -71,10 +71,20 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
   for (go.type in c('GOTERM_MF_ALL','GOTERM_CC_ALL','GOTERM_BP_ALL')){
     act.gos <- gos.data[gos.data$Category == go.type,colnames(gos.data)!='Category']
     if(dim(act.gos)[1]>0){
-      tmp <- vapply(as.character(act.gos$Term),strsplit,'~',FUN.VALUE = list(1))
-      tmp <- t(matrix(unlist(tmp),nrow=2))
-      act.gos[['GO.ID']] <- tmp[,1]
-      act.gos[['Term']] <- tmp[,2]
+      ontology.term <- c()
+      remove <- c()
+      for ( i in seq(length(act.gos$Term))){
+        ontology.str <- as.character(act.gos[i,'Term'])
+        num.gos <- str_count(ontology.str,'GO:')
+        if (num.gos == 1) ontology.term <- c(ontology.term,strsplit(ontology.str,'~'))
+        else remove <- c(remove,i)
+      }
+      ontology.term <- t(matrix(unlist(ontology.term),nrow=2))
+      
+      if (length(remove)>0) act.gos <- act.gos[-remove,]
+      act.gos[['GO.ID']] <- ontology.term[,1]
+      act.gos[['Term']] <- ontology.term[,2]
+
       
       # Add column with gene symbols
       if (returnGeneSymbols){

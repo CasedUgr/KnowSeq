@@ -25,7 +25,7 @@ importFrom(rlist,list.map)
 importFrom(rmarkdown, render)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
-              downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getAnnotationFromEnsembl,
+              downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getGenesAnnotation,
               hisatAlignment, kallistoAlignment, knn_CV, knn_test, DEGsExtraction, plotConfMatrix, RNAseqQA, rawAlignment, rf_CV, rf_test
               , salmonAlignment, sraToFastq, svm_CV, svm_test, DEGsEvidences, knowseqReport)
 

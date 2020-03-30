@@ -15,11 +15,11 @@ DEGsPathwayVisualization(
 \arguments{
 \item{DEGsMatrix}{A matrix that contains the expression of the DEGs for each samples. This matrix can be achieved by calling the function \code{\link{DEGsExtraction}}. If the samples are more than 24, only the first 24 will be used to colour the pathways.}
 
-\item{DEGsAnnotation}{A matrix that contains the gene names and the entrez IDs for the genes available in the DEGs matrix. This annotation can be obtained from the function \code{\link{getAnnotationFromEnsembl}}.}
+\item{DEGsAnnotation}{A matrix that contains the gene names and the entrez IDs for the genes available in the DEGs matrix. This annotation can be obtained from the function \code{\link{getGenesAnnotation}}.}
 
 \item{expressionMatrix}{A matrix that contains the expression of the all the genes available for each samples. If the samples are more than 24, only the first 24 will be used to colour the pathways.}
 
-\item{expressionAnnotation}{A matrix that contains the gene names and the entrez IDs for all the genes available. This annotation can be obtained from the function \code{\link{getAnnotationFromEnsembl}}.}
+\item{expressionAnnotation}{A matrix that contains the gene names and the entrez IDs for all the genes available. This annotation can be obtained from the function \code{\link{getGenesAnnotation}}.}
 
 \item{labels}{A vector that contains the labels of the samples for both the DEGsMatrix and the expressionMatrix.}
 }

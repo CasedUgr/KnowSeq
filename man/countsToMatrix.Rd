@@ -4,7 +4,7 @@
 \alias{countsToMatrix}
 \title{countsToMatrix merges in a matrix the information in the count files.}
 \usage{
-countsToMatrix(csvFile, sep = ",", extension = "count")
+countsToMatrix(csvFile, sep = ",", extension = "")
 }
 \arguments{
 \item{csvFile}{The csv that contains the name and the path to each of the count files. The column of the name of the file must be named Run and the column that contains the paths must be named Path. Furthermore, to facilitate the posterior steps, a column named Class that contains the classes for the samples must be required.}

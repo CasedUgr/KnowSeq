@@ -246,10 +246,10 @@ This step is only required if the user wants to get the gene names and the annot
 
 ```{r Downloading_annotation} 
 # Downloading human annotation
-myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix))
+myAnnotation <- getGenesAnnotation(rownames(countsMatrix))
 
 # Downloading mus musculus annotation
-myAnnotationMusMusculus <- getAnnotationFromEnsembl(rownames(countsMatrix), 
+myAnnotationMusMusculus <- getGenesAnnotation(rownames(countsMatrix), 
 notHSapiens = TRUE,notHumandataset = "mm129s1svimj_gene_ensembl")
 
 ```
@@ -464,7 +464,7 @@ Gene ontology (GO) provides information about the biological functions of the ge
 ```{r Retrieving_GOs, message=FALSE}
 # Retrieving the GO information from the three different ontologies
 
-data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
+data <- getGenesAnnotation(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
 GOsList <- geneOntologyEnrichment(as.character(data$entrezgene_id), geneType='ENTREZ_GENE_ID', pvalCutOff=0.1, returnGeneSymbols = FALSE)
 ``` 
 
@@ -479,11 +479,11 @@ Another important step in the enrichment methodology in this pipeline is the pat
 ```{r Downloading_pathways eval} 
 # Downloading and filling with expression the pathways of the DEGs
 
-myDEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix)[1:3],
+myDEGsAnnotation <- getGenesAnnotation(rownames(DEGsMatrix)[1:3],
 referenceGenome=38,attributes = c("external_gene_name","entrezgene_id"), 
 filter = "external_gene_name")
 
-allMyAnnotation <-  getAnnotationFromEnsembl(rownames(expressionMatrix),
+allMyAnnotation <-  getGenesAnnotation(rownames(expressionMatrix),
 referenceGenome=38,attributes = c("external_gene_name","entrezgene_id"), 
 filter = "external_gene_name")
 

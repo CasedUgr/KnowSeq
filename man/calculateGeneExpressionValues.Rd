@@ -15,7 +15,7 @@ calculateGeneExpressionValues(
 \arguments{
 \item{countsMatrix}{The original counts matrix returned by \code{\link{countsToMatrix}} function or a matrix with the gene Ensembl ID in the rows and the samples in the columns that contains the count values.}
 
-\item{annotation}{A matrix that contains the Ensembl IDs, the gene name and the percentage gene gc content for the genes available in the expression matrix. This annotation could be extracted from the function \code{\link{getAnnotationFromEnsembl}}.}
+\item{annotation}{A matrix that contains the Ensembl IDs, the gene name and the percentage gene gc content for the genes available in the expression matrix. This annotation could be extracted from the function \code{\link{getGenesAnnotation}}.}
 
 \item{genesNames}{A boolean variable which indicates if the rownames of the expression matrix are the genes Names (Symbols) or the ensembl IDs.}
 

@@ -1,4 +1,4 @@
-#' getAnnotationFromEnsembl returns the required information about a list of genes from Ensembl biomart.
+#' getGenesAnnotation returns the required information about a list of genes from Ensembl biomart.
 #'
 #' The function returns the required information about a list of genes from Ensembl biomart. This list of genes can be Ensembl ID, gene names or either of the possible values admited by Ensembl biomart. Furthermore, the reference genome can be chosen depending on the necessity of the user.
 #' @param values A list of genes that contains the names or IDs or "allGenome" string, which indicates that all genome will be  returned.
@@ -9,10 +9,10 @@
 #' @param referenceGenome Integer that indicates used reference genome. It must be 37 or 38.
 #' @return A matrix that contains all the information asked to the attributes parameter.
 #' @examples
-#' myAnnotation <- getAnnotationFromEnsembl(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content","entrezgene_id"),filter='external_gene_name',notHSapiens=FALSE)
-#' myAnnotation <- getAnnotationFromEnsembl(c("MGP_129S1SvImJ_G0038602", "MGP_129S1SvImJ_G0007718"),attributes=c("percentage_gene_gc_content","ensembl_gene_id"),filter='ensembl_gene_id',notHSapiens = TRUE, notHumandataset = 'mm129s1svimj_gene_ensembl')
+#' myAnnotation <- getGenesAnnotation(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content","entrezgene_id"),filter='external_gene_name',notHSapiens=FALSE)
+#' myAnnotation <- getGenesAnnotation(c("MGP_129S1SvImJ_G0038602", "MGP_129S1SvImJ_G0007718"),attributes=c("percentage_gene_gc_content","ensembl_gene_id"),filter='ensembl_gene_id',notHSapiens = TRUE, notHumandataset = 'mm129s1svimj_gene_ensembl')
 
-getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content"), filter="ensembl_gene_id", notHSapiens = FALSE, notHumandataset = "",referenceGenome=38){
+getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content"), filter="ensembl_gene_id", notHSapiens = FALSE, notHumandataset = "",referenceGenome=38){
   
   if(typeof(attributes) != "character"){stop("The parameter attributes must be a character vector that contains the wanted ensembl attributes.")}
   if(typeof(values) != "character"){stop("The parameter values must be a character vector that contains the genes IDs.")}

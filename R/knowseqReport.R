@@ -84,7 +84,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   
   expressionMatrix <- data
   if (geneOntology || getPathways)
-    myAnnotation <- getAnnotationFromEnsembl(rownames(expressionMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter="external_gene_name",notHSapiens = FALSE)
+    myAnnotation <- getGenesAnnotation(rownames(expressionMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter="external_gene_name",notHSapiens = FALSE)
     
 
   disease <- gsub(' ','-',disease)
@@ -615,13 +615,6 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       
       markobj <- c(markobj,'```{r echo=FALSE}',paste('knitr::kable(paths.data,"',table.format,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```\n')
       
-      
-      # pathways <- list.dirs('Pathways')
-      # pathways <- str_sub(pathways,10,nchar(pathways))
-      # pathways <-  pathways[pathways!='']
-      # for (pathway in pathways){
-      #   markobj  <- c(markobj,paste('- [',pathway,'](',pathway.url,pathway,')\n',sep=''))
-      # }
     }
     
     # --- Related Diseases --- #

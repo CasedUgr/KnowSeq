@@ -22,18 +22,18 @@
 
 ![](https://github.com/CasedUgr/KnowSeq/blob/master/vignettes/KnowSeqPipeline.png)
 
-The whole pipeline included in KnowSeq has been designed carefully with the purpose of achieving a great quality and robustness in each of the steps that conform the pipeline. For that, the pipeline has four fundamental processes:
+The whole pipeline included in KnowSeq has been designed carefully with the purpose of achieving a great quality and robustness in each of the steps that belong to the pipeline. Therefore, the pipeline has four fundamental processes:
 
 - Transcriptomic RAW data processing.
 - Biomarkers identification & assessment.
 - DEGs enrichment methodology.
 - Intelligent Automatic Report.
 
-The first process is focused on the Transcriptomic RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO ArrayExpress and GDC-Portal). The second one englobes the Differential Expressed Genes (DEGs) identification and extraction by using a novel parameter (Specifically for multiclass studies) defined as Coverage [3], and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). Once the DEGs were assessed, the next step is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the Evidences related to the addressed disease from the final set of DEGs. Finally, all of this information can be shaped on an automatic and intelligent HTML report that contains the results of the complete study for the tackled disease or diseases.
+The first process is focused on the Transcriptomic RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO ArrayExpress and GDC-Portal). The second one englobes the Differential Expressed Genes (DEGs) identification and extraction by using a novel parameter (Specifically for multiclass studies) defined as Coverage [3], and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). Once the DEGs are assessed, the next step is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the Evidences related to the addressed disease from the final set of DEGs. Finally, all of this information can be displayed on  an automatic and intelligent HTML report that contains the results of the complete study for the faced disease or diseases.
 
-With the pipeline designed and addressed by KnowSeq, researchers can convert the RAW data of RNA-seq into real knowledge on the identification of possible gene signatures about the studied diseases.
+With the pipeline designed and addressed by KnowSeq, researchers can convert the RAW data of RNA-seq into real knowledge for the identification of possible gene signatures about the studied diseases.
 
-KnowSeq expects to serve as a novel tool to help to the experts in the field to acquire robust knowledge and conclusions for the data and diseases to study. KnowSeq has three clear strengths: the first one is the modular design, because the analyses can be started from different points (FASTQ, BAM, count and even a custom expression matrix); the second one is the versatility due to the different algorithms for Machine Learning and Feature Selection and the different databases implemented in KnowSeq; and the last one is the adaptability of the analyses, because KnowSeq allows to use data from different sources and, even select different parameters that give to the user a real control of the pipeline.
+KnowSeq expects to serve as a novel tool to help experts to acquire robust knowledge and to draw conclusions for the data and diseases studied. KnowSeq has three clear strengths: the first one is the modular design, because the analyses can be started from different points (FASTQ, BAM, count and even a custom expression matrix); the second one is the versatility due to the different algorithms for Machine Learning and Feature Selection and the different databases implemented in KnowSeq; and the last one is the adaptability of the analyses, because KnowSeq allows to use data from different sources and select different parameters that gives the user a real control over the pipeline.
 
 # Installation
 To install and load KnowSeq package in R, it is necessary the previous installation of BiocManager from Bioconductor. The next code shows how this install can be performed:
@@ -66,7 +66,7 @@ Contributions are welcomed and each PR would be reviewed by KnowSeq maintainers.
 If you find KnowSeq useful and you use it in your work, please cite it as follows:
 
 ```
-Castillo-Secilla D, Galvez JM, Ortuno FM, Herrera LJ, Rojas. I (2019). KnowSeq: A R package to extract knowledge by using RNA-seq raw files. R package version 1.0.0. 
+Castillo-Secilla D, Galvez JM, Carrillo-Perez F, Almeida MV, Ortuno FM, Herrera LJ, Rojas. I (2020). KnowSeq: KnowSeq R/Bioc package: Beyond the traditional RNA-seq pipeline.. R package version 1.1.20. 
 ```
 # References
 

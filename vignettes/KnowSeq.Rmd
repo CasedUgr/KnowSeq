@@ -57,8 +57,7 @@ The whole pipeline included in KnowSeq has been designed carefully with the purp
 - DEGs enrichment methodology.
 - Intelligent Automatic Report.
 
-The first process is focused on the Transcriptomic RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO [5] ArrayExpress [6] and GDC-Portal). The second one englobes the Differential Expressed Genes (DEGs) identification and extraction by using a novel parameter (Specifically for multiclass studies) defined as Coverage [3], and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). Once the DEGs were assessed, the next step is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the Evidences related to the addressed disease from the final set of DEGs. Finally, all of this information can be shaped on an automatic and intelligent HTML report that contains the results of the complete study for the tackled disease or diseases.
-
+The first process is focused on the Transcriptomic RAW data treatment. This step has the purpose of extracting a set of count files from raw files stored in the repositories supported by our package (NCBI/GEO [5] ArrayExpress [6] and GDC-Portal). The second one englobes the Differential Expressed Genes (DEGs) identification and extraction by using a novel parameter (Specifically for multiclass studies) defined as Coverage [3], and the assessment of those DEGs by applying advanced machine learning techniques (feature selection process and supervised classification). Once the DEGs are  assessed, the next step is the DEGs enrichment methodology which allows retrieving biological information from the DEGs. In this process, relevant information (such as related diseases, biological processes associated and pathways) about the DEGs is retrieved by using very well-known tools and databases. The three types of enrichment are the Gene Ontology (GO) study, the pathways visualization taking into account the gene expression, and the Evidences related to the addressed disease from the final set of DEGs. Finally, all of this information can be displayed on  an automatic and intelligent HTML report that contains the results of the complete study for the faced disease or diseases.
 
 # Transcriptomic RAW data processing
 ## Aligners preparation
@@ -507,13 +506,13 @@ diseasesTargetValidation <- DEGsToDiseases(rownames(DEGsMatrix), getEvidences = 
 
 
 # Gene Expression Intelligent Report
-Most of these steps can be displayed using a single function, *knowseqReport*, that starting from an expression matrix, or counts matrix, and the labels of the samples, will follow part of the pipeline explained above and display the result in a report which output format is html.
+Most of these steps can be displayed using a single function, *knowseqReport*, that starting from an expression matrix (or counts matrix) and the labels of the samples, will follow part of the pipeline explained above and will display the result in a report in html format.
 
-This report will contain DEGs extraction using limma package, a feature selection process, where the used algorithm can be set by the featureSelectionMode param, and the visualization steps described above are shown.
+For the obtention of this report a DEGs extraction using limma package will be performed. Then, a feature selection process will be carried out, where the used algorithm can be set by the featureSelectionMode parameter, along with the visualizations steps that have been described previously.
 
-Then, machine learning process starts, where the classification algorithms and the classification metrics to me displayed can be chossen by the user by clasifAlgs and metrics params. 
+Following, the machine learning process starts, where the classification algorithms and the classification metrics to be displayed can be chossen by the user by clasifAlgs and metrics parameters. 
 
-Finally DEGs enrichment is obtained, showing Gene Ontologies and found evidences for related diseases with each gene. It is possible to obtain evidences for a certain disease, specifying it by the disease parameter.
+Finally DEGs enrichment is obtained, showing Gene Ontologies and found evidences for related diseases for each gene. It is possible to obtain evidences for a certain disease, specifying it by the disease parameter.
 
 ```{r, eval=FALSE} 
 # Performing the automatic and intelligent KnowSeq report 

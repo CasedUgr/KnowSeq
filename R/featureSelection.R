@@ -65,8 +65,6 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
     return(rownames(rfRanking))
     
   }else if(mode == "da" || mode == 'daRed'){
-    subdiseases <- str_replace(subdiseases,' ','-')
-    diseases <- str_replace(disease,' ','-')
     
     if(disease == ""){
       stop("Please, indicate a disease name to acquire the Disease Association Score and Feature selection.")
@@ -82,7 +80,8 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       overallRanking <- rep(0,length(vars_selected))
       names(overallRanking) <- vars_selected
       
-      r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
+      disease_ <-  str_replace_all(disease,' ','-')
+      r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease_,"&size=1&filter=disease",sep = ""))
       respon <- content(r_Ensembl)
       
       if ( 'size' %in% names(respon) && respon$size == 0) stop('Disease not found')
@@ -107,8 +106,8 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       
       for (i in seq(length(subdiseases))){
         subdisease <- subdiseases[i]
-        
-        r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",subdisease,"&size=1&filter=disease",sep = ""))
+        subdisease_ <- str_replace_all(subdisease)
+        r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",subdisease_,"&size=1&filter=disease",sep = ""))
         respon <- content(r_Ensembl)
 
         if ( 'size' %in% names(respon) && respon$size == 0) stop(paste('Subdisease',subdisease,'not found'))
@@ -146,7 +145,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       
       for (subdisease in subdiseases){
         
-        evidences[[subdisease]] <- DEGsEvidences(names(overallRanking),disease,subdisease,size=100)
+        evidences[[subdisease]] <- DEGsEvidences(names(overallRanking),subdisease,size=100)
         
       }
       remove <- list('global'=c())

@@ -9,7 +9,7 @@
 #' @param referenceGenome Integer that indicates used reference genome. It must be 37 or 38.
 #' @return A matrix that contains all the information asked to the attributes parameter.
 #' @examples
-#' myAnnotation <- getGenesAnnotation(c("KRT19","BRCA1"),notHSapiens=FALSE)
+#' myAnnotation <- getGenesAnnotation(c("KRT19","BRCA1"), filter="external_gene_name",notHSapiens=FALSE)
 
 getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content"), filter="ensembl_gene_id", notHSapiens = FALSE, notHumandataset = "",referenceGenome=38){
   

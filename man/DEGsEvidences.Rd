@@ -4,14 +4,12 @@
 \alias{DEGsEvidences}
 \title{DEGsEvidences function returns for each DEG a list of evidences that correlate it with the studied disease.}
 \usage{
-DEGsEvidences(geneList, disease, subdisease = "", size = 10, verbose = TRUE)
+DEGsEvidences(geneList, disease, size = 10, verbose = TRUE)
 }
 \arguments{
 \item{geneList}{A list that contains the gene symbols or gene names of the DEGs.}
 
 \item{disease}{The name of a disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.}
-
-\item{subdisease}{The name of a particular subdisease from disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.}
 
 \item{size}{The number of diseases to retrieve from targetValidation}
 

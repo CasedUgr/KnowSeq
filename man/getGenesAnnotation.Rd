@@ -33,6 +33,5 @@ A matrix that contains all the information asked to the attributes parameter.
 The function returns the required information about a list of genes from Ensembl biomart. This list of genes can be Ensembl ID, gene names or either of the possible values admited by Ensembl biomart. Furthermore, the reference genome can be chosen depending on the necessity of the user.
 }
 \examples{
-myAnnotation <- getGenesAnnotation(c("KRT19","BRCA1"),attributes=c("ensembl_gene_id","percentage_gene_gc_content","entrezgene_id"),filter='external_gene_name',notHSapiens=FALSE)
-myAnnotation <- getGenesAnnotation(c("MGP_129S1SvImJ_G0038602", "MGP_129S1SvImJ_G0007718"),attributes=c("percentage_gene_gc_content","ensembl_gene_id"),filter='ensembl_gene_id',notHSapiens = TRUE, notHumandataset = 'mm129s1svimj_gene_ensembl')
+myAnnotation <- getGenesAnnotation(c("KRT19","BRCA1"),notHSapiens=FALSE)
 }

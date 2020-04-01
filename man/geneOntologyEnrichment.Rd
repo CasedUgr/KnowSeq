@@ -30,8 +30,5 @@ A list that contains a matrix for each of the possible ontologies and a matrix w
 The function obtains the information about GO terms from the three differents ontologies that are related to the DEGs. The function also returns the description about each GO and a list of genes that are inside of each GO.
 }
 \examples{
-dir <- system.file("extdata", package="KnowSeq")
-load(paste(dir,"/expressionExample.RData",sep = ""))
-data <- getGenesAnnotation(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
-\dontrun{GOsList <- geneOntologyEnrichment(as.character(data$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)}
+\dontrun{GOsList <- geneOntologyEnrichment(data$entrezgene_id,geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)}
 }

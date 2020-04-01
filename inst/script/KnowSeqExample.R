@@ -38,7 +38,7 @@ countsMatrix <- countsInformation$countsMatrix
 labels <- countsInformation$labels
 
 # Downloading human annotation
-myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+myAnnotation <- getGenesAnnotation(rownames(countsMatrix),referenceGenome=37)
 
 # Calculating gene expression values matrix using the counts matrix
 expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation,genesNames = TRUE)

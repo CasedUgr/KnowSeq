@@ -103,17 +103,21 @@ getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_g
             colnames(act.myAnnotation) <- union(attributes,filter)
             return(act.myAnnotation)
           },
-          error = function(e){
-            stop('Connection error, please try again.')
+          error = function(e){''},
+          finally={
+            message('\nConnection error, please try again.')
+            result <- data.frame(matrix(ncol = length(attributes), nrow = 0))
+            colnames(result)  <- attributes
+            return(result)
           }
         )
-      }
+      },
+      error = function(e){''}
     )
-    
     if( grepl('ERROR',act.myAnnotation[1,1]) ){
-      
+
       stop('Error in query, please check attributes and filter')
-      
+
     }
     
     if (dim(myAnnotation)[1] == 0) myAnnotation <- act.myAnnotation
@@ -123,8 +127,7 @@ getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_g
     else act.values <- act.values[(max.values+1):length(act.values)]
     max.values <- min(max,length(act.values))
   }
-  
-  colnames(myAnnotation) <- union(attributes,filter)
+
   if (length(values)>1 || values != 'allGenome')
     myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
 

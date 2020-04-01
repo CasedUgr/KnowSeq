@@ -91,7 +91,7 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
     act.myAnnotation <- tryCatch(
       {
         response <- GET(URLencode(paste(base,'?query=',query,sep='')))
-        act.myAnnotation <- read.csv(text=httr::content(response,'text'),sep=',',header=FALSE)
+        act.myAnnotation <- read.csv(text=content(response,'text'),sep=',',header=FALSE)
         colnames(act.myAnnotation) <- union(attributes,filter)
         act.myAnnotation
       },
@@ -99,7 +99,7 @@ getAnnotationFromEnsembl <- function(values,attributes=c("ensembl_gene_id","exte
         tryCatch(
           {
             response <- GET(URLencode(paste(base,'?query=',query,sep='')))
-            act.myAnnotation <- read.csv(text=httr::content(response,'text'),sep=',',header=FALSE)
+            act.myAnnotation <- read.csv(text=content(response,'text'),sep=',',header=FALSE)
             colnames(act.myAnnotation) <- union(attributes,filter)
             return(act.myAnnotation)
           },

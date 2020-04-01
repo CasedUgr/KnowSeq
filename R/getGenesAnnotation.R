@@ -87,9 +87,27 @@ getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_g
     query <- paste(query,'</Dataset></Query>',sep='')
     
     # Download annotation file
-    response <- GET(URLencode(paste(base,'?query=',query,sep='')))
-    act.myAnnotation <- read.csv(text=content(response,'text'),sep=',',header=FALSE)
-
+    act.myAnnotation <- tryCatch(
+      {
+        response <- GET(URLencode(paste(base,'?query=',query,sep='')))
+        act.myAnnotation <- read.csv(text=content(response,'text'),sep=',',header=FALSE)
+        colnames(act.myAnnotation) <- union(attributes,filter)
+        act.myAnnotation
+      },
+      error = function(e){
+        tryCatch(
+          {
+            response <- GET(URLencode(paste(base,'?query=',query,sep='')))
+            act.myAnnotation <- read.csv(text=content(response,'text'),sep=',',header=FALSE)
+            colnames(act.myAnnotation) <- union(attributes,filter)
+            return(act.myAnnotation)
+          },
+          error = function(e){
+            stop('Connection error, please try again.')
+          }
+        )
+      }
+    )
     
     if( grepl('ERROR',act.myAnnotation[1,1]) ){
       

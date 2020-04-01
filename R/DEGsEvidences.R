@@ -3,18 +3,17 @@
 #' DEGsEvidences function returns for each DEG a list of evidences that correlate it with the studied disease.
 #' @param geneList A list that contains the gene symbols or gene names of the DEGs.
 #' @param disease The name of a disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.
-#' @param subdisease The name of a particular subdisease from disease in order to obtain related evidences from target validation by using the DEGs indicated in the geneList parameter.
 #' @param size The number of diseases to retrieve from targetValidation
 #' @param verbose Boolean that indicates if progress messages are printed to stdout
 #' @return A list which names are genes from geneList and which contains related evidences for each gene in geneList and indicated disease.
 #' @examples
 #' evidences <- DEGsEvidences(c("KRT19","BRCA1","TYMP"),'cancer')
 
-DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRUE){
+DEGsEvidences <- function(geneList, disease,size=10, verbose=TRUE){
   if(length(geneList)[1] == 0 || is.null(geneList) ){
-    
+
     stop("The geneList is empty! Please, provide a right geneList.")
-    
+
   }
   if(disease == ''){
     
@@ -22,14 +21,15 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
     
   }
   # Get disease id (it's necesary for evidences request)
-  r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
+  disease_ <- str_replace_all(disease,' ','-')
+  r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease_,"&size=1&filter=disease",sep = ""))
   respon <- content(r_Ensembl)
   
   if ( 'size' %in% names(respon) && respon$size == 0){
     stop("Disease not found")
   }
   disease.id <- respon$data[[1]]$id
-  
+
   if (verbose) cat("Obtaining related diseases with the DEGs from targetValidation platform...\n")
   base = "https://api.opentargets.io/v3/platform/public/evidence/filter?target="
   
@@ -58,8 +58,8 @@ DEGsEvidences <- function(geneList, disease, subdisease='', size=10, verbose=TRU
         # Iter in found evidences
         for(k in seq(response.disease$size)){
           # Check if disease is matching
-          if ( (subdisease=='' && grepl(disease,response.disease$data[[k]]$disease$efo_info$label))
-               || grepl(subdisease,response.disease$data[[k]]$disease$efo_info$label)){
+          
+          if ( grepl(disease,response.disease$data[[k]]$disease$efo_info$label)){
             # Create empty evidence
             act.evidence <- list()
             

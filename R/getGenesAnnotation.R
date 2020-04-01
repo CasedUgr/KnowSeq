@@ -91,7 +91,7 @@ getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_g
     act.myAnnotation <- tryCatch(
       {
         response <- GET(URLencode(paste(base,'?query=',query,sep='')))
-        act.myAnnotation <- read.csv(text=content(response,'text'),sep=',',header=FALSE)
+        act.myAnnotation <- read.csv(text=content(response,as='text',encoding='UTF-8'),sep=',',header=FALSE)
         colnames(act.myAnnotation) <- union(attributes,filter)
         act.myAnnotation
       },
@@ -99,7 +99,7 @@ getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_g
         tryCatch(
           {
             response <- GET(URLencode(paste(base,'?query=',query,sep='')))
-            act.myAnnotation <- read.csv(text=content(response,'text'),sep=',',header=FALSE)
+            act.myAnnotation <- read.csv(text=content(response,as='text',encoding='UTF-8'),sep=',',header=FALSE)
             colnames(act.myAnnotation) <- union(attributes,filter)
             return(act.myAnnotation)
           },
@@ -127,7 +127,7 @@ getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_g
     else act.values <- act.values[(max.values+1):length(act.values)]
     max.values <- min(max,length(act.values))
   }
-
+  
   if (length(values)>1 || values != 'allGenome')
     myAnnotation <- myAnnotation[myAnnotation[[filter]] %in% values,]
 

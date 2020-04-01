@@ -36,7 +36,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
     stop("The vars_selected parameter is empty! Please, provide a right vars list.")
     
   }
-
+  
   data <- as.data.frame(apply(data,2,as.double))
   
   if(mode == "mrmr"){
@@ -74,47 +74,62 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
     }else if(mode == 'daRed'){
       cat("Calculating ranking of biological relevant genes by using DA-Red implementation...\n")
     }
-    relatedDiseases <- DEGsToDiseases(vars_selected, size = 100)
     
-    # Check if it is not a multiclass problem
-    if (length(subdiseases) == 0){
-      overallRanking <- c()
-      for(i in seq(length(relatedDiseases))){
-        
-        if(is.na(grep(disease,relatedDiseases[[i]]$summary[,1])[1]))
-          overallScore <- 0.0
-        else
-          overallScore <- relatedDiseases[[i]]$summary[grep(disease,relatedDiseases[[i]]$summary[,1])[1],2]
-        
-        overallRanking <- c(overallRanking,overallScore)
-      }
+    
+    if (length(subdiseases)==0){
+      overallRanking <- rep(0,length(vars_selected))
+      names(overallRanking) <- vars_selected
+      
+      disease_ <-  str_replace_all(disease,' ','-')
+      r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease_,"&size=1&filter=disease",sep = ""))
+      respon <- content(r_Ensembl)
+      
+      if ( 'size' %in% names(respon) && respon$size == 0) stop('Disease not found')
+      
+      disease.id <- respon$data[[1]]$id
+      url  <- paste("https://api.opentargets.io/v3/platform/public/association/filter?disease=",disease.id,"&size=10000",sep='')
+      response <- GET(url)
+      response <- content(response)
+      found.symbols <- unlist(list.map(response$data,target$gene_info$symbol))
+      scores <- unlist(list.map(response$data,association_score$overall))
+      
+      keep <- which(!duplicated(found.symbols))
+      found.symbols[keep]
+      scores[keep]
+
+      found.index <- which(found.symbols %in% vars_selected)
+      overallRanking[found.symbols[found.index]] <- scores[found.index]
     }
     else{
-      overallRankingDisease <- list()
-      # Get DA score for each sub disease
-      for( subdisease in subdiseases){
-        overallRankingDisease[[subdisease]] = c()
-        for(i in seq(length(relatedDiseases))){
-          if(is.na(grep(subdisease,relatedDiseases[[i]]$summary[,1])[1])){
-            overallScore <- 0.0
-          }else{
-            overallScore <- relatedDiseases[[i]]$summary[grep(subdisease,relatedDiseases[[i]]$summary[,1])[1],2]
-          }
-          overallRankingDisease[[subdisease]] <- c(overallRankingDisease[[subdisease]],overallScore)
-        }
-        names(overallRankingDisease[[subdisease]]) <- names(relatedDiseases)
-      }
+      overallRanking <- rep(0,length(vars_selected))
+      names(overallRanking) <- vars_selected
       
-      # Final DA score is the difference in absolute value
-      overallRanking <- rep(0,length(overallRankingDisease[[1]]))
-      for (i in seq(length(overallRankingDisease))){
-        overallRanking <- abs(overallRanking-as.numeric(overallRankingDisease[[i]]))
+      for (i in seq(length(subdiseases))){
+        subdisease <- subdiseases[i]
+        subdisease_ <- str_replace_all(subdisease)
+        r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",subdisease_,"&size=1&filter=disease",sep = ""))
+        respon <- content(r_Ensembl)
+
+        if ( 'size' %in% names(respon) && respon$size == 0) stop(paste('Subdisease',subdisease,'not found'))
+
+        disease.id <- respon$data[[1]]$id
+        url  <- paste("https://api.opentargets.io/v3/platform/public/association/filter?disease=",disease.id,"&size=10000",sep='')
+        response <- GET(url)
+        response <- content(response)
+        found.symbols <- unlist(list.map(response$data,target$gene_info$symbol))
+        scores <- unlist(list.map(response$data,association_score$overall))
+
+        keep <- which(!duplicated(found.symbols))
+        found.symbols <- found.symbols[keep]
+        scores <- scores[keep]
+        
+        found.index <- which(found.symbols %in% vars_selected)
+        if (i==1) overallRanking[found.symbols[found.index]] <- as.vector(scores[found.index])
+        else overallRanking[found.symbols[found.index]] <- rowMeans(cbind(as.vector(overallRanking[found.symbols[found.index]]),as.vector(scores[found.index])))
       }
     }
-    
-    names(overallRanking) <- names(relatedDiseases)
+
     overallRanking <- sort(overallRanking,decreasing = TRUE)
-    
     cat("Disease Association ranking: ")
     cat(names(overallRanking))
     cat("\n")
@@ -130,7 +145,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       
       for (subdisease in subdiseases){
         
-        evidences[[subdisease]] <- DEGsEvidences(names(overallRanking),disease,subdisease,size=100)
+        evidences[[subdisease]] <- DEGsEvidences(names(overallRanking),subdisease,size=100)
         
       }
       remove <- list('global'=c())
@@ -138,7 +153,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
         all = TRUE
         for (subdisease in subdiseases){
           if (! subdisease %in% names(evidences)) evidences[[subdisease]] <- c()
-          if (is(evidences[[subdisease]][[gen]]) == 'character') remove[[subdisease]] <- c(remove[[subdisease]],gen)
+          if (is.character(evidences[[subdisease]][[gen]])) remove[[subdisease]] <- c(remove[[subdisease]],gen)
           else all = FALSE
         }
         if ( all ) remove[['global']] <- c(remove[['global']],gen)
@@ -153,13 +168,13 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       
       final.evidences <- evidences[[subdiseases[1]]]
       for (gen in names(final.evidences)){
-        if ( is(evidences[[subdiseases[2]]][[gen]]) == 'list'){
+        if ( is.list(evidences[[subdiseases[2]]][[gen]])){
           for (type in names(evidences[[subdiseases[2]]][[gen]])){
             if (type %in% names(final.evidences[[gen]])){
               final.evidences[[gen]][[type]] <- append(final.evidences[[gen]][[type]],evidences[[subdiseases[2]]][[gen]][[type]])
             }
             else{
-              if (is(final.evidences[[gen]]) != 'list') final.evidences[[gen]]  <-  list()
+              if (is.list(final.evidences[[gen]])) final.evidences[[gen]]  <-  list()
               final.evidences[[gen]][[type]] <- evidences[[subdiseases[2]]][[gen]][[type]]
             }
           }
@@ -209,7 +224,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
           # Calculate and save redudance 
           if (redundances[gen,sel] == -1){
             redundances[gen,sel] = 0
-            if ( is(evidences[[gen]]) == 'list' && is(evidences[[sel]]) == 'list'){
+            if ( is.list(evidences[[gen]]) && is.list(evidences[[sel]])){
               gen.nevs <- 0
               for (type in names(evidences[[gen]])){
                 if (type %in% names(evidences[[gen]])){
@@ -263,8 +278,9 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
       colnames(redundances)[length(selected.genes)] <- act.selected
     }
     return(selected.genes)
-    
   }else{
     stop("The mode is unrecognized, please use mrmr or rf.")
   }
 }
+
+

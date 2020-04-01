@@ -28,7 +28,6 @@
 #' \dontrun{knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)}
 #' \dontrun{knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)}
 
-
 knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels="",outdir="knowSeq-report", qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
                           geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
                           lfc=2.0, pvalue=0.01, cov=2, 
@@ -47,7 +46,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       data <-  data[,-remove.cols]
       col.names <- col.names[-remove.cols]
       
-      if (is(data) != 'matrix')
+      if (! is.matrix(data))
         data <- as.matrix(data)
       if (dim(data)[2] != length(col.names))
         data <- t(data)
@@ -84,10 +83,11 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   
   expressionMatrix <- data
   if (geneOntology || getPathways)
-    myAnnotation <- getGenesAnnotation(rownames(expressionMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter="external_gene_name",notHSapiens = FALSE)
-    
 
+    myAnnotation <- getGenesAnnotation(rownames(expressionMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter="external_gene_name",notHSapiens = FALSE)
+  
   disease <- gsub(' ','-',disease)
+
   table.format <- 'html'
   
   # Create output's directory if it doesn't exists
@@ -160,7 +160,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                  paste('The search and extraction of Differential Expressed Genes is the main challenge for this type of study. Thus, to achieve a set 
                        of possible biomarkers the following thresholds will be selected: LFC greater or equal than ', lfc,', P-Value lower or equal than ',pvalue,'.\n', sep = ""))
     
-      markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'DEGs have been kept after using DEGs extraction and they can be seen in the table below: \n'))
+    markobj <- c(markobj,'Finally',paste(dim(DEGsMatrix)[1],'DEGs have been kept after using DEGs extraction and they can be seen in the table below: \n'))
     
     markobj <- c(markobj,
                  '```{r, echo=FALSE, fig.align="center"}',
@@ -271,7 +271,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   clasifNames <- str_replace(clasifNames,'svm','Support Vector Machine (SVM)')
   
   if(MLTest == FALSE){
-  markobj <- c(markobj,paste('With the purpose of evaluating the robustness of the DEGs for the classification task between the studied pathologies, 
+    markobj <- c(markobj,paste('With the purpose of evaluating the robustness of the DEGs for the classification task between the studied pathologies, 
   a supervised classification step will be performed. 
   For it,',clasifNames,'classification algorithms will be trained using 10-Fold Cross Validation.
                     To evaluate obtained results the Mean Accuracy,Mean Specificity, Mean Sensitivity and the Confusion Matrix will be shown in the following plots:\n'))
@@ -343,11 +343,11 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                        main = "',s,' test results with ',clasifAlg,'",
                        xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
         }
-      
-      
+        
+        
         testConfMatrixknn <- results_test_knn$cfMats[[maxGenes]]$table
         markobj <- c(markobj,'```{r echo = FALSE}',
-                   paste('dataPlot(testConfMatrixknn, testLabels, mode = "confusionMatrix")',sep=''),'```\n')
+                     paste('dataPlot(testConfMatrixknn, testLabels, mode = "confusionMatrix")',sep=''),'```\n')
       }
       
     }else if (clasifAlg == 'rf'){
@@ -434,7 +434,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
         
         s <- strsplit(metric, " ")[[1]]
         s <- paste(toupper(substring(s, 1, 1)), substring(s, 2),
-              sep = "", collapse = " ")
+                   sep = "", collapse = " ")
         
         markobj <- c(markobj,'```{r echo = FALSE}',
                      paste('dataPlot(colMeans(results_cv_svm[["',act.metric,'"]]),
@@ -509,7 +509,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
           gene.names <- str_replace(gene.names,as.character(myAnnotation[gen,'entrezgene_id']),
                                     as.character(myAnnotation[gen,'external_gene_name']))
         }
-
+        
         GOsMatrix$`BP Ontology GOs`['Gene Symbols'] <- gene.names
         GOsMatrix$`BP Ontology GOs`$`Gene Symbols` <- as.character(lapply(GOsMatrix$`BP Ontology GOs`$`Gene Symbols`, function(x) {gsub(",", ", ", x)}))
         bp.frame <- GOsMatrix$`BP Ontology GOs`[,c('GO.ID','Term','Description','Gene Symbols')]
@@ -633,7 +633,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
           check.diseases <- names(diseases[[gene]]$evidences)
           
           for (act.disease in check.diseases){
-            if ( is(diseases[[gene]]$evidences[[act.disease]]) == 'list' ){
+            if ( is.list(diseases[[gene]]$evidences[[act.disease]])){
               if (!gene %in% names(evidences.frame)) evidences.frame[[gene]] <- list()
               
               act.markobj <- c(act.markobj,paste('####',act.disease,sep=' '))
@@ -659,7 +659,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
         dis <- gsub("-"," ",disease)
         dis <- strsplit(dis, " ")[[1]]
         dis <- paste(toupper(substring(dis, 1, 1)), substring(dis, 2),
-                   sep = "", collapse = " ")
+                     sep = "", collapse = " ")
         
         markobj <- c(markobj,paste('## DEGs Evidences for ',dis,'\n',sep = ""),
                      'Finally, the ',dis,' related evidences enrichment is displayed. DEGs related evidences are searched 
@@ -680,8 +680,14 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
           
           if(length(found.symbols) > 0){
             evidences_ <- c()
-            for (subdisease in subdiseases){
-              evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,disease,subdisease))
+            
+            if (length(subdiseases)==1 && subdiseases == ''){
+              evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,disease,size=10))
+            }
+            else{
+              for (subdisease in subdiseases){
+                evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,subdisease,size=10))
+              }
             }
             evidences.frame <- list()
             for (gene in found.symbols){
@@ -690,7 +696,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                 if (!as.character(ev.index)  %in% names(evidences.frame))
                   evidences.frame[[as.character(ev.index)]]<-list()
                 evidences <- evidences_[ev.index,]
-                if (is(evidences[[gene]])=='list'){
+                if (is.list(evidences[[gene]])){
                   evidences.frame[[as.character(ev.index)]][[gene]] = list()
                   for ( evidence.type in names(evidences[[gene]]) ){
                     act.evidences.frame <- c()
@@ -701,7 +707,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                     act.evidences.frame <- removeEmptyColumns(act.evidences.frame)
                     evidences.frame[[as.character(ev.index)]][[gene]][[evidence.type]] <- act.evidences.frame
                   }
-                  if (subdisease != '' && length(evidences.frame[[as.character(ev.index)]])>0)
+                  if (all(subdiseases != '') && length(evidences.frame[[as.character(ev.index)]])>0)
                     act.markobj <- c(act.markobj,paste('####',subdiseases[ev.index]))
                   for ( evidence.type in names(evidences.frame[[as.character(ev.index)]][[gene]]))
                     act.markobj <- c(act.markobj,'```{r echo=FALSE}',
@@ -746,7 +752,6 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     css = paste(dir,"/report_style.css",sep = "")
   ))
   file.remove("report.Rmd")
-
 }
 
 

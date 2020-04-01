@@ -3,7 +3,7 @@
 #' Calculates the gene expression values by using a matrix of counts from RNA-seq. Furthermore, the conversion from Ensembl IDs to genes names is performed by default, but can be changed with the parameter genesNames.
 #'
 #' @param countsMatrix The original counts matrix returned by \code{\link{countsToMatrix}} function or a matrix with the gene Ensembl ID in the rows and the samples in the columns that contains the count values.
-#' @param annotation A matrix that contains the Ensembl IDs, the gene name and the percentage gene gc content for the genes available in the expression matrix. This annotation could be extracted from the function \code{\link{getAnnotationFromEnsembl}}.
+#' @param annotation A matrix that contains the Ensembl IDs, the gene name and the percentage gene gc content for the genes available in the expression matrix. This annotation could be extracted from the function \code{\link{getGenesAnnotation}}.
 #' @param genesNames A boolean variable which indicates if the rownames of the expression matrix are the genes Names (Symbols) or the ensembl IDs.
 #' @param notHuman A boolean variable which indicates if the gene length file is the default gene length human file or another file indicated by parameter.
 #' @param notHumanGeneLengthCSV Path to the CSV file that contains the gene length of the specie to use.

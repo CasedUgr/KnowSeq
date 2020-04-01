@@ -10,8 +10,8 @@
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#' data <- getAnnotationFromEnsembl(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
-#' GOsList <- geneOntologyEnrichment(as.character(data$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)
+#' data <- getGenesAnnotation(rownames(DEGsMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter='external_gene_name')
+#' \dontrun{GOsList <- geneOntologyEnrichment(as.character(data$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)}
 
 geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologies=c('BP','CC','MF'), pvalCutOff=1,returnGeneSymbols=FALSE){
   if(!is(geneList)[1]=='character'){stop('The class of geneList must be character')}
@@ -33,7 +33,7 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
     else if (geneType == 'GENE_SYMBOL') gene.type <- 'external_gene_name'
     else gene.type <- tolower(geneType)
     cat('Getting gene symbols...')
-    genes.annotations <- getAnnotationFromEnsembl(geneList,attributes=c("external_gene_name",gene.type),filter=gene.type)
+    genes.annotations <- getGenesAnnotation(geneList,attributes=c("external_gene_name",gene.type),filter=gene.type)
   }
 
   cat('Retrieving Gene Ontology terms related to the list of DEGs...')

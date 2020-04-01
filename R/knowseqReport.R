@@ -47,7 +47,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       data <-  data[,-remove.cols]
       col.names <- col.names[-remove.cols]
       
-      if (is(data) != 'matrix')
+      if (! is.matrix(data))
         data <- as.matrix(data)
       if (dim(data)[2] != length(col.names))
         data <- t(data)
@@ -640,7 +640,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
           check.diseases <- names(diseases[[gene]]$evidences)
           
           for (act.disease in check.diseases){
-            if ( is(diseases[[gene]]$evidences[[act.disease]]) == 'list' ){
+            if ( is.list(diseases[[gene]]$evidences[[act.disease]])){
               if (!gene %in% names(evidences.frame)) evidences.frame[[gene]] <- list()
               
               act.markobj <- c(act.markobj,paste('####',act.disease,sep=' '))
@@ -697,7 +697,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                 if (!as.character(ev.index)  %in% names(evidences.frame))
                   evidences.frame[[as.character(ev.index)]]<-list()
                 evidences <- evidences_[ev.index,]
-                if (is(evidences[[gene]])=='list'){
+                if (is.list(evidences[[gene]])){
                   evidences.frame[[as.character(ev.index)]][[gene]] = list()
                   for ( evidence.type in names(evidences[[gene]]) ){
                     act.evidences.frame <- c()

@@ -118,12 +118,19 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     markobj <- c(markobj,'# Quality analysis\n',
                  'A quality analysis must be performed in order to detect and remove any possible outlier contained within the samples. ',
                  'Outliers are numerically different samples when compared with the rest of the samples, and this numerical difference might affect study results. ', 
-                 'For that purpose, arrayQualityMetrics bioc package is used to carry out different statistical tests, detecting possible outliers. ',
-                 'arrayQualityMetrics generates a report containing all this information that can be seen [**HERE**](RNAseqQA/index.html).\n')
+                 'For that purpose, several graphics have been created, which allow to find possible outliers.',
+                 '\nNext image shows a heatmap with the distances between arrays.',
+                 paste('![](',outdir,'RNAseqQA/distance-plot.png)',sep=''),
+                 '\nIn the following plot, a boxplot of arrays values is shown.',
+                 paste('![](',outdir,'RNAseqQA/box-plot.png)',sep=''),
+                 '\nNext image shows a bar chart of the Kolmogorov-Smirnov statistic $K_a$',
+                 paste('![](',outdir,'RNAseqQA/ks-plot.png)',sep=''),
+                 '\nFinally, MA-plot is shown bellow',
+                 paste('![](',outdir,'RNAseqQA/MA-plot.png)',sep=''))
   }
   
   # --- Differencia Expressed Genes --- #
-  markobj <- c(markobj,'# Differential Expressed Genes extraction\n')
+  markobj <- c(markobj,'\n# Differential Expressed Genes extraction\n')
   
   if(batchEffectTreatment){
     

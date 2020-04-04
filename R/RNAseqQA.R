@@ -37,7 +37,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   # BOXPLOT
   boxplot.data <- melt(expressionMatrix)
   colnames(boxplot.data) <- c('Tags','Samples','Expression')
-  box.plot <- ggplot(boxplot.data, aes(x=Samples, y=Expression)) + 
+  box.plot <- ggplot(boxplot.data, aes(x=Expression , y=Samples)) + 
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4,fill='#56B4E9') 
   #box.plot

@@ -60,17 +60,33 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   if (toPDF) ggsave(paste(outdir,'ks-plot.pdf',sep='/'),ks.plot)
   
   # MA-PLOT
-  plots <- list()
-  for ( i in seq(dim(expressionMatrix)[2])){
-    act.mean <- rowMeans(expressionMatrix[,setdiff(seq(num.samples),i)])
-    M <- expressionMatrix[,i] - act.mean
-    A = rowMeans(cbind(expressionMatrix[,i],act.mean))
-    act.data  <- data.frame('M'=M,'A'=A)
-    d <- hoeffd(cbind(A,M))$D[1,2]
-    plots[[i]] <- ( ggplot(act.data,aes(A,M)) +  geom_point(shape=1) +  
-                      ggtitle(paste(colnames(expressionMatrix)[i],'. D =',d)) )
+  ma.plot <- function(){
+    par(mfrow=c(ceiling(num.samples/3),3))
+    par(mar=c(1,2,1,1),mgp=c(3,0.3,0))
+    for ( i in seq(num.samples)){
+      act.mean <- rowMeans(expressionMatrix[,setdiff(seq(num.samples),i)])
+      M <- expressionMatrix[,i] - act.mean
+      A = rowMeans(cbind(expressionMatrix[,i],act.mean))
+      act.data  <- data.frame('M'=M,'A'=A)
+      d <- hoeffd(cbind(A,M))$D[1,2]
+      d <- round(d,3)
+      smoothScatter(A,M,main=paste(colnames(expressionMatrix)[i],'.D =',d),xlab='',ylab='')
+      title(xlab='A',line=0)
+      title(ylab='M',line=1)
+    }
+    par(mfrow=c(1,1))
   }
-  ma.plots <- do.call(grid.arrange,c(plots,ncol=2))
+  if (toPNG){
+    png("MA-plot.png")
+    ma.plot()
+    dev.off()
+  }
+  if (toPDF){
+    pdf("MA-plot.pdf")
+    ma.plot()
+    dev.off()
+  }
+    
   #ma.plots
   if (toPNG) ggsave(paste(outdir,'MA-plot.png',sep='/'),ma.plots)
   if (toPDF) ggsave(paste(outdir,'MA-plot.pdf',sep='/'),ma.plots)

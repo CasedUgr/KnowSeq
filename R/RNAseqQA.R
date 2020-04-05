@@ -77,7 +77,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
     par(mfrow=c(1,1))
   }
   if (toPNG){
-    png("MA-plot.png")
+    png("MA-plot.png",units="in", width=5, height=5, res=300)
     ma.plot()
     dev.off()
   }

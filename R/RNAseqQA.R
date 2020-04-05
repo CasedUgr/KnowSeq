@@ -26,8 +26,10 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   num.samples <- ncol(expressionMatrix)
   
   # Array distances matrix
-  melted_cormat <- melt(cor(expressionMatrix))
-  distance.plot <- ggplot(data = melted_cormat, aes(x=Var1, y=Var2, fill=value)) + 
+  distance.matrix <- as.matrix(dist(t(expressionMatrix),'manhattan'))/nrow(expressionMatrix)
+  distance.matrix <- melt(distance.matrix)
+
+  distance.plot <- ggplot(data = distance.matrix, aes(x=Var1, y=Var2, fill=value)) + 
     geom_tile() + ggtitle('Distances between arrays') + 
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab('') + ylab('')
   #distance.plot

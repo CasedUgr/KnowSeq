@@ -86,7 +86,6 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
 
     myAnnotation <- getGenesAnnotation(rownames(expressionMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter="external_gene_name",notHSapiens = FALSE)
   
-  disease <- gsub(' ','-',disease)
 
   table.format <- 'html'
   
@@ -760,5 +759,3 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   ))
   file.remove("report.Rmd")
 }
-
-

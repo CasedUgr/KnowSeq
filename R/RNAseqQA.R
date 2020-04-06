@@ -30,10 +30,11 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   outliers <- list('KS','D','Distance')
   
   outlierBarPlot <- function(data,title,limit,xlab){
+    yticks=data$y
     outlier.bar.plot <-  ggplot(data,aes(x=x,y=y)) + geom_point(color = "#56B4E9") +
       geom_segment(aes(yend=y),xend=0,color = "#56B4E9") + ylab('Samples') + xlab(xlab) +
       ggtitle(title) + theme_classic() + geom_vline(xintercept = limit) +
-      scale_y_discrete(breaks = levels(seq(num.data))[floor(seq(1, nlevels(seq(num.data)),length.out = 10))])
+      scale_y_discrete(breaks = yticks[seq(1,length(yticks),by=3)],labels=yticks[seq(1,length(yticks),by=3)])
     return(outlier.bar.plot)
   }
 

@@ -5,6 +5,8 @@
 #' @param outdir The output directory to store the report of arrayQualityMetrics
 #' @param toPNG Boolean variable to indicate if a plot would be save to PNG.
 #' @param toPDF Boolean variable to indicate if a plot would be save to PDF.
+#' @param D.limit Numeric variable to indicate Hoeffding's statistic, D, limit to a sample to be outlier
+#' @param KS.limit Numeric variable to indicate Kolmogorov-Smirnov statistic, KS, limit to a sample to be outlier
 #' @return Nothing to return.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
@@ -12,7 +14,8 @@
 #' RNAseqQA(expressionMatrix)
 
 
-RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF = TRUE){
+
+RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF = TRUE, D.limit = 0.1 , KS.limit = 0.1){
   
   if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
   if(!is.logical(toPNG)){stop("toPNG parameter can only take the values TRUE or FALSE.")}
@@ -24,11 +27,22 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   
   expressionMatrix <- expressionMatrix[unique(rownames(expressionMatrix)),]
   num.samples <- ncol(expressionMatrix)
+  outliers <- list('KS','D','Distance')
   
+  outlierBarPlot <- function(data,title,limit,xlab){
+    outlier.bar.plot <-  ggplot(data,aes(x=x,y=y)) + geom_point(color = "#56B4E9") +
+      geom_segment(aes(yend=y),xend=0,color = "#56B4E9") + ylab('Samples') + xlab(xlab) +
+      ggtitle(title) + theme_classic() + geom_vline(xintercept = limit)
+    return(outlier.bar.plot)
+  }
+  
+  # --- --- SAMPLES DISTANCES --- --- #
   # Array distances matrix
   distance.matrix <- as.matrix(dist(t(expressionMatrix),'manhattan'))/nrow(expressionMatrix)
-  distance.matrix <- melt(distance.matrix)
+  distance.sum  <- colSums(distance.matrix)
+  dist.data <-  data.frame('x'=distance.sum,'y'=colnames(distance.matrix))
 
+  distance.matrix <- melt(distance.matrix)
   distance.plot <- ggplot(data = distance.matrix, aes(x=Var1, y=Var2, fill=value)) + 
     geom_tile() + ggtitle('Distances between arrays') + 
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab('') + ylab('')
@@ -36,13 +50,27 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   if (toPNG) ggsave(paste(outdir,'distance-plot.png',sep='/'),distance.plot)
   if (toPDF)  ggsave(paste(outdir,'distance-plot.pdf',sep='/'),distance.plot)
 
-  # BOXPLOT
+  # Distance outlier detection
+  dist.outlier.plot <- outlierBarPlot(dist.data,'Distance based Outliers',min(dist.data$x)*2,'Sum-Distance')
+  
+  if (toPNG) ggsave(paste(outdir,'distance-outlier-plot.png',sep='/'),dist.outlier.plot)
+  if (toPDF)  ggsave(paste(outdir,'distance-outlier-plot.pdf',sep='/'),dist.outlier.plot)
+  
+  outliers[['Distance']] <- distance.sum
+  
+  # --- --- BOXPLOT --- --- #
+  
+  quantiles <-  apply(expressionMatrix,2, quantile)
+  min.x <- max(quantiles[1,])
+  max.x <- min(quantiles[5,])
+  
   boxplot.data <- melt(expressionMatrix)
   colnames(boxplot.data) <- c('Tags','Samples','Expression')
   box.plot <- ggplot(boxplot.data, aes(x=Expression , y=Samples)) + 
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlim(min.x,max.x) +
     geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4,fill='#56B4E9') 
   #box.plot
+  
   if (toPNG) ggsave(paste(outdir,'box-plot.png',sep='/'),box.plot)
   if (toPDF) ggsave(paste(outdir,'box-plot.pdf',sep='/'),box.plot)
   
@@ -52,44 +80,65 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   fx = ecdf(as.vector(expressionMatrix))
   r <- suppressWarnings(apply(expressionMatrix, 2, function(v)
     ks.test(v, y = fx, alternative='two.sided')$statistic))
-  ks.data <- data.frame('ks'=as.vector(r),'x'=c(1:length(r)))
-  ks.plot <- ggplot(ks.data,aes(x=ks,y=x)) + geom_point(color = "#56B4E9") + 
-    geom_segment(aes(yend=x),xend=0,color = "#56B4E9") +
-    scale_y_discrete(limits=c(1:num.samples),labels=colnames(expressionMatrix)) + ylab('') +
-    theme_classic()
+
+  ks.data <- data.frame('x'=r,'y'=c(1:length(r)))
+  ks.plot <- outlierBarPlot(ks.data,'KS - Outliers',KS.limit,'KS')
+
   #ks.plot
   if (toPNG) ggsave(paste(outdir,'ks-plot.png',sep='/'),ks.plot)
   if (toPDF) ggsave(paste(outdir,'ks-plot.pdf',sep='/'),ks.plot)
   
-  # MA-PLOT
-  ma.plot <- function(){
-    par(mfrow=c(ceiling(num.samples/3),3))
+  outliers[['ks']] <- r
+  
+  # --- --- MA --- --- #
+  M <- list()
+  A <- list()
+  Da <- list()
+  
+  for ( i in seq(num.samples)){
+    act.mean <- rowMeans(expressionMatrix[,setdiff(seq(num.samples),i)])
+    M[[i]] <- expressionMatrix[,i] - act.mean
+    A[[i]] = rowMeans(cbind(expressionMatrix[,i],act.mean))
+    Da[[i]] <- round(hoeffd(cbind(A[[i]],M[[i]]))$D[1,2],3)
+  }
+  
+  Da <- unlist(Da)
+  names(Da) <- colnames(expressionMatrix)
+  sort.da <- sort(Da)
+
+  ma.plot <- function(ma.data){
+    par(mfrow=c(3,3))
     par(mar=c(1,2,1,1),mgp=c(3,0.3,0))
-    for ( i in seq(num.samples)){
-      act.mean <- rowMeans(expressionMatrix[,setdiff(seq(num.samples),i)])
-      M <- expressionMatrix[,i] - act.mean
-      A = rowMeans(cbind(expressionMatrix[,i],act.mean))
+    for ( i in seq(length(ma.data))){
       act.data  <- data.frame('M'=M,'A'=A)
-      d <- hoeffd(cbind(A,M))$D[1,2]
-      d <- round(d,3)
-      smoothScatter(A,M,main=paste(colnames(expressionMatrix)[i],'.D =',d),xlab='',ylab='')
+      smoothScatter(A[[i]],M[[i]],main=paste(names(ma.data)[i],'.D =',ma.data[i]),xlab='',ylab='')
       title(xlab='A',line=0)
       title(ylab='M',line=1)
     }
     par(mfrow=c(1,1))
   }
+  
   if (toPNG){
-    png("MA-plot.png",units="in", width=5, height=5, res=300)
-    ma.plot()
+    png(paste(outdir,'MA-plot.png',sep='/'),units="in", width=5, height=5, res=300)
+    ma.plot(sort.da[1:9])
     dev.off()
   }
   if (toPDF){
-    pdf("MA-plot.pdf")
-    ma.plot()
+    pdf(paste(outdir,'MA-plot.pdf',sep='/'))
+    ma.plot(sort.da[1:9])
     dev.off()
   }
-    
-  #ma.plots
-  if (toPNG) ggsave(paste(outdir,'MA-plot.png',sep='/'),ma.plots)
-  if (toPDF) ggsave(paste(outdir,'MA-plot.pdf',sep='/'),ma.plots)
+
+  # MA - Outliers
+  ma.data <- data.frame('x'=unlist(Da),'y'=seq(length(Da)))
+  ma.outlier.plot <- outlierBarPlot(ma.data,'MA - Outliers',D.limit,'D')
+  ma.outlier.plot
+  if (toPNG) ggsave(paste(outdir,'MA-outlier-plot.png',sep='/'),ma.outlier.plot)
+  if (toPDF) ggsave(paste(outdir,'MA-outlier-plot.pdf',sep='/'),ma.outlier.plot)
+
+  outliers[['MA-D']] <- Da
+
+  return(outliers)
 }
+
+

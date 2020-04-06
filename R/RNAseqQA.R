@@ -13,7 +13,7 @@
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' RNAseqQA(expressionMatrix)
 
-
+expressionMatrixTrain <- t(read.table(paste('/Users/marta/Desktop/featureSelector/cancer-types/lung/data/DEGsMatrixML-biclase-fold-2.csv',sep=''),sep='\t'))
 
 RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF = TRUE, D.limit = 0.1 , KS.limit = 0.1){
   
@@ -32,10 +32,11 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   outlierBarPlot <- function(data,title,limit,xlab){
     outlier.bar.plot <-  ggplot(data,aes(x=x,y=y)) + geom_point(color = "#56B4E9") +
       geom_segment(aes(yend=y),xend=0,color = "#56B4E9") + ylab('Samples') + xlab(xlab) +
-      ggtitle(title) + theme_classic() + geom_vline(xintercept = limit)
+      ggtitle(title) + theme_classic() + geom_vline(xintercept = limit) +
+      scale_y_discrete(breaks = levels(seq(num.data))[floor(seq(1, nlevels(seq(num.data)),length.out = 10))])
     return(outlier.bar.plot)
   }
-  
+
   # --- --- SAMPLES DISTANCES --- --- #
   # Array distances matrix
   distance.matrix <- as.matrix(dist(t(expressionMatrix),'manhattan'))/nrow(expressionMatrix)
@@ -43,12 +44,15 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   dist.data <-  data.frame('x'=distance.sum,'y'=colnames(distance.matrix))
 
   distance.matrix <- melt(distance.matrix)
+  num.data <- ncol(distance.matrix)
   distance.plot <- ggplot(data = distance.matrix, aes(x=Var1, y=Var2, fill=value)) + 
     geom_tile() + ggtitle('Distances between arrays') + 
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlab('') + ylab('')
-  #distance.plot
-  if (toPNG) ggsave(paste(outdir,'distance-plot.png',sep='/'),distance.plot)
-  if (toPDF)  ggsave(paste(outdir,'distance-plot.pdf',sep='/'),distance.plot)
+    scale_y_discrete(breaks = levels(seq(num.data))[floor(seq(1, nlevels(seq(num.data)),length.out = 10))]) +
+    scale_x_discrete(breaks = levels(seq(num.data))[floor(seq(1, nlevels(seq(num.data)),length.out = 10))]) +
+    xlab('') + ylab('')
+  distance.plot
+  if (toPNG) ggsave(paste(outdir,'distance-plot.png',sep='/'),distance.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+  if (toPDF)  ggsave(paste(outdir,'distance-plot.pdf',sep='/'),distance.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
 
   # Distance outlier detection
   dist.outlier.plot <- outlierBarPlot(dist.data,'Distance based Outliers',min(dist.data$x)*2,'Sum-Distance')
@@ -59,21 +63,23 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   outliers[['Distance']] <- distance.sum
   
   # --- --- BOXPLOT --- --- #
-  
   quantiles <-  apply(expressionMatrix,2, quantile)
   min.x <- max(quantiles[1,])
   max.x <- min(quantiles[5,])
   
   boxplot.data <- melt(expressionMatrix)
   colnames(boxplot.data) <- c('Tags','Samples','Expression')
+
   box.plot <- ggplot(boxplot.data, aes(x=Expression , y=Samples)) + 
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) + xlim(min.x,max.x) +
-    geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4,fill='#56B4E9') 
+    scale_y_discrete(breaks = levels(seq(nrow(boxplot.data)))[floor(seq(1, nlevels(seq(nrow(boxplot.data))),length.out = 10))]) +
+    xlim(min.x,max.x) + geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4,fill='#56B4E9') 
   #box.plot
   
-  if (toPNG) ggsave(paste(outdir,'box-plot.png',sep='/'),box.plot)
-  if (toPDF) ggsave(paste(outdir,'box-plot.pdf',sep='/'),box.plot)
   
+  if (toPNG) ggsave(paste(outdir,'box-plot.png',sep='/'),box.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+  if (toPDF) ggsave(paste(outdir,'box-plot.pdf',sep='/'),box.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+
+
   # KS
   # Empirical cumulative distribution function
   # AÑADIR ecdf DE stats
@@ -85,9 +91,10 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   ks.plot <- outlierBarPlot(ks.data,'KS - Outliers',KS.limit,'KS')
 
   #ks.plot
-  if (toPNG) ggsave(paste(outdir,'ks-plot.png',sep='/'),ks.plot)
-  if (toPDF) ggsave(paste(outdir,'ks-plot.pdf',sep='/'),ks.plot)
-  
+
+  if (toPNG) ggsave(paste(outdir,'ks-plot.png',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+  if (toPDF) ggsave(paste(outdir,'ks-plot.pdf',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+
   outliers[['ks']] <- r
   
   # --- --- MA --- --- #
@@ -132,13 +139,13 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   # MA - Outliers
   ma.data <- data.frame('x'=unlist(Da),'y'=seq(length(Da)))
   ma.outlier.plot <- outlierBarPlot(ma.data,'MA - Outliers',D.limit,'D')
-  ma.outlier.plot
-  if (toPNG) ggsave(paste(outdir,'MA-outlier-plot.png',sep='/'),ma.outlier.plot)
-  if (toPDF) ggsave(paste(outdir,'MA-outlier-plot.pdf',sep='/'),ma.outlier.plot)
+  
+  
+  if (toPNG) ggsave(paste(outdir,'MA-outlier-plot.png',sep='/'),ma.outlier.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+  if (toPDF) ggsave(paste(outdir,'MA-outlier-plot.pdf',sep='/'),ma.outlier.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
 
   outliers[['MA-D']] <- Da
 
   return(outliers)
 }
-
 

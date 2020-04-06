@@ -4,22 +4,25 @@
 \alias{RNAseqQA}
 \title{RNAseqQA performs the quality analysis of an expression matrix.}
 \usage{
-RNAseqQA(expressionMatrix, outdir = "RNAseqQA")
+RNAseqQA(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF = TRUE)
 }
 \arguments{
 \item{expressionMatrix}{A matrix that contains the gene expression values.}
 
 \item{outdir}{The output directory to store the report of arrayQualityMetrics}
+
+\item{toPNG}{Boolean variable to indicate if a plot would be save to PNG.}
+
+\item{toPDF}{Boolean variable to indicate if a plot would be save to PDF.}
 }
 \value{
 Nothing to return.
 }
 \description{
-RNAseqQA performs the quality analysis of an expression matrix. This function adapts the RNA-seq data in order to allows using arrayQualityMetrics expression analysis.
+RNAseqQA performs the quality analysis of an expression matrix. This function generates different plots over expression data in order to detect possible outliers.
 }
 \examples{
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
-
 RNAseqQA(expressionMatrix)
 }

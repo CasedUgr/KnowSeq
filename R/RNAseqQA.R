@@ -88,8 +88,5 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
     ma.plot()
     dev.off()
   }
-    
-  #ma.plots
-  if (toPNG) ggsave(paste(outdir,'MA-plot.png',sep='/'),ma.plots)
-  if (toPDF) ggsave(paste(outdir,'MA-plot.pdf',sep='/'),ma.plots)
+
 }

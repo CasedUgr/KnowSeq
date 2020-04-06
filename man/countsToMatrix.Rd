@@ -27,7 +27,7 @@ countsInfo$Path <- paste(dir,"/countFiles/",countsInfo$Run,sep = "")
 
 write.csv(countsInfo, file = "countsInfo.csv")
 
-countsInformation <- countsToMatrix("countsInfo.csv")
+countsInformation <- countsToMatrix("countsInfo.csv", extension = 'count')
 
 countsMatrix <- countsInformation$countsMatrix
 labels <- countsInformation$labels

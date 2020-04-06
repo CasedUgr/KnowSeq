@@ -124,8 +124,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                  paste('![](',outdir,'RNAseqQA/box-plot.png)',sep=''),
                  '\nNext image shows a bar chart of the Kolmogorov-Smirnov statistic $K_a$',
                  paste('![](',outdir,'RNAseqQA/ks-plot.png)',sep=''),
-                 '\nFinally, MA-plot is shown bellow',
-                 paste('![](',outdir,'RNAseqQA/MA-plot.png)',sep=''))
+                 '\nFinally, MA-plot is shown bellow')
   }
   
   # --- Differencia Expressed Genes --- #

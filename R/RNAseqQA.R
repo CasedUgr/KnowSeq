@@ -7,11 +7,11 @@
 #' @param toPDF Boolean variable to indicate if a plot would be save to PDF.
 #' @param D.limit Numeric variable to indicate Hoeffding's statistic, D, limit to a sample to be outlier
 #' @param KS.limit Numeric variable to indicate Kolmogorov-Smirnov statistic, KS, limit to a sample to be outlier
-#' @return Nothing to return.
+#' @return A list containing found outliers for each realized test. 
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#' RNAseqQA(expressionMatrix)
+#' outliers <- RNAseqQA(expressionMatrix)
 
 RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF = TRUE, D.limit = 0.1 , KS.limit = 0.1){
   
@@ -25,7 +25,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   
   expressionMatrix <- expressionMatrix[unique(rownames(expressionMatrix)),]
   num.samples <- ncol(expressionMatrix)
-  outliers <- list('KS','D','Distance')
+  outliers <- list()
   
   outlierBarPlot <- function(data,title,limit,xlab){
     yticks=data$y
@@ -44,12 +44,13 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
 
   distance.matrix <- melt(distance.matrix)
   num.data <- ncol(distance.matrix)
+
   distance.plot <- ggplot(data = distance.matrix, aes(x=Var1, y=Var2, fill=value)) + 
     geom_tile() + ggtitle('Distances between arrays') + 
     scale_y_discrete(breaks = levels(seq(num.data))[floor(seq(1, nlevels(seq(num.data)),length.out = 10))]) +
     scale_x_discrete(breaks = levels(seq(num.data))[floor(seq(1, nlevels(seq(num.data)),length.out = 10))]) +
     xlab('') + ylab('')
-  distance.plot
+
   if (toPNG) ggsave(paste(outdir,'distance-plot.png',sep='/'),distance.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
   if (toPDF)  ggsave(paste(outdir,'distance-plot.pdf',sep='/'),distance.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
 
@@ -59,7 +60,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   if (toPNG) ggsave(paste(outdir,'distance-outlier-plot.png',sep='/'),dist.outlier.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
   if (toPDF)  ggsave(paste(outdir,'distance-outlier-plot.pdf',sep='/'),dist.outlier.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
   
-  outliers[['Distance']] <- distance.sum
+  outliers[['Distance']] <- distance.sum[which(distance.sum > min(dist.data$x)*2)]
   
   # --- --- BOXPLOT --- --- #
   quantiles <-  apply(expressionMatrix,2, quantile)
@@ -83,10 +84,10 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   # Empirical cumulative distribution function
   # AÑADIR ecdf DE stats
   fx = ecdf(as.vector(expressionMatrix))
-  r <- suppressWarnings(apply(expressionMatrix, 2, function(v)
+  ks <- suppressWarnings(apply(expressionMatrix, 2, function(v)
     ks.test(v, y = fx, alternative='two.sided')$statistic))
 
-  ks.data <- data.frame('x'=r,'y'=c(1:length(r)))
+  ks.data <- data.frame('x'=ks,'y'=c(1:length(ks)))
   ks.plot <- outlierBarPlot(ks.data,'KS - Outliers',KS.limit,'KS')
 
   #ks.plot
@@ -94,7 +95,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   if (toPNG) ggsave(paste(outdir,'ks-plot.png',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
   if (toPDF) ggsave(paste(outdir,'ks-plot.pdf',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
 
-  outliers[['ks']] <- r
+  outliers[['KS']] <- ks[which(ks > KS.limit)]
   
   # --- --- MA --- --- #
   M <- list()
@@ -143,7 +144,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   if (toPNG) ggsave(paste(outdir,'MA-outlier-plot.png',sep='/'),ma.outlier.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
   if (toPDF) ggsave(paste(outdir,'MA-outlier-plot.pdf',sep='/'),ma.outlier.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
 
-  outliers[['MA-D']] <- Da
+  outliers[['MA-D']] <- Da[which(Da > D.limit)]
 
   return(outliers)
 }

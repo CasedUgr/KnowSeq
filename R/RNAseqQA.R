@@ -13,8 +13,6 @@
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' RNAseqQA(expressionMatrix)
 
-expressionMatrixTrain <- t(read.table(paste('/Users/marta/Desktop/featureSelector/cancer-types/lung/data/DEGsMatrixML-biclase-fold-2.csv',sep=''),sep='\t'))
-
 RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF = TRUE, D.limit = 0.1 , KS.limit = 0.1){
   
   if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
@@ -58,8 +56,8 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   # Distance outlier detection
   dist.outlier.plot <- outlierBarPlot(dist.data,'Distance based Outliers',min(dist.data$x)*2,'Sum-Distance')
   
-  if (toPNG) ggsave(paste(outdir,'distance-outlier-plot.png',sep='/'),dist.outlier.plot)
-  if (toPDF)  ggsave(paste(outdir,'distance-outlier-plot.pdf',sep='/'),dist.outlier.plot)
+  if (toPNG) ggsave(paste(outdir,'distance-outlier-plot.png',sep='/'),dist.outlier.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+  if (toPDF)  ggsave(paste(outdir,'distance-outlier-plot.pdf',sep='/'),dist.outlier.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
   
   outliers[['Distance']] <- distance.sum
   
@@ -67,7 +65,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   quantiles <-  apply(expressionMatrix,2, quantile)
   min.x <- max(quantiles[1,])
   max.x <- min(quantiles[5,])
-  
+
   boxplot.data <- melt(expressionMatrix)
   colnames(boxplot.data) <- c('Tags','Samples','Expression')
 

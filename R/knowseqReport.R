@@ -165,6 +165,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       markobj <- c(markobj,paste('There were',length(found.outliers$`MA-D`),
                                  'found outlier using this criterion:',outliers,'\n'))
     }
+
   }
   
   # --- Differencia Expressed Genes --- #

@@ -116,8 +116,6 @@ dataPlot(results_test_svm$specVector,mode = "classResults", main = "Specificity 
 dataPlot(results_test_svm$cfMats[[100]]$table,testLabels,mode = "confusionMatrix",toPNG = TRUE, toPDF = TRUE)
 
 # Retrieving the GO information from the three different ontologies
-labelsGo <- gsub("Control",0,labels)
-labelsGo <- gsub("Tumor",1,labelsGo)
 GOsInfo <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
 
 # Downloading and filling with expression the pathways of the DEGs

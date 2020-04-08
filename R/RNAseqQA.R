@@ -147,5 +147,6 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   outliers[['MA-D']] <- Da[which(Da > D.limit)]
 
   return(outliers)
+
 }
 

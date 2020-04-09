@@ -116,18 +116,23 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     KS.limit <- 0.1
     D.limit <- 0.1
     found.outliers <- RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA',sep=''),KS.limit=KS.limit,D.limit=D.limit)
+
     markobj <- c(markobj,'# Quality analysis\n',
                  'A quality analysis must be performed in order to detect and remove any possible outlier contained within the samples. ',
                  'Outliers are numerically different samples when compared with the rest of the samples, and this numerical difference might affect study results. ', 
-                 'For that purpose, several methods and graphics have been performed, which allow to find possible outliers.\n')
+                 'For that purpose, several methods and graphics have been performed, which allow to find possible outliers.',
+                 paste('All created images are availables in',outdir,'RNAseqQA folder. \n'))
     markobj <- c(markobj,'## Between array comparison. \n',
-                 '\nNext image shows a heatmap with the distances between samples Distances between a pair of samples is perform as
-                 the mean of the manhattan distance between each gene: $dist(S_a,S_b) = mean \\sum_{i} | g_{ai} - g_{bi}|$',
-                 paste('![](',outdir,'RNAseqQA/distance-plot.png)',sep=''),
-                 '\nOutlier detection. In the next plot the sum of the distances to each array is shown for each array, this is
+                 '\nFirst, a heatmap with the distances between samples Distances between a pair of samples is perform as
+                 the mean of the manhattan distance between each gene: $dist(S_a,S_b) = mean \\sum_{i} | g_{ai} - g_{bi}|$. 
+                 This image can be seen ',
+                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/distance-plot.pdf)',sep=''),
+                 '\nFor outlier detection the sum of the distances to each array is calculated for each array, this is
                  $Dist_{S_a} = \\sum_{S_b} dist(S_a,S_b)$.',
-                 'Using this criterion, a sample will be considerer an outlier if this sum is sufficiently large',
-                 paste('![](',outdir,'RNAseqQA/distance-outlier-plot.png)\n',sep=''))
+                 'Using this criterion, a sample will be considerer an outlier if this sum is sufficiently large.',
+                 'A plot of this distances and be seen ',
+                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/distance-outlier-plot.pdf)\n',sep=''))
+    
     if (length(found.outliers$Distance)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
     else{
@@ -137,11 +142,12 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     }
 
     markobj <- c(markobj,'## Array intensity distributions. \n',
-                 '\nIn the following plot, a boxplot of arrays values is shown.',
-                 paste('![](',outdir,'RNAseqQA/box-plot.png)',sep=''),
-                 '\nNext image shows a bar chart of the Kolmogorov-Smirnov statistic $K_a$.',
-                 paste('In this case, a sample will be considerated an outlier if $K_a > ',KS.limit,'$',sep=''),
-                 paste('![](',outdir,'RNAseqQA/ks-plot.png)\n',sep=''))
+                 '\nA boxplot of arrays values is shown ',
+                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/box-plot.pdf)',sep=''),
+                 '\nOutlier detection is perform using Kolmogorov-Smirnov statistic $K_a$.',
+                 paste('In this case, a sample will be considerated an outlier if $K_a > ',KS.limit,'$.',sep=''),
+                 'A bar chart plot shown $K_a$ statistic for each sample is available ',
+                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/ks-plot.pdf)\n',sep=''))
     if (length(found.outliers$KS)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
     else{
@@ -149,15 +155,17 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       markobj <- c(markobj,paste('There were',length(found.outliers$KS),'found outlier using this criterion:',
                                  outliers,'\n'))
     }
-    
+
     markobj <- c(markobj,'## Individual array quality. \n',
                  "\nFinally, MA-plot is performed for each sample and Hoeffding's statistic, 
                  $ D_a $, is calculated on the joint distribution of A and M for each sample.",
-                 "In the following plot, MA-plot of the 9 samples with lowest $D_a$ is shown.\n",
+                 "In the following plot, MA-plot of the 9 samples with lowest $D_a$ is shown.",
                  paste('![](',outdir,'RNAseqQA/MA-plot.png)',sep=''),
                  paste('\nOutlier detection. In this experiment, a sample, $S_a$, will be considerated an outlier 
-                 if $D_a < ',D.limit,'$\n',sep=''),
-                 paste('![](',outdir,'RNAseqQA/MA-outlier-plot.png)\n',sep=''))
+                 if $D_a < ',D.limit,'$.',sep=''),
+                 'The bar chart containing this information for each sample can be seen ',
+                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/MA-outlier-plot.pdf)\n',sep=''))
+    
     if (length(found.outliers$`MA-D`)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
     else{

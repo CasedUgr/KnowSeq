@@ -62,24 +62,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
   
   outliers[['Distance']] <- distance.sum[which(distance.sum > min(dist.data$x)*2)]
   
-  # --- --- BOXPLOT --- --- #
-  quantiles <-  apply(expressionMatrix,2, quantile)
-  min.x <- max(quantiles[1,])
-  max.x <- min(quantiles[5,])
-
-  boxplot.data <- melt(expressionMatrix)
-  colnames(boxplot.data) <- c('Tags','Samples','Expression')
-
-  box.plot <- ggplot(boxplot.data, aes(x=Expression , y=Samples)) + 
-    scale_y_discrete(breaks = levels(seq(nrow(boxplot.data)))[floor(seq(1, nlevels(seq(nrow(boxplot.data))),length.out = 10))]) +
-    xlim(min.x,max.x) + geom_boxplot(outlier.colour="red", outlier.shape=8, outlier.size=4,fill='#56B4E9') 
-  #box.plot
-  
-  
-  if (toPNG) ggsave(paste(outdir,'box-plot.png',sep='/'),box.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
-  if (toPDF) ggsave(paste(outdir,'box-plot.pdf',sep='/'),box.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
-
-
+  # --- --- KS --- --- #
   # KS
   # Empirical cumulative distribution function
   # AÑADIR ecdf DE stats
@@ -89,11 +72,37 @@ RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF =
 
   ks.data <- data.frame('x'=ks,'y'=c(1:length(ks)))
   ks.plot <- outlierBarPlot(ks.data,'KS - Outliers',KS.limit,'KS')
-
   #ks.plot
 
-  if (toPNG) ggsave(paste(outdir,'ks-plot.png',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
-  if (toPDF) ggsave(paste(outdir,'ks-plot.pdf',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+  ks.outliers.index <- which(ks > KS.limit)
+  
+  quantiles <-  apply(expressionMatrix,2, quantile)
+  min.x <- max(quantiles[1,])
+  max.x <- min(quantiles[5,])
+  
+  boxplot.data <- melt(expressionMatrix)
+  colnames(boxplot.data) <- c('Tags','Samples','Expression')
+  
+  box.plot <- ggplot(boxplot.data, aes(x=Expression , y=Samples)) + 
+    scale_y_discrete(breaks = levels(seq(nrow(boxplot.data)))[floor(seq(1, nlevels(seq(nrow(boxplot.data))),length.out = 10))]) +
+    xlim(min.x,max.x) + geom_boxplot(outlier.shape=NA,fill='#56B4E9') 
+  
+  for ( i in seq(length(ks.outliers.index)))  {
+    box.plot <-  box.plot + annotate(geom="point", x = min.x+0.1, y = ks.outliers.index[i], colour="red",size=3)
+  }
+
+  box.plot
+  ggsave('box-plot.pdf',box.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+  
+  if (toPNG) {
+    ggsave(paste(outdir,'box-plot.png',sep='/'),box.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+    ggsave(paste(outdir,'ks-plot.png',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+  }
+  if (toPDF) {
+    ggsave(paste(outdir,'box-plot.pdf',sep='/'),box.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+    ggsave(paste(outdir,'ks-plot.pdf',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
+  }
+  
 
   outliers[['KS']] <- ks[which(ks > KS.limit)]
   

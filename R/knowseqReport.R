@@ -113,9 +113,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   
   if(qualityAnalysis){
     cat("Performing the quality analysis of the samples\n")
-    KS.limit <- 0.1
-    D.limit <- 0.1
-    found.outliers <- RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA',sep=''),KS.limit=KS.limit,D.limit=D.limit)
+    found.outliers <- RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA',sep=''))
 
     markobj <- c(markobj,'# Quality analysis\n',
                  'A quality analysis must be performed in order to detect and remove any possible outlier contained within the samples. ',
@@ -129,29 +127,30 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                  paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/distance-plot.pdf)',sep=''),
                  '\nFor outlier detection the sum of the distances to each array is calculated for each array, this is
                  $Dist_{S_a} = \\sum_{S_b} dist(S_a,S_b)$.',
-                 'Using this criterion, a sample will be considerer an outlier if this sum is sufficiently large.',
-                 'A plot of this distances and be seen ',
+                 paste('Using this criterion, a sample will be considerer an outlier if this sum is higer than',round(found.outliers$Distance$limit,3),'.',sep=''),
+                 'A bar chart plot showing this distances for each sample and be seen ',
                  paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/distance-outlier-plot.pdf)\n',sep=''))
     
-    if (length(found.outliers$Distance)==0)
+    if (length(found.outliers$Distance$outliers)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
     else{
-      outliers <- paste(names(found.outliers$Distance),collapse=', ')
-      markobj <- c(markobj,paste('There were',length(found.outliers$Distance),'found outlier using this criterion:',
-                                 names(found.outliers$Distance),'\n'))
+      outliers <- paste(names(found.outliers$Distance$outliers),collapse=', ')
+      outliers <-  paste(names(found.outliers$Distance$outliers),collapse=', ')
+      markobj <- c(markobj,paste('There were',length(found.outliers$Distance$outliers),'found outlier using this criterion:',
+                                 outliers,'\n'))
     }
 
     markobj <- c(markobj,'## Array intensity distributions. \n',
                  '\nA boxplot of arrays values is shown ',
                  paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/box-plot.pdf)',sep=''),
                  '\nOutlier detection is perform using Kolmogorov-Smirnov statistic $K_a$.',
-                 paste('In this case, a sample will be considerated an outlier if $K_a > ',KS.limit,'$.',sep=''),
+                 paste('In this case, a sample will be considerated an outlier if $K_a > ',round(found.outliers$KS$limit,3),'$.',sep=''),
                  'A bar chart plot shown $K_a$ statistic for each sample is available ',
                  paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/ks-plot.pdf)\n',sep=''))
-    if (length(found.outliers$KS)==0)
+    if (length(found.outliers$KS$outliers)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
     else{
-      outliers <- paste(names(found.outliers$KS),collapse=', ')
+      outliers <- paste(names(found.outliers$KS$outliers),collapse=', ')
       markobj <- c(markobj,paste('There were',length(found.outliers$KS),'found outlier using this criterion:',
                                  outliers,'\n'))
     }
@@ -162,14 +161,14 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                  "In the following plot, MA-plot of the 9 samples with lowest $D_a$ is shown.",
                  paste('![](',outdir,'RNAseqQA/MA-plot.png)',sep=''),
                  paste('\nOutlier detection. In this experiment, a sample, $S_a$, will be considerated an outlier 
-                 if $D_a < ',D.limit,'$.',sep=''),
+                 if $D_a < ',round(found.outliers$`MA-D`$limit,3),'$.',sep=''),
                  'The bar chart containing this information for each sample can be seen ',
                  paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/MA-outlier-plot.pdf)\n',sep=''))
     
-    if (length(found.outliers$`MA-D`)==0)
+    if (length(found.outliers$`MA-D`$outliers)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
     else{
-      outliers <- paste(names(found.outliers$`MA-D`),collapse=', ')
+      outliers <- paste(names(found.outliers$`MA-D`$outliers),collapse=', ')
       markobj <- c(markobj,paste('There were',length(found.outliers$`MA-D`),
                                  'found outlier using this criterion:',outliers,'\n'))
     }

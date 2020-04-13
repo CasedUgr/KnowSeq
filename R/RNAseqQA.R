@@ -12,7 +12,7 @@
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #' outliers <- RNAseqQA(expressionMatrix)
 
-RNAseqQA <- function(expressionMatrix, outdir = "myPlots", toPNG = TRUE, toPDF = TRUE, toRemoval = FALSE){
+RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG = TRUE, toPDF = TRUE, toRemoval = FALSE){
   
   if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
   if(!is.logical(toPNG)){stop("toPNG parameter can only take the values TRUE or FALSE.")}

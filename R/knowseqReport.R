@@ -28,8 +28,8 @@
 #' \dontrun{knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)}
 #' \dontrun{knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)}
 
-knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels="",outdir="knowSeq-report", qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
-                          geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
+knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels="",outdir="knowSeq-report", qualityAnalysis = TRUE, batchEffectTreatment =  FALSE,
+                          geneOntology = FALSE, getPathways = FALSE, getDiseases = FALSE,
                           lfc=2.0, pvalue=0.01, cov=2, 
                           featureSelectionMode = 'nofs', disease = '',subdiseases=c(''), maxGenes = Inf, clasifAlgs=c('knn','rf','svm'),
                           metrics=c('accuracy','specificity','sensitivity')){
@@ -122,14 +122,12 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                  paste('All created images are availables in',outdir,'RNAseqQA folder. \n'))
     markobj <- c(markobj,'## Between array comparison. \n',
                  '\nFirst, a heatmap with the distances between samples Distances between a pair of samples is perform as
-                 the mean of the manhattan distance between each gene: $dist(S_a,S_b) = mean \\sum_{i} | g_{ai} - g_{bi}|$. 
-                 This image can be seen ',
-                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/distance-plot.pdf)',sep=''),
+                 the mean of the manhattan distance between each gene: $dist(S_a,S_b) = mean \\sum_{i} | g_{ai} - g_{bi}|$.',
                  '\nFor outlier detection the sum of the distances to each array is calculated for each array, this is
                  $Dist_{S_a} = \\sum_{S_b} dist(S_a,S_b)$.',
                  paste('Using this criterion, a sample will be considerer an outlier if this sum is higer than',round(found.outliers$Distance$limit,3),'.',sep=''),
                  'A bar chart plot showing this distances for each sample and be seen ',
-                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/distance-outlier-plot.pdf)\n',sep=''))
+                 paste('[**here.**](file://',getwd(),'/',outdir,'RNAseqQA/distance-outlier-plot.pdf)\n',sep=''))
     
     if (length(found.outliers$Distance$outliers)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
@@ -142,11 +140,11 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
 
     markobj <- c(markobj,'## Array intensity distributions. \n',
                  '\nA boxplot of arrays values is shown ',
-                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/box-plot.pdf)',sep=''),
+                 paste('[**here.**](file://',getwd(),'/',outdir,'RNAseqQA/box-plot.pdf)',sep=''),
                  '\nOutlier detection is perform using Kolmogorov-Smirnov statistic $K_a$.',
                  paste('In this case, a sample will be considerated an outlier if $K_a > ',round(found.outliers$KS$limit,3),'$.',sep=''),
                  'A bar chart plot shown $K_a$ statistic for each sample is available ',
-                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/ks-plot.pdf)\n',sep=''))
+                 paste('[**here.**](file://',getwd(),'/',outdir,'RNAseqQA/ks-plot.pdf)\n',sep=''))
     if (length(found.outliers$KS$outliers)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
     else{
@@ -159,11 +157,11 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                  "\nFinally, MA-plot is performed for each sample and Hoeffding's statistic, 
                  $ D_a $, is calculated on the joint distribution of A and M for each sample.",
                  "In the following plot, MA-plot of the 9 samples with lowest $D_a$ is shown.",
-                 paste('![](',outdir,'RNAseqQA/MA-plot.png)',sep=''),
+                 paste('![**here.**](',outdir,'RNAseqQA/MA-plot.png)',sep=''),
                  paste('\nOutlier detection. In this experiment, a sample, $S_a$, will be considerated an outlier 
                  if $D_a < ',round(found.outliers$`MA-D`$limit,3),'$.',sep=''),
                  'The bar chart containing this information for each sample can be seen ',
-                 paste('[here.](file://',getwd(),'/',outdir,'RNAseqQA/MA-outlier-plot.pdf)\n',sep=''))
+                 paste('[**here.**](file://',getwd(),'/',outdir,'RNAseqQA/MA-outlier-plot.pdf)\n',sep=''))
     
     if (length(found.outliers$`MA-D`$outliers)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
@@ -792,7 +790,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   write(file = "report.Rmd", c(mark.header.html,markobj))
   
   dir <- system.file("extdata", package="KnowSeq")
-
+  dir <- 'inst/extdata'
   render(input = "report.Rmd", output_file = paste(outdir,'report.html',sep='/'),output_format = rmarkdown::html_document(
     theme = "default",
     mathjax = NULL,
@@ -806,3 +804,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   ))
   file.remove("report.Rmd")
 }
+
+
+knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)
+

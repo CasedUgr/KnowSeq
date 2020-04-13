@@ -128,7 +128,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG 
   
     ma.plot <- function(ma.data){
       par(mfrow=c(2,3))
-      par(mar=c(2.5,2,1,1),mgp=c(3,0.3,0))
+      par(mar=c(4,2,1,1))
       for ( i in seq(length(ma.data))){
         act.data  <- data.frame('M'=M,'A'=A)
         smoothScatter(A[[i]],M[[i]],main=paste(names(ma.data)[i],'.D =',ma.data[i]),xlab='',ylab='')

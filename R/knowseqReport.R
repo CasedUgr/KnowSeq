@@ -156,7 +156,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     markobj <- c(markobj,'## Individual array quality. \n',
                  "\nFinally, MA-plot is performed for each sample and Hoeffding's statistic, 
                  $ D_a $, is calculated on the joint distribution of A and M for each sample.",
-                 "In the following plot, MA-plot of the 9 samples with lowest $D_a$ is shown.",
+                 "In the following plot, MA-plot of the 3 samples with lowest and higest $D_a$ is shown.",
                  paste('![**here.**](',outdir,'RNAseqQA/MA-plot.png)',sep=''),
                  paste('\nOutlier detection. In this experiment, a sample, $S_a$, will be considerated an outlier 
                  if $D_a < ',round(found.outliers$`MA-D`$limit,3),'$.',sep=''),

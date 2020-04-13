@@ -28,8 +28,8 @@
 #' \dontrun{knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)}
 #' \dontrun{knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',subdiseases=c('squamous cell lung carcinoma','lung adenocarcinoma'),maxGenes = 9)}
 
-knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels="",outdir="knowSeq-report", qualityAnalysis = TRUE, batchEffectTreatment =  FALSE,
-                          geneOntology = FALSE, getPathways = FALSE, getDiseases = FALSE,
+knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels="",outdir="knowSeq-report", qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
+                          geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
                           lfc=2.0, pvalue=0.01, cov=2, 
                           featureSelectionMode = 'nofs', disease = '',subdiseases=c(''), maxGenes = Inf, clasifAlgs=c('knn','rf','svm'),
                           metrics=c('accuracy','specificity','sensitivity')){
@@ -790,7 +790,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   write(file = "report.Rmd", c(mark.header.html,markobj))
   
   dir <- system.file("extdata", package="KnowSeq")
-  dir <- 'inst/extdata'
+
   render(input = "report.Rmd", output_file = paste(outdir,'report.html',sep='/'),output_format = rmarkdown::html_document(
     theme = "default",
     mathjax = NULL,
@@ -804,7 +804,3 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   ))
   file.remove("report.Rmd")
 }
-
-
-knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('rf'),disease='lung-cancer',maxGenes = 9)
-

@@ -128,18 +128,18 @@ RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG 
   
     ma.plot <- function(ma.data){
       par(mfrow=c(2,3))
-      par(mar=c(4,2,1,1))
+      par(mar=c(4,3,4,1))
       for ( i in seq(length(ma.data))){
         act.data  <- data.frame('M'=M,'A'=A)
         smoothScatter(A[[i]],M[[i]],main=paste(names(ma.data)[i],'.D =',ma.data[i]),xlab='',ylab='')
-        title(xlab='A',line=1)
-        title(ylab='M',line=1)
+        title(xlab='A',line=2)
+        title(ylab='M',line=1.8)
       }
       par(mfrow=c(1,1))
     }
     
     if (toPNG){
-      png(paste(outdir,'MA-plot.png',sep='/'),units="in", width=5, height=5, res=300)
+      png(paste(outdir,'MA-plot.png',sep='/'),units="in", width=6, height=5, res=300)
       ma.plot(sort.da[c(c(1:3),c((length(sort.da)-2):length(sort.da)))])
       dev.off()
     }

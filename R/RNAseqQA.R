@@ -97,7 +97,9 @@ RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG 
     for ( i in seq(length(ks.outliers.index)))  {
       box.plot <-  box.plot + annotate(geom="point", x = min.x+0.1, y = ks.outliers.index[i], colour="red",size=3)
     }
-  
+    
+
+    options(warn=-1)
     if (toPNG) {
       ggsave(paste(outdir,'box-plot.png',sep='/'),box.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
       ggsave(paste(outdir,'ks-plot.png',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
@@ -106,7 +108,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG 
       ggsave(paste(outdir,'box-plot.pdf',sep='/'),box.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
       ggsave(paste(outdir,'ks-plot.pdf',sep='/'),ks.plot,width=5, height=ceiling(ncol(expressionMatrix)/5),limitsize=FALSE,units = "in", dpi = 300)
     }
-    
+    options(warn=0)
   
     outliers[['KS']] <- list('limit'=KS.limit,'outliers'=ks[which(ks > KS.limit)])
     

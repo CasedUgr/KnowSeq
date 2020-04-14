@@ -13,7 +13,7 @@
 #' outliers <- RNAseqQA(expressionMatrix)
 
 RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG = TRUE, toPDF = TRUE, toRemoval = FALSE){
-  
+
   if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
   if(!is.logical(toPNG)){stop("toPNG parameter can only take the values TRUE or FALSE.")}
   if(!is.logical(toPDF)){stop("toPDF parameter can only take the values TRUE or FALSE.")}
@@ -25,7 +25,8 @@ RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG 
   expressionMatrix <- expressionMatrix[unique(rownames(expressionMatrix)),]
   outliers <- list()
   found.outliers <- c(-1)
-  
+  removed.outliers <- c()
+
   outlierBarPlot <- function(data,title,limit,xlab){
     yticks=data$y
     outlier.bar.plot <-  ggplot(data,aes(x=x,y=y)) + geom_point(color = "#56B4E9") +
@@ -126,25 +127,25 @@ RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG 
     sort.da <- sort(Da)
   
     ma.plot <- function(ma.data){
-      par(mfrow=c(3,3))
-      par(mar=c(1,2,1,1),mgp=c(3,0.3,0))
+      par(mfrow=c(2,3))
+      par(mar=c(4,3,2,1))
       for ( i in seq(length(ma.data))){
         act.data  <- data.frame('M'=M,'A'=A)
         smoothScatter(A[[i]],M[[i]],main=paste(names(ma.data)[i],'.D =',ma.data[i]),xlab='',ylab='')
-        title(xlab='A',line=0)
-        title(ylab='M',line=1)
+        title(xlab='A',line=2)
+        title(ylab='M',line=1.8)
       }
       par(mfrow=c(1,1))
     }
     
     if (toPNG){
-      png(paste(outdir,'MA-plot.png',sep='/'),units="in", width=5, height=5, res=300)
-      ma.plot(sort.da[1:9])
+      png(paste(outdir,'MA-plot.png',sep='/'),units="in", width=6, height=5, res=300)
+      ma.plot(sort.da[c(c(1:3),c((length(sort.da)-2):length(sort.da)))])
       dev.off()
     }
     if (toPDF){
       pdf(paste(outdir,'MA-plot.pdf',sep='/'))
-      ma.plot(sort.da[1:9])
+      ma.plot(sort.da[c(c(1:3),c((length(sort.da)-2):length(sort.da)))])
       dev.off()
     }
     
@@ -165,7 +166,8 @@ RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG 
                     union(intersect(names(outliers[[1]]$outliers),names(outliers[[3]]$outliers)),
                     intersect(names(outliers[[2]]$outliers),names(outliers[[3]]$outliers))))
     expressionMatrix <- expressionMatrix[, ! colnames(expressionMatrix) %in% found.outliers]
+    removed.outliers <- c(removed.outliers,found.outliers)
   }
-  return(expressionMatrix)
+  return(list('matrix'=expressionMatrix,'outliers'=removed.outliers))
 }
 

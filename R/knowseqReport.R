@@ -112,7 +112,6 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   
   
   if(qualityAnalysis){
-    cat("Performing the quality analysis of the samples\n")
     found.outliers <- RNAseqQA(expressionMatrix,outdir=paste(outdir,'RNAseqQA',sep=''))
 
     markobj <- c(markobj,'# Quality analysis\n',

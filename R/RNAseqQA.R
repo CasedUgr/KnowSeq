@@ -76,7 +76,7 @@ RNAseqQA <- function(expressionMatrix, outdir = "SamplesQualityAnalysis", toPNG 
     ks <- suppressWarnings(apply(expressionMatrix, 2, function(v)
       ks.test(v, y = fx, alternative='two.sided')$statistic))
     
-    ks.data <- data.frame('x'=ks,'y'=c(1:length(ks)))
+    ks.data <- data.frame('x'=ks,'y'=seq_len(length(ks)))
     q3 <- quantile(ks.data$x)[4]
     KS.limit <- q3 + 1.5 * IQR(ks.data$x)
     ks.plot <- outlierBarPlot(ks.data,'KS - Outliers',KS.limit,'KS')

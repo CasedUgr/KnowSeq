@@ -9,8 +9,7 @@ RNAseqQA(
   outdir = "SamplesQualityAnalysis",
   toPNG = TRUE,
   toPDF = TRUE,
-  D.limit = 0.1,
-  KS.limit = 0.1
+  toRemoval = FALSE
 )
 }
 \arguments{
@@ -22,12 +21,10 @@ RNAseqQA(
 
 \item{toPDF}{Boolean variable to indicate if a plot would be save to PDF.}
 
-\item{D.limit}{Numeric variable to indicate Hoeffding's statistic, D, limit to a sample to be outlier}
-
-\item{KS.limit}{Numeric variable to indicate Kolmogorov-Smirnov statistic, KS, limit to a sample to be outlier}
+\item{toRemoval}{Boolean variable to indicate if detected outliers will be removed from original data}
 }
 \value{
-A list containing found outliers for each realized test.
+A list containing found outliers for each realized test or corrected data if toRemoval is TRUE.
 }
 \description{
 RNAseqQA performs the quality analysis of an expression matrix. This function generates different plots over expression data in order to detect possible outliers.

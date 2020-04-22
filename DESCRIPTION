@@ -1,7 +1,7 @@
 Package: KnowSeq
 Type: Package
 Title: KnowSeq R/Bioc package: Beyond the traditional Transcriptomic pipeline
-Version: 1.1.28
+Version: 1.1.29
 Author: Daniel Castillo-Secilla, Juan Manuel Galvez, Francisco Carrillo-Perez, Marta Verona-Almeida, Francisco Manuel Ortuno, Luis Javier Herrera and Ignacio Rojas.
 Maintainer: Daniel Castillo-Secilla <cased@ugr.es>
 Description: KnowSeq proposes a novel methodology that comprises the most relevant steps in the Transcriptomic gene expression analysis. KnowSeq expects to serve as an integrative tool that allows to process and extract relevant biomarkers, as well as to assess them through a Machine Learning approaches. Finally, the last objective of KnowSeq is the biological knowledge extraction from the biomarkers (Gene Ontology enrichment, Pathway listing and Visualization and Evidences related to the addressed disease). Although the package allows analyzing all the data manually, the main strenght of KnowSeq is the possibilty of carrying out an automatic and intelligent HTML report that collect all the involved steps in one document. It is important to highligh that the pipeline is totally modular and flexible, hence it can be started from whichever of the different steps. KnowSeq expects to serve as a novel tool to help to the experts in the field to acquire robust knowledge and conclusions for the data and diseases to study.
@@ -12,6 +12,6 @@ Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.0.2
 biocViews: GeneExpression, DifferentialExpression, GeneSetEnrichment, DataImport, Classification, FeatureExtraction, Sequencing, RNASeq, BatchEffect, Normalization, Preprocessing, QualityControl, Genetics, Transcriptomics, Microarray, Alignment, Pathways, SystemsBiology, GO, ImmunoOncology
-Imports: stringr, kernlab, ggplot2 (>= 3.3.0), rlist, rmarkdown, reshape2, gplots, caret, RCurl, XML, class, praznik, R.utils, e1071, randomForest, httr, jsonlite, sva (>= 3.30.1), edgeR (>= 3.24.3), limma (>= 3.38.3), tximport (>= 1.10.1), tximportData (>= 1.10.0), rhdf5 (>= 2.26.2), Biobase, multtest, pathview (>= 1.22.3), grDevices, graphics, stats, utils, Hmisc (>= 4.4.0), gridExtra
+Imports: stringr, kernlab, ggplot2 (>= 3.3.0), rlist, rmarkdown, reshape2, gplots, caret, RCurl, XML, class, praznik, R.utils, e1071, randomForest, httr, jsonlite, sva (>= 3.30.1), edgeR (>= 3.24.3), limma (>= 3.38.3), Biobase, multtest, pathview (>= 1.22.3), grDevices, graphics, stats, utils, Hmisc (>= 4.4.0), gridExtra
 Suggests: knitr
 git_url: https://github.com/CasedUgr/KnowSeq

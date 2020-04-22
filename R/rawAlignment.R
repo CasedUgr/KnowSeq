@@ -2,7 +2,6 @@
 #'
 #' This function allows downloading and processing the fastq samples in a CSV file. Also, different alignment methods can be used such as Hisat2, Salmon and Kallisto. Finally, the function can downloads the reference files required: FASTA Reference Genome and GTF file.
 #' @param data The ID of the variable which contains the samples. Our recommendation is to load this variable from a CSV file.
-#' @param seq This parameter represents the alignment method that will be used in the process. The possibilities are "hisat2" "salmon" and "kallisto".
 #' @param downloadRef A logical parameter that represents if the reference files will be downloaded or not.
 #' @param downloadSamples A logical parameter that represents if the samples of the CSV file will be downloaded or not.
 #' @param createIndex A logical parameter that represents if the index of the aligner would be created or not.
@@ -15,7 +14,6 @@
 #' @param fromGDC A logical parameter that allows processing BAM files from GDC portal by using the custom reference genome from GDC.
 #' @param tokenPath The path to the GDC portal user token. It is required to downloads the controlled BAM files.
 #' @param manifestPath The path to the manifest with the information required to downloads the controlled BAM files selected in GDC Portal.
-#' @param tx2Counts A matrix with two columns that contains the conversion of transcripts ID to genes ID. There is more information in the function \code{\link{tximport}}. This parameter is only required with salmon and kallisto.
 #' @return Nothing to return.
 #' @examples
 #' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
@@ -25,10 +23,10 @@
 #' #Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
 #' GSE74251csv <- read.csv(paste(dir,"/GSE74251.csv",sep = ""))
 #' 
-#' \dontrun{rawAlignment(GSE74251csv,seq="hisat2",downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "",tx2Counts = "")}
+#' \dontrun{rawAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "")}
 
 
-rawAlignment <- function(data,seq="hisat2",downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "",tx2Counts = ""){
+rawAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = ""){
 
   if(version$os == "linux-gnu"){
 
@@ -36,13 +34,11 @@ rawAlignment <- function(data,seq="hisat2",downloadRef=FALSE,downloadSamples=FAL
 
     if(dir.exists("unixUtils/")){
       cat("Directory unixUtils found. Checking the tools...\n")
-      if(file.exists("unixUtils/salmon/bin/salmon")){cat("Salmon found!\n")}else{stop("Salmon not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/hisat2/hisat2")){cat("Hisat2 found!\n")}else{stop("Hisat2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/bowtie2/bowtie2")){cat("Bowtie2 found!\n")}else{stop("Bowtie2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/samtools/samtools")){cat("Samtools found!\n")}else{stop("Samtools not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/sratoolkit/bin/fastq-dump.2.8.0")){cat("Sratoolkit found!\n")}else{stop("Sratoolkit not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/htseq/scripts-2.7/htseq-count")){cat("Htseq found!\n")}else{stop("Htseq not found, please remove unixUtils folder and re-run the function to download it.\n")}
-      if(file.exists("unixUtils/kallisto/kallisto")){cat("Kallisto found!\n")}else{stop("Kallisto not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/gdcClient/gdc-client")){cat("GDC client found!\n")}else{stop("GDC client not found, please remove unixUtils folder and re-run the function to download it.\n")}
 
     }else{
@@ -146,23 +142,7 @@ rawAlignment <- function(data,seq="hisat2",downloadRef=FALSE,downloadSamples=FAL
       }
 
     }else{
-        if(seq == "salmon"){
-
-          salmonAlignment(data,downloadRef=downloadRef,downloadSamples=downloadSamples,createIndex=createIndex,BAMfiles=BAMfiles,SAMfiles=SAMfiles,countFiles=countFiles,referenceGenome=referenceGenome,customFA = customFA, tx2Counts = tx2Counts)
-
-        }else if(seq == "hisat2"){
-
-          hisatAlignment(data,downloadRef=downloadRef,downloadSamples=downloadSamples,createIndex=createIndex,BAMfiles=BAMfiles,SAMfiles=SAMfiles,countFiles=countFiles,referenceGenome=referenceGenome,customFA = customFA,customGTF = customGTF)
-
-        }else if(seq == "kallisto"){
-
-          kallistoAlignment(data,downloadRef=downloadRef,downloadSamples=downloadSamples,createIndex=createIndex,BAMfiles=BAMfiles,SAMfiles=SAMfiles,countFiles=countFiles,referenceGenome=referenceGenome,customFA = customFA, tx2Counts = tx2Counts)
-
-        }else{
-
-          stop("Selected aligner can't be recognized. Please, use hisat2, salmon or kallisto")
-
-        }
+        hisatAlignment(data,downloadRef=downloadRef,downloadSamples=downloadSamples,createIndex=createIndex,BAMfiles=BAMfiles,SAMfiles=SAMfiles,countFiles=countFiles,referenceGenome=referenceGenome,customFA = customFA,customGTF = customGTF)
     }
   }
 }

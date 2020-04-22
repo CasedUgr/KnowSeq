@@ -267,15 +267,16 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                  paste('With the purpose of finding the best combination of DEGs to assess the data, the',featureSelectionMode,'method
                      will be used in order to select the',maxGenes,'most relevant genes for the classification process.\n'))
     
-    ranking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML), mode = featureSelectionMode)
-    if (featureSelectionMode == 'mrmr') ranking <- names(sort(ranking,decreasing = FALSE))
-    else if (featureSelectionMode == 'rf') ranking <- names(ranking)
+    ranking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML)[seq_len(maxGenes)], mode = featureSelectionMode)
+
+    if (featureSelectionMode == 'mrmr') ranking <- names(ranking)
+    else if (featureSelectionMode == 'rf') ranking <- ranking
     else if (featureSelectionMode == 'da') ranking <- names(ranking)
     
     markobj <- c(markobj,paste('First',maxGenes,'selected genes by ',featureSelectionMode,' algorithm/method are:'),ranking[seq_len(maxGenes)],'.\n')
     
     
-  } else{ranking <- rownames(DEGsMatrix)}
+  } else{ranking <- rownames(topTable)}
   
   
   genes <- ''

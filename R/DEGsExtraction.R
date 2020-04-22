@@ -52,7 +52,7 @@ DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov
 
           fit <- eBayes(fit)
           table <- topTable(fit, number = number, coef = 2, sort.by = "logFC", p.value = pvalue, adjust = "fdr", lfc = lfc)
-          DEGsMatrix <- expressionMatrix[rownames(expressionMatrix) %in% rownames(table),]
+          DEGsMatrix <- expressionMatrix[rownames(table),]
           DEGsMatrix <- DEGsMatrix[unique(rownames(DEGsMatrix)),]
 
           results <- list(table,DEGsMatrix)

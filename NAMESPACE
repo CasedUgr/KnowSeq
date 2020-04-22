@@ -1,4 +1,4 @@
-import(stringr,sva, RCurl, XML, jsonlite, tximportData, rhdf5, multtest, kernlab)
+import(stringr,sva, RCurl, XML, jsonlite, multtest, kernlab)
 
 importFrom(randomForest, randomForest)
 importFrom(R.utils, mkdirs, gunzip)
@@ -13,7 +13,6 @@ importFrom(Biobase, ExpressionSet)
 importFrom(edgeR, readDGE, cpm)
 importFrom(reshape2, melt)
 importFrom(praznik, MRMR)
-importFrom(tximport, tximport)
 importFrom(caret, trainControl, train, knn3, confusionMatrix)
 importFrom(class, knn)
 importFrom(limma, eBayes, topTable, lmFit, makeContrasts, contrasts.fit, decideTests)
@@ -27,6 +26,6 @@ importFrom(gridExtra,grid.arrange)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getGenesAnnotation,
-              hisatAlignment, kallistoAlignment, knn_CV, knn_test, DEGsExtraction, plotConfMatrix, RNAseqQA, rawAlignment, rf_CV, rf_test
-              , salmonAlignment, sraToFastq, svm_CV, svm_test, DEGsEvidences, knowseqReport)
+              hisatAlignment, knn_CV, knn_test, DEGsExtraction, plotConfMatrix, RNAseqQA, rawAlignment, rf_CV, rf_test
+              , sraToFastq, svm_CV, svm_test, DEGsEvidences, knowseqReport)
 

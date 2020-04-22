@@ -104,7 +104,7 @@ getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_g
           },
           error = function(e){''},
           finally={
-            message('\nConnection error, please try again.')
+            message('\nConnection error, trying again...')
             result <- data.frame(matrix(ncol = length(attributes), nrow = 0))
             colnames(result)  <- attributes
             return(result)

@@ -22,13 +22,11 @@ sraToFastq <- function(urlsVector){
       
       if(dir.exists("unixUtils/")){
         cat("Directory unixUtils found. Checking the tools...\n")
-        if(file.exists("unixUtils/salmon/bin/salmon")){cat("Salmon found!\n")}else{stop("Salmon not found, please remove unixUtils folder and re-run the function to download it.\n")}
         if(file.exists("unixUtils/hisat2/hisat2")){cat("Hisat2 found!\n")}else{stop("Hisat2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
         if(file.exists("unixUtils/bowtie2/bowtie2")){cat("Bowtie2 found!\n")}else{stop("Bowtie2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
         if(file.exists("unixUtils/samtools/samtools")){cat("Samtools found!\n")}else{stop("Samtools not found, please remove unixUtils folder and re-run the function to download it.\n")}
         if(file.exists("unixUtils/sratoolkit/bin/fastq-dump.2.8.0")){cat("Sratoolkit found!\n")}else{stop("Sratoolkit not found, please remove unixUtils folder and re-run the function to download it.\n")}
         if(file.exists("unixUtils/htseq/scripts-2.7/htseq-count")){cat("Htseq found!\n")}else{stop("Htseq not found, please remove unixUtils folder and re-run the function to download it.\n")}
-        if(file.exists("unixUtils/kallisto/kallisto")){cat("Kallisto found!\n")}else{stop("Kallisto not found, please remove unixUtils folder and re-run the function to download it.\n")}
         if(file.exists("unixUtils/gdcClient/gdc-client")){cat("GDC client found!\n")}else{stop("GDC client not found, please remove unixUtils folder and re-run the function to download it.\n")}
         
       }else{

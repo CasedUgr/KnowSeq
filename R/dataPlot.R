@@ -220,7 +220,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     }
     
   }else if(mode == "classResults"){
-    
+    c_palette <- c('red', 'blue', 'green', 'orange', 'yellow', 'brown', 'purple', 'pink', 'tan', 'sienna')
     if(!is.matrix(data)){
       
       plot(data,type='l',col=colours[1], main=main,
@@ -239,7 +239,8 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
       
     }else if(is.matrix(data)){
       
-      if(length(colours) != dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
+      if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
+      if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
       
       plot(data[1,],type='l',col=colours[2], main=main,
            xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))
@@ -287,7 +288,8 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
         
       }else if(is.matrix(data)){
         
-        if(length(colours) != dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
+        if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
+        if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
         
         plot(data[1,],type='l',col=colours[2], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))
@@ -337,7 +339,8 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
         
       }else if(is.matrix(data)){
         
-        if(length(colours) != dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
+        if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
+        if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
         
         plot(data[1,],type='l',col=colours[2], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))

@@ -1,0 +1,72 @@
+body {
+  font-family: Calibri, helvetica, sans-serif;
+}
+
+h1 {
+  color: #D95032;
+  font-weight: bold;
+  font-size: 150%;
+}
+
+.title {
+  margin-right: 200px;
+}
+
+h2 {
+  color: #027368;
+  font-size: 140%;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 130%;
+  font-weight: bold;
+}
+
+h4 {
+  font-size: 120%;
+  font-weight: bold;
+  font-style: italic;
+}
+
+table.paleBlueRows {
+  font-family: "Times New Roman", Times, serif;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+table.paleBlueRows td, table.paleBlueRows th {
+  border: 1px solid #000000;
+  padding: 3px 2px;
+}
+table.paleBlueRows tbody td {
+  font-size: 13px;
+  font-weight: bold;
+  color: #000000;
+}
+table.paleBlueRows tr:nth-child(even) {
+  background: #D97E6A;
+}
+table.paleBlueRows thead {
+  background: #027368;
+  border-bottom: 5px solid #FFFFFF;
+}
+table.paleBlueRows thead th {
+  font-size: 17px;
+  font-weight: bold;
+  color: #FFFFFF;
+  text-align: left;
+  border-left: 2px solid #FFFFFF;
+}
+table.paleBlueRows thead th:first-child {
+  border-left: none;
+}
+
+table.paleBlueRows tfoot td {
+  font-size: 14px;
+}
+
+a:link strong {
+  color: #D95032;
+}

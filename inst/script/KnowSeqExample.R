@@ -7,13 +7,9 @@ downloadPublicSeries(c("GSE74251","GSE81593"))
 GSE74251csv <- read.csv("ReferenceFiles/GSE74251.csv")
 GSE81593csv <- read.csv("ReferenceFiles/GSE81593.csv")
 
-# Loading the transcripts to genes converter variable
-dir <- system.file("extdata", package="tximportData")
-tx2gene <- read.csv(file.path(dir, "tx2gene.ensembl.v87.csv"))
-
 # Performing the alignment of the samples by using kallisto aligner
-rawAlignment(GSE74251csv,seq = "kallisto", downloadRef = TRUE,downloadSamples = TRUE, createIndex = TRUE, referenceGenome = 37, tx2Counts = tx2gene)
-rawAlignment(GSE81593csv,seq = "kallisto", downloadRef = FALSE,downloadSamples = TRUE, createIndex = FALSE, referenceGenome = 37, tx2Counts = tx2gene)
+rawAlignment(GSE74251csv, downloadRef = TRUE,downloadSamples = TRUE, createIndex = TRUE, referenceGenome = 37)
+rawAlignment(GSE81593csv, downloadRef = FALSE,downloadSamples = TRUE, createIndex = FALSE, referenceGenome = 37)
 
 # Creating the csv file with the information about the counts files location and the labels
 Run <- GSE74251csv$Run
@@ -38,7 +34,7 @@ countsMatrix <- countsInformation$countsMatrix
 labels <- countsInformation$labels
 
 # Downloading human annotation
-myAnnotation <- getAnnotationFromEnsembl(rownames(countsMatrix),referenceGenome=37)
+myAnnotation <- getGenesAnnotation(rownames(countsMatrix),referenceGenome=37)
 
 # Calculating gene expression values matrix using the counts matrix
 expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation,genesNames = TRUE)
@@ -53,7 +49,7 @@ RNAseqQA(expressionMatrix)
 svaMod <- batchEffectRemoval(expressionMatrix, as.factor(labels), method = "sva")
 
 # Extracting DEGs that pass the imposed restrictions
-DEGsInformation <- limmaDEGsExtraction(expressionMatrixCorrected, as.factor(labels), lfc = 1.0, pvalue = 0.01,
+DEGsInformation <- DEGsExtraction(expressionMatrixCorrected, as.factor(labels), lfc = 1.0, pvalue = 0.01,
                                        number = 100, svaCorrection = TRUE, svaMod = svaMod)
 topTable <- DEGsInformation$Table
 DEGsMatrix <- DEGsInformation$DEGsMatrix
@@ -116,9 +112,7 @@ dataPlot(results_test_svm$specVector,mode = "classResults", main = "Specificity 
 dataPlot(results_test_svm$cfMats[[100]]$table,testLabels,mode = "confusionMatrix",toPNG = TRUE, toPDF = TRUE)
 
 # Retrieving the GO information from the three different ontologies
-labelsGo <- gsub("Control",0,labels)
-labelsGo <- gsub("Tumor",1,labelsGo)
-GOsInfo <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20)
+GOsInfo <- geneOntologyEnrichment(rownames(DEGsMatrix))
 
 # Downloading and filling with expression the pathways of the DEGs
 myDEGsAnnotation <- getAnnotationFromEnsembl(rownames(DEGsMatrix)[1:10],

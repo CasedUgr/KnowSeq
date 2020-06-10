@@ -1,4 +1,4 @@
-#' limmaDEGsExtraction performs the analysis to extract the Differentially Expressed Genes (DEGs) among the classes to compare.
+#' DEGsExtraction performs the analysis to extract the Differentially Expressed Genes (DEGs) among the classes to compare.
 #'
 #' The function performs the analysis to extract the Differentially Expressed Genes (DEGs) among the classes to compare. The number of final DEGs can change depending on the p-value and the LFC indicated by parameters of the function. Furthermore, the function detects if the number of classes are greater than 2 to perform a multiclass DEGs analysis.
 #' @param expressionMatrix The expressionMatrix parameter is an expression matrix or data.frame that contains the genes in the rows and the samples in the columns.
@@ -16,14 +16,14 @@
 #'
 #' expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
 #'
-#' DEGsInformation <- limmaDEGsExtraction(expressionMatrix, labels, lfc = 2.0,
+#' DEGsInformation <- DEGsExtraction(expressionMatrix, labels, lfc = 2.0,
 #' pvalue = 0.01, number = Inf)
 #'
 #' topTable <- DEGsInformation$Table
 #'
 #' DEGsMatrix <- DEGsInformation$DEGsMatrix
 
-limmaDEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1,number = Inf, svaCorrection = FALSE, svaMod){
+DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1,number = Inf, svaCorrection = FALSE, svaMod){
 
       if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
       if(!is.character(labels)  && !is.factor(labels)){stop("The class of the labels parameter must be character vector or factor.")}
@@ -52,7 +52,7 @@ limmaDEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0
 
           fit <- eBayes(fit)
           table <- topTable(fit, number = number, coef = 2, sort.by = "logFC", p.value = pvalue, adjust = "fdr", lfc = lfc)
-          DEGsMatrix <- expressionMatrix[rownames(expressionMatrix) %in% rownames(table),]
+          DEGsMatrix <- expressionMatrix[rownames(table),]
           DEGsMatrix <- DEGsMatrix[unique(rownames(DEGsMatrix)),]
 
           results <- list(table,DEGsMatrix)
@@ -63,8 +63,9 @@ limmaDEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0
         cat("More than two classes detected, applying limma multiclass\n")
 
         condition <- labels
+        condition <- as.factor(condition)
         designMulti <- model.matrix(~0+condition)
-        colnames(designMulti) = levels(condition)
+        colnames(designMulti) = as.character(levels(condition))
         fitmicroMulti <- lmFit(expressionMatrix, designMulti)
 
         contrasts <- as.character()
@@ -93,10 +94,8 @@ limmaDEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0
           multIndMatches <- abs(multIndMatches)
 
           DEGsMultiClass <- expressionMatrix[names(ind),]
-          
-          results <- list(fitmicroMultiContrast,DEGsMultiClass)
-          names(results) <- c("Table","DEGsMatrix")
-
+          results <- list(fitmicroMultiContrast,lfcIndmatrix,DEGsMultiClass)
+          names(results) <- c("Table","MulticlassLFC","DEGsMatrix")
 
         }else{
           stop("There are not genes that complains these restrictions, please change the p-value, lfc or cov.")

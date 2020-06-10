@@ -11,7 +11,7 @@ rf_CV(data, labels, vars_selected, numFold = 10)
 
 \item{labels}{A vector or factor that contains the labels for each of the samples in the data object.}
 
-\item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
+\item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
 
 \item{numFold}{The number of folds to carry out in the cross validation process.}
 }

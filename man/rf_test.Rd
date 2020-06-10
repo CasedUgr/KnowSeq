@@ -15,7 +15,7 @@ rf_test(train, labelsTrain, test, labelsTest, vars_selected)
 
 \item{labelsTest}{A vector or factor that contains the test labels for each of the samples in the test object.}
 
-\item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
+\item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
 }
 \value{
 A list that contains four objects. The confusion matrix, the accuracy, the sensitibity and the specificity for each genes.
@@ -32,5 +32,5 @@ trainingLabels <- labels[c(1:4,6:9)]
 testMatrix <- t(DEGsMatrix)[c(5,10),]
 testLabels <- labels[c(5,10)]
 
-rf_test(trainingMatrix,trainingLabels,testMatrix,testLabels,rownames(DEGsMatrix)[1:10])
+rf_test(trainingMatrix, trainingLabels, testMatrix, testLabels,rownames(DEGsMatrix)[1:10])
 }

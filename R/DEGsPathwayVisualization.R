@@ -1,10 +1,10 @@
 #' The function uses the DEGs to show graphically the expression of the samples in the pathways in which those genes appear.
 #'
 #' The function uses the DEGs to show graphically the expression of the samples in the pathways in which those genes appear. For that, the function makes use of a DEGsMatrix with the expression of the DEGs and the annotation of those DEGs in which appear the pathway or pathways of each DEGs. Internally, the function uses \code{\link{pathview}} to retrieve and colours the pathways, but a maximum number of 24 samples can be used. Furthermore, the function needs the expression matrix with all the genes in order to use them to colour the rest of the elements in the pathways.
-#' @param DEGsMatrix A matrix that contains the expression of the DEGs for each samples. This matrix can be achieved by calling the function \code{\link{limmaDEGsExtraction}}. If the samples are more than 24, only the first 24 will be used to colour the pathways.
-#' @param DEGsAnnotation A matrix that contains the gene names and the entrez IDs for the genes available in the DEGs matrix. This annotation can be obtained from the function \code{\link{getAnnotationFromEnsembl}}.
+#' @param DEGsMatrix A matrix that contains the expression of the DEGs for each samples. This matrix can be achieved by calling the function \code{\link{DEGsExtraction}}. If the samples are more than 24, only the first 24 will be used to colour the pathways.
+#' @param DEGsAnnotation A matrix that contains the gene names and the entrez IDs for the genes available in the DEGs matrix. This annotation can be obtained from the function \code{\link{getGenesAnnotation}}.
 #' @param expressionMatrix A matrix that contains the expression of the all the genes available for each samples. If the samples are more than 24, only the first 24 will be used to colour the pathways.
-#' @param expressionAnnotation A matrix that contains the gene names and the entrez IDs for all the genes available. This annotation can be obtained from the function \code{\link{getAnnotationFromEnsembl}}.
+#' @param expressionAnnotation A matrix that contains the gene names and the entrez IDs for all the genes available. This annotation can be obtained from the function \code{\link{getGenesAnnotation}}.
 #' @param labels A vector that contains the labels of the samples for both the DEGsMatrix and the expressionMatrix.
 #' @return Nothing to return.
 #' @examples
@@ -39,8 +39,8 @@ DEGsPathwayVisualization <- function(DEGsMatrix, DEGsAnnotation, expressionMatri
     for(gene in DEGsAnnotation$entrezgene_id){
 
       if(!is.na(gene)){
-          get_GO <- httr::GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
-          get_GO_text <- httr::content(get_GO, "text")
+          get_GO <- GET(paste("http://rest.kegg.jp/get/hsa:",gene,sep = ""))
+          get_GO_text <- content(get_GO, "text")
           pathway_start <- str_locate_all(pattern = "PATHWAY", get_GO_text)[[1]][2]
           pathway_end <- str_locate_all(pattern = "BRITE", get_GO_text)[[1]][1]
           pathways <- substr(get_GO_text,pathway_start+1,pathway_end-1)

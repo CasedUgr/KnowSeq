@@ -1,17 +1,17 @@
 Package: KnowSeq
 Type: Package
-Title: KnowSeq R/Bioc package: Beyond the traditional RNA-seq pipeline.
-Version: 1.2.0
-Author: Daniel Castillo-Secilla, Juan Manuel Galvez, Francisco Carrillo-Perez, Marta Verona Almeida, Francisco Manuel Ortuno, Luis Javier Herrera and Ignacio Rojas.
-Maintainer: Daniel Castillo Secilla <cased@ugr.es>
-Description: KnowSeq proposes a whole pipeline that comprises the most relevant steps in the RNA-seq gene expression analysis, with the main goal of extracting biological knowledge from raw data (Differential Expressed Genes, Gene Ontology enrichment, pathway visualization and related diseases). In this sense, KnowSeq allows aligning raw data from the original fastq or sra files, by using the most renowned aligners such as tophat2, hisat2, salmon and kallisto. Nowadays, there is no package that only from the information of the samples to align -included in a text file-, automatically performs the download and alignment of all of the samples. Furthermore, the package includes functions to: calculate the gene expression values; remove batch effect; calculate the Differentially Expressed Genes (DEGs); plot different graphs; and perform the DEGs enrichment with the GO information, pathways visualization and related diseases information retrieval. Moreover, KnowSeq is the only package that allows applying both a machine learning and DEGs enrichment processes just after the DEGs extraction. This idea emerged with the aim of proposing a complete tool to the research community containing all the necessary steps to carry out complete studies in a simple and fast way.
+Title: KnowSeq R/Bioc package: Beyond the traditional Transcriptomic pipeline
+Version: 1.1.29
+Author: Daniel Castillo-Secilla, Juan Manuel Galvez, Francisco Carrillo-Perez, Marta Verona-Almeida, Francisco Manuel Ortuno, Luis Javier Herrera and Ignacio Rojas.
+Maintainer: Daniel Castillo-Secilla <cased@ugr.es>
+Description: KnowSeq proposes a novel methodology that comprises the most relevant steps in the Transcriptomic gene expression analysis. KnowSeq expects to serve as an integrative tool that allows to process and extract relevant biomarkers, as well as to assess them through a Machine Learning approaches. Finally, the last objective of KnowSeq is the biological knowledge extraction from the biomarkers (Gene Ontology enrichment, Pathway listing and Visualization and Evidences related to the addressed disease). Although the package allows analyzing all the data manually, the main strenght of KnowSeq is the possibilty of carrying out an automatic and intelligent HTML report that collect all the involved steps in one document. It is important to highligh that the pipeline is totally modular and flexible, hence it can be started from whichever of the different steps. KnowSeq expects to serve as a novel tool to help to the experts in the field to acquire robust knowledge and conclusions for the data and diseases to study.
 VignetteBuilder: knitr
 License: GPL (>=2)
-Depends: R (>= 4.0), quantreg, mclust, topGO (>= 2.34.0)
+Depends: R (>= 4.0), cqn (>= 1.28.1)
 Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.0.2
-biocViews: GeneExpression, DifferentialExpression, GeneSetEnrichment, DataImport, Classification, FeatureExtraction, Sequencing, RNASeq, BatchEffect, Normalization, Preprocessing, QualityControl, Genetics, Transcriptomics, Microarray, Metabolomics, Proteomics, Alignment, Pathways, SystemsBiology, MultipleComparison, GO, GraphAndNetwork
-Imports: stringr, kernlab, ggplot2, reshape2, gplots, caret, RCurl, XML, class, praznik, R.utils, e1071, randomForest, httr, jsonlite, sva (>= 3.30.1), cqn (>= 1.28.1), edgeR (>= 3.24.3), limma (>= 3.38.3), tximport (>= 1.10.1), tximportData (>= 1.10.0), arrayQualityMetrics (>= 3.38.0), rhdf5 (>= 2.26.2), Biobase, multtest, pathview (>= 1.22.3), grDevices, graphics, stats, utils
+biocViews: GeneExpression, DifferentialExpression, GeneSetEnrichment, DataImport, Classification, FeatureExtraction, Sequencing, RNASeq, BatchEffect, Normalization, Preprocessing, QualityControl, Genetics, Transcriptomics, Microarray, Alignment, Pathways, SystemsBiology, GO, ImmunoOncology
+Imports: stringr, kernlab, ggplot2 (>= 3.3.0), rlist, rmarkdown, reshape2, gplots, caret, RCurl, XML, class, praznik, R.utils, e1071, randomForest, httr, jsonlite, sva (>= 3.30.1), edgeR (>= 3.24.3), limma (>= 3.38.3), Biobase, multtest, pathview (>= 1.22.3), grDevices, graphics, stats, utils, Hmisc (>= 4.4.0), gridExtra
 Suggests: knitr
 git_url: https://github.com/CasedUgr/KnowSeq

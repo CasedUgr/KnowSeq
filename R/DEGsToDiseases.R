@@ -7,7 +7,7 @@
 #' @param getEvidences Boolean. If true, for each gene, a list of found evidences for each disease will be returned.
 #' @return A list which contains the information about the diseases associated to each genes or to a set of genes. If getEvidences is TRUE, found evidences for each case will be returned too.
 #' @examples
-#' diseases <- DEGsToDiseases(c("KRT19","BRCA1"),getEvidences = TRUE)
+#' diseases <- DEGsToDiseases(c("KRT19","BRCA1"),getEvidences = FALSE)
 
 DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, getEvidences = FALSE){
 
@@ -25,7 +25,7 @@ DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, getEvidences = 
   results <- vector("list", 0)
   
   for(j in seq_len(length(unique(geneList)))){
-    r_Ensembl <- httr::GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",geneList[j],"&size=1&filter=target",sep = ""))
+    r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",geneList[j],"&size=1&filter=target",sep = ""))
     respon <- content(r_Ensembl)
     ensembl_id <- respon$data[[1]]$data$ensembl_gene_id
     

@@ -13,14 +13,14 @@
 #' 
 #' write.csv(countsInfo, file = "countsInfo.csv")
 #'
-#' countsInformation <- countsToMatrix("countsInfo.csv")
+#' countsInformation <- countsToMatrix("countsInfo.csv", extension = 'count')
 #'
 #' countsMatrix <- countsInformation$countsMatrix
 #' labels <- countsInformation$labels
 #'
 #' file.remove("countsInfo.csv")
 
-countsToMatrix <- function(csvFile,sep=',',extension='count'){
+countsToMatrix <- function(csvFile,sep=',',extension=''){
 
     if(!file.exists(csvFile)){
       stop("Unable to find the CSV file. Please check the path to the file.")
@@ -35,7 +35,11 @@ countsToMatrix <- function(csvFile,sep=',',extension='count'){
     countf <- vector(mode="character", length=0)
     for(i in seq_len(dim(countsData)[1])){
       dir = paste(countsData$Path[i], countsData$Run[i], sep = "/")
-      countf[i] = paste(dir, extension, sep = ".")
+      if(extension != ''){ 
+        countf[i] = paste(dir, extension, sep = ".")
+      }else{
+        countf[i] = dir 
+      }
       cat(paste("\n",countf[i],sep = ""))
     }
     

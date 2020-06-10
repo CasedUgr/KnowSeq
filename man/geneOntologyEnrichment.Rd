@@ -5,26 +5,23 @@
 \title{geneOntologyEnrichment obtains the information about what Gene Ontology terms are related to the DEGs.}
 \usage{
 geneOntologyEnrichment(
-  geneMatrix,
-  labels,
-  identificator = "SYMBOL",
-  mapping = "org.Hs.eg.db",
-  nGOs = 10,
-  pvalCutOff = 0.01
+  geneList,
+  geneType = "ENTREZ_GENE_ID",
+  ontologies = c("BP", "CC", "MF"),
+  pvalCutOff = 1,
+  returnGeneSymbols = FALSE
 )
 }
 \arguments{
-\item{geneMatrix}{A matrix that contains the expression of the DEGs for each samples.}
+\item{geneList}{A list that contains entrez gene id of the DEGs. Entrez gene id can be obtained using getAnnotationFromEnsembl function.}
 
-\item{labels}{A vector that contains the labels of the samples of the DEGsMatrix.}
+\item{geneType}{A string indicating the type of genes in geneList, it must be one of indicated in DAVIDs API documentation.}
 
-\item{identificator}{The identification methods for the genes. By default the identificator is the gene symbol or gene name.}
-
-\item{mapping}{The annotation database to map the gene and GOs. By default is prepared for homo sapiens but can be changed for other species.}
-
-\item{nGOs}{Maximun number of GOs to return of the total amount of top GOs. By default is equal to 10.}
+\item{ontologies}{A list that contains ontologies to be searchs. Values must be contained in the following three: BP, CC, MF.}
 
 \item{pvalCutOff}{The maximum p-value to considers that a genes is related with a GO term.}
+
+\item{returnGeneSymbols}{A boolean that indicates if gene symbols must be added to the ontologies matrix.}
 }
 \value{
 A list that contains a matrix for each of the possible ontologies and a matrix with the GOs for the three ontologies together.
@@ -33,11 +30,5 @@ A list that contains a matrix for each of the possible ontologies and a matrix w
 The function obtains the information about GO terms from the three differents ontologies that are related to the DEGs. The function also returns the description about each GO and a list of genes that are inside of each GO.
 }
 \examples{
-dir <- system.file("extdata", package="KnowSeq")
-load(paste(dir,"/expressionExample.RData",sep = ""))
-
-labelsGo <- gsub("Control",0,labels)
-labelsGo <- gsub("Tumor",1,labelsGo)
-
-GOsList <- geneOntologyEnrichment(DEGsMatrix,labelsGo,nGOs = 20,pvalCutOff = 0.001)
+\dontrun{GOsList <- geneOntologyEnrichment(data$entrezgene_id,geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)}
 }

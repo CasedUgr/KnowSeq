@@ -1,14 +1,14 @@
 #' This function downloads a list of controlled files from GDC Portal with the user token and the manifest with the information about the desired controlled files.
 #'
-#' @param tokenPath Path to the GDC token
 #' @param manifestPath Path to the samples manifest
-#' @param data The matrix or data.frame with the information from the Samples Sheet downloaded from GDC Portal.
+#' @param controlled Parameter that indicates if data to download are controlled or not
+#' @param tokenPath Path to the GDC token if data are controlled
 #' @return Nothing to return.
 #' @examples 
 #' # This function needs the download of the pre-compiled tools supplied by KnowSeq.
 #' \dontrun{gdcClientDownload("PathToTheToken", "PathToTheFileWithDownloadInfo", dataMatrix)}
 
-gdcClientDownload <- function(tokenPath, manifestPath, data) {
+gdcClientDownload <- function(manifestPath, controlled = FALSE, tokenPath = "") {
 
   if(version$os == "linux-gnu"){
     
@@ -16,7 +16,6 @@ gdcClientDownload <- function(tokenPath, manifestPath, data) {
     
     if(dir.exists("unixUtils/")){
       cat("Directory unixUtils found. Checking the tools...\n")
-      if(file.exists("unixUtils/tophat2/tophat2")){cat("Tophat2 found!\n")}else{stop("Tophat2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/salmon/bin/salmon")){cat("Salmon found!\n")}else{stop("Salmon not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/hisat2/hisat2")){cat("Hisat2 found!\n")}else{stop("Hisat2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/bowtie2/bowtie2")){cat("Bowtie2 found!\n")}else{stop("Bowtie2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
@@ -57,16 +56,15 @@ gdcClientDownload <- function(tokenPath, manifestPath, data) {
     stop("This function is only supported by GNU/Linux distributions due to the external pre-compiled tools are designed for these type of operating system. The version of MAC-OS will be added in next releases.")
   }
   
-  if(file.exists(tokenPath)){cat("Token found!\n")}else{stop("Token not found, please revise the path to the token.\n")}
   if(file.exists(manifestPath)){cat("Manifest found!\n")}else{stop("Manifest not found, please revise the path to the manifest.\n")}
+  if(controlled){
+    if(file.exists(tokenPath)){cat("Token found!\n")}else{stop("Token not found, please revise the path to the token.\n")}
+    system2("unixUtils/gdcClient/gdc-client download", args = paste("-t ",tokenPath," -m ", manifestPath," -n 64 --no-segment-md5sums --no-file-md5sum"))
+  }else{
+    system2("unixUtils/gdcClient/gdc-client download", args = paste(" -m ", manifestPath," -n 64 --no-segment-md5sums --no-file-md5sum"))
+  }
 
-  system2("unixUtils/gdcClient/gdc-client download", args = paste("-t ",tokenPath," -m ", manifestPath," -n 64 --no-segment-md5sums --no-file-md5sum"))
 
   cat("Moving the downloaded files to ReferenceFiles/Samples/RNAseq/BAMFiles/ \n")
-
-  for(i in seq_len(dim(data)[1])){
-    system2("mv", args = paste(data$File.ID[i], " ReferenceFiles/Samples/RNAseq/BAMFiles/",sep = ""))
-
-  }
 
 }

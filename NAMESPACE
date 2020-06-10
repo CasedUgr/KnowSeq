@@ -1,28 +1,31 @@
-import(stringr,sva, RCurl, XML, jsonlite, tximportData, rhdf5, multtest, kernlab, quantreg, mclust)
+import(stringr,sva, RCurl, XML, jsonlite, multtest, kernlab)
 
 importFrom(randomForest, randomForest)
 importFrom(R.utils, mkdirs, gunzip)
 importFrom(gplots, heatmap.2, redgreen)
-importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal,scale_fill_manual,ggtitle, ylab, xlab, labs)
+importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal,scale_fill_manual,ggtitle, ylab, xlab, labs, geom_tile, theme, element_text, geom_point, geom_segment, scale_y_discrete, theme_classic, scale_x_discrete, geom_vline, xlim, annotate)
 importFrom(grDevices, colorRampPalette, dev.off, hsv, pdf, png)
-importFrom(graphics, abline, axis, box, boxplot, image, layout, lines, par, text, title, grid)
-importFrom(stats, model.matrix, p.adjust, setNames)
-importFrom(utils, read.csv, untar, write.csv, write.table, download.file, capture.output)
+importFrom(graphics, abline, axis, box, boxplot, image, layout, lines, par, text, title, grid, smoothScatter)
+importFrom(stats, model.matrix, p.adjust, setNames, complete.cases, ecdf,dist, ks.test, quantile, IQR)
+importFrom(utils, read.csv, untar, write.csv, write.table, download.file, capture.output, tail, read.table, URLencode)
 importFrom(cqn, cqn)
 importFrom(Biobase, ExpressionSet)
 importFrom(edgeR, readDGE, cpm)
 importFrom(reshape2, melt)
 importFrom(praznik, MRMR)
-importFrom(tximport, tximport)
 importFrom(caret, trainControl, train, knn3, confusionMatrix)
 importFrom(class, knn)
 importFrom(limma, eBayes, topTable, lmFit, makeContrasts, contrasts.fit, decideTests)
 importFrom(e1071, svm)
 importFrom(pathview, pathview)
-importFrom(topGO, getPvalues, runTest, GenTable, genesInTerm, annFUN.org, groupGOTerms)
-importFrom(httr, GET, content)
+importFrom(httr, GET, content, POST)
+importFrom(rlist,list.map)
+importFrom(rmarkdown, render)
+importFrom(Hmisc,hoeffd)
+importFrom(gridExtra,grid.arrange)
 
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
-              downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getAnnotationFromEnsembl,
-              hisatAlignment, kallistoAlignment, knn_CV, knn_test, limmaDEGsExtraction, plotConfMatrix, rawAlignment, rf_CV, rf_test
-              , salmonAlignment, sraToFastq, svm_CV, svm_test, tophatAlignment, DEGsEvidences, evidencesToRedundance)
+              downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getGenesAnnotation,
+              hisatAlignment, knn_CV, knn_test, DEGsExtraction, plotConfMatrix, RNAseqQA, rawAlignment, rf_CV, rf_test
+              , sraToFastq, svm_CV, svm_test, DEGsEvidences, knowseqReport)
+

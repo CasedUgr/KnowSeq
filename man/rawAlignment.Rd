@@ -6,7 +6,6 @@
 \usage{
 rawAlignment(
   data,
-  seq = "tophat2",
   downloadRef = FALSE,
   downloadSamples = FALSE,
   createIndex = TRUE,
@@ -18,14 +17,11 @@ rawAlignment(
   customGTF = "",
   fromGDC = FALSE,
   tokenPath = "",
-  manifestPath = "",
-  tx2Counts = ""
+  manifestPath = ""
 )
 }
 \arguments{
 \item{data}{The ID of the variable which contains the samples. Our recommendation is to load this variable from a CSV file.}
-
-\item{seq}{This parameter represents the alignment method that will be used in the process. The possibilities are "tophat2" "salmon" "hisat2" and "kallisto".}
 
 \item{downloadRef}{A logical parameter that represents if the reference files will be downloaded or not.}
 
@@ -50,14 +46,12 @@ rawAlignment(
 \item{tokenPath}{The path to the GDC portal user token. It is required to downloads the controlled BAM files.}
 
 \item{manifestPath}{The path to the manifest with the information required to downloads the controlled BAM files selected in GDC Portal.}
-
-\item{tx2Counts}{A matrix with two columns that contains the conversion of transcripts ID to genes ID. There is more information in the function \code{\link{tximport}}. This parameter is only required with salmon and kallisto.}
 }
 \value{
 Nothing to return.
 }
 \description{
-This function allows downloading and processing the fastq samples in a CSV file. Also, different alignment methods can be used such as Tophat2, Salmon, Hisat2 and Kallisto. Finally, the function can downloads the reference files required: FASTA Reference Genome and GTF file.
+This function allows downloading and processing the fastq samples in a CSV file. Also, different alignment methods can be used such as Hisat2, Salmon and Kallisto. Finally, the function can downloads the reference files required: FASTA Reference Genome and GTF file.
 }
 \examples{
 # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
@@ -67,5 +61,5 @@ dir <- system.file("extdata", package="KnowSeq")
 #Using read.csv for NCBI/GEO files (read.csv2 for ArrayExpress files)
 GSE74251csv <- read.csv(paste(dir,"/GSE74251.csv",sep = ""))
 
-\dontrun{rawAlignment(GSE74251csv,seq="tophat2",downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "",tx2Counts = "")}
+\dontrun{rawAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "")}
 }

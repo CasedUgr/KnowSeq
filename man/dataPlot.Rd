@@ -7,7 +7,7 @@
 dataPlot(
   data,
   labels,
-  colours = c("green", "red"),
+  colours = c("red", "green"),
   main = "",
   ylab = "Expression",
   xlab = "Samples",

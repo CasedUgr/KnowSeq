@@ -25,7 +25,7 @@
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE,toPDF = TRUE)
 
 
-dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot", toPNG = FALSE, toPDF = FALSE){
+dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot", toPNG = FALSE, toPDF = FALSE){
   
   if(!is.logical(toPNG)){stop("toPNG parameter can only take the values TRUE or FALSE.")}
   if(!is.logical(toPDF)){stop("toPDF parameter can only take the values TRUE or FALSE.")}
@@ -114,6 +114,16 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
     
   }else if(mode == "genesBoxplot"){
     
+    if(length(levels(as.factor(labels))) != 2 && length(levels(as.factor(labels))) != length(colours)){
+      
+      coloursPalette <- c("green","red",sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],length(levels(as.factor(labels))) - 2))
+      
+    }else{
+      
+      coloursPalette <- colours
+      
+    }
+    
     
     meltMatrix <- t(data)
     rownames(meltMatrix) <- labels
@@ -128,18 +138,18 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
     names(xx) <- c("Classes", "Gen", "Value")
     
     print(ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) 
-          + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes"))
+          + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes"))
     
     if(toPNG){
       cat("Creating PNG...\n")
-      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
+      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
       
       ggsave("genesBoxplot.png", width = 15, height = 10)
       
     }
     if(toPDF){
       cat("Creating PDF...\n")
-      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=colours) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
+      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
       
       ggsave("genesBoxplot.pdf", width = 15, height = 10)
       
@@ -210,10 +220,10 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
     }
     
   }else if(mode == "classResults"){
-    
+    c_palette <- c('red', 'blue', 'green', 'orange', 'yellow', 'brown', 'purple', 'pink', 'tan', 'sienna')
     if(!is.matrix(data)){
       
-      plot(data,type='l',col=colours[2], main=main,
+      plot(data,type='l',col=colours[1], main=main,
            xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5)
       
       if(xgrid){
@@ -224,14 +234,15 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
       }
       
       if(legend != ""){
-        legend("bottomright", legend=legend, col=colours[2],lwd = 2.5,cex=0.8,lty = "solid")
+        legend("bottomright", legend=legend, col=colours[1],lwd = 2.5,cex=0.8,lty = "solid")
       }
       
     }else if(is.matrix(data)){
       
-      if(length(colours) != dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
+      if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
+      if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
       
-      plot(data[1,],type='l',col=colours[1], main=main,
+      plot(data[1,],type='l',col=colours[2], main=main,
            xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))
       
       for(i in c(2:dim(data)[1])){
@@ -261,7 +272,7 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
       
       if(!is.matrix(data)){
         
-        plot(data,type='l',col=colours[2], main=main,
+        plot(data,type='l',col=colours[1], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5)
         
         if(xgrid){
@@ -277,9 +288,10 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
         
       }else if(is.matrix(data)){
         
-        if(length(colours) != dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
+        if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
+        if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
         
-        plot(data[1,],type='l',col=colours[1], main=main,
+        plot(data[1,],type='l',col=colours[2], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))
         
         for(i in c(2:dim(data)[1])){
@@ -310,7 +322,7 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
       
       if(!is.matrix(data)){
         
-        plot(data,type='l',col=colours[2], main=main,
+        plot(data,type='l',col=colours[1], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5)
         
         if(xgrid){
@@ -322,14 +334,15 @@ dataPlot <- function(data, labels, colours = c("green", "red"), main = "", ylab 
         
         
         if(legend != ""){
-          legend("bottomright", legend=legend, col=colours[2],lwd = 2.5,cex=0.8,lty = "solid")
+          legend("bottomright", legend=legend, col=colours[1],lwd = 2.5,cex=0.8,lty = "solid")
         }
         
       }else if(is.matrix(data)){
         
-        if(length(colours) != dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
+        if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
+        if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
         
-        plot(data[1,],type='l',col=colours[1], main=main,
+        plot(data[1,],type='l',col=colours[2], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))
         
         for(i in c(2:dim(data)[1])){

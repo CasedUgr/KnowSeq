@@ -4,14 +4,14 @@
 \alias{gdcClientDownload}
 \title{This function downloads a list of controlled files from GDC Portal with the user token and the manifest with the information about the desired controlled files.}
 \usage{
-gdcClientDownload(tokenPath, manifestPath, data)
+gdcClientDownload(manifestPath, controlled = FALSE, tokenPath = "")
 }
 \arguments{
-\item{tokenPath}{Path to the GDC token}
-
 \item{manifestPath}{Path to the samples manifest}
 
-\item{data}{The matrix or data.frame with the information from the Samples Sheet downloaded from GDC Portal.}
+\item{controlled}{Parameter that indicates if data to download are controlled or not}
+
+\item{tokenPath}{Path to the GDC token if data are controlled}
 }
 \value{
 Nothing to return.

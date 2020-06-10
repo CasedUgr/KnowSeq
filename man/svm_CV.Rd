@@ -11,19 +11,19 @@ svm_CV(data, labels, vars_selected, numFold = 10)
 
 \item{labels}{A vector or factor that contains the labels for each of the samples in the data object.}
 
-\item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
+\item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
 
 \item{numFold}{The number of folds to carry out in the cross validation process.}
 }
 \value{
-A list that contains four objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes.
+A list that contains five objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes, and a vector with the best parameters found for the SVM algorithm after tuning.
 }
 \description{
 svm_CV allows assessing the final DEGs through a machine learning step by using svm in a cross validation process. This function applies a cross validation of n folds with representation of all classes in each fold. The 80\% of the data are used for training and the 20\% for test. An optimization of C and G hiperparameters is done at the start of the process.
 }
 \examples{
-dir <- system.file("extdata", package="KnowSeq")
-load(paste(dir,"/expressionExample.RData",sep = ""))
+dir <- system.file("extdata", package = "KnowSeq")
+load(paste(dir, "/expressionExample.RData", sep = ""))
 
-svm_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),2)
+svm_CV(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
 }

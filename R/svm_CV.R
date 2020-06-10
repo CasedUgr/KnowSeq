@@ -4,7 +4,7 @@
 #'
 #' @param data The data parameter is an expression matrix or data.frame that contains the genes in the columns and the samples in the rows.
 #' @param labels A vector or factor that contains the labels for each of the samples in the data object.
-#' @param vars_selected The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{limmaDEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.
+#' @param vars_selected The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.
 #' @param numFold The number of folds to carry out in the cross validation process.
 #' @return A list that contains five objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes, and a vector with the best parameters found for the SVM algorithm after tuning.
 #' @examples
@@ -12,6 +12,7 @@
 #' load(paste(dir, "/expressionExample.RData", sep = ""))
 #'
 #' svm_CV(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+
 svm_CV <- function(data, labels, vars_selected, numFold = 10) {
   if (!is.data.frame(data) && !is.matrix(data)) {
     stop("The data argument must be a dataframe or a matrix.")
@@ -68,33 +69,26 @@ svm_CV <- function(data, labels, vars_selected, numFold = 10) {
   sens_cv <- matrix(0L, nrow = numFold, ncol = dim(data)[2])
   spec_cv <- matrix(0L, nrow = numFold, ncol = dim(data)[2])
   cfMatList <- list()
-
+  # compute size of val fold
+  lengthValFold <- dim(data)[1]/numFold
+  
+  # reorder the data matrix in order to have more
+  # balanced folds
+  positions <- rep(seq_len(dim(data)[1]))
+  randomPositions <- sample(positions)
+  data <- data[randomPositions,]
+  labels <- labels[randomPositions]
+  
   for (i in seq_len(numFold)) {
     cat(paste("Training fold ", i, "...\n", sep = ""))
-    trainingDataset <- setNames(
-      data.frame(matrix(ncol = ncol(data), nrow = 0)),
-      colnames(data)
-    )
-    testDataset <- setNames(
-      data.frame(matrix(ncol = ncol(data), nrow = 0)),
-      colnames(data)
-    )
-    labelsTrain <- factor(0L)
-    labelsTest <- factor(0L)
-
-    for (class in names(table(labels))) {
-      classPos <- which(labels == class)
-      classPos <- sample(classPos)
-      trainingPos <- round(length(classPos) * 0.8)
-      testPos <- round(length(classPos) * 0.2)
-      trainingDataset <- rbind(trainingDataset, data[classPos[seq_len(trainingPos)], ])
-      testDataset <- rbind(testDataset, data[classPos[(trainingPos + 1):(trainingPos + testPos)], ])
-      labelsTrain <- unlist(list(labelsTrain, labels[classPos[seq_len(trainingPos)]]))
-      labelsTest <- unlist(list(labelsTest, labels[classPos[(trainingPos + 1):(trainingPos + testPos)]]))
-    }
-
-    labelsTrain <- factor(labelsTrain[-1])
-    labelsTest <- factor(labelsTest[-1])
+    
+    # obtain validation and training folds
+    valFold <- seq(round((i-1)*lengthValFold + 1 ), round(i*lengthValFold))
+    trainDataCV <- setdiff(seq_len(dim(data)[1]), valFold)
+    testDataset<- data[valFold,]
+    trainingDataset <- data[trainDataCV,]
+    labelsTrain <- labels[trainDataCV]
+    labelsTest <- labels[valFold]
 
     for (j in seq_len(length(vars_selected))) {
       svm_model <- svm(trainingDataset[, seq(j)], labelsTrain,
@@ -107,6 +101,9 @@ svm_CV <- function(data, labels, vars_selected, numFold = 10) {
       acc_cv[i, j] <- confusionMatrix(predicts, labelsTest)$overall[[1]]
       sens_cv[i, j] <- confusionMatrix(predicts, labelsTest)$byClass[[1]]
       spec_cv[i, j] <- confusionMatrix(predicts, labelsTest)$byClass[[2]]
+      
+      if(is.na(sens_cv[i,j])) sens_cv[i,j] <- 0
+      if(is.na(spec_cv[i,j])) spec_cv[i,j] <- 0
     }
   }
   rownames(acc_cv) <- paste("Fold", seq(numFold), sep = "")

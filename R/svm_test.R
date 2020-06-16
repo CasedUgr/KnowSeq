@@ -85,14 +85,22 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
     predicts<-predict(svm_model,test[,seq(i)],probability=TRUE)
 
     cfMat<-confusionMatrix(predicts,labelsTest)
-    acc<-confusionMatrix(predicts,labelsTest)$overall[[1]]
-    sens<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
-    spec<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
-
+    
+    if (length(levels(labelsTrain))==2){
+      sens <- cfMat$byClass[[1]]
+      spec <- cfMat$byClass[[2]]
+      f1 <- cfMat$byClass[[7]]
+    } else{
+      sens <- mean(cfMat$byClass[,1])
+      spec <- mean(cfMat$byClass[,2])
+      f1 <- mean(cfMat$byClass[,7])
+    }
+    
     cfMatList[[i]] <- cfMat
     accVector[i] <- acc
     sensVector[i] <- sens
     specVector[i] <- spec
+    f1Vector[i] <- f1
 
   }
 

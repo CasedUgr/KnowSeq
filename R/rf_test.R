@@ -81,14 +81,21 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   predicts <- predict(rf_mod , test[, 1, drop=FALSE])
   
   cfMat<-confusionMatrix(predicts,labelsTest)
-  acc<-confusionMatrix(predicts,labelsTest)$overall[[1]]
-  sens<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
-  spec<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
+  if (length(levels(labelsTrain))==2){
+    sens <- cfMat$byClass[[1]]
+    spec <- cfMat$byClass[[2]]
+    f1 <- cfMat$byClass[[7]]
+  } else{
+    sens <- mean(cfMat$byClass[,1])
+    spec <- mean(cfMat$byClass[,2])
+    f1 <- mean(cfMat$byClass[,7])
+  }
   
   cfMatList[[1]] <- cfMat
   accVector[1] <- acc
   sensVector[1] <- sens
   specVector[1] <- spec
+  f1Vector[1] <- f1
   
   for(i in c(2:dim(train)[2])){
 
@@ -97,14 +104,21 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
     predicts <- predict(rf_mod , test[,seq(i)])
 
     cfMat<-confusionMatrix(predicts,labelsTest)
-    acc<-confusionMatrix(predicts,labelsTest)$overall[[1]]
-    sens<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
-    spec<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
-
+    if (length(levels(labelsTrain))==2){
+      sens <- cfMat$byClass[[1]]
+      spec <- cfMat$byClass[[2]]
+      f1 <- cfMat$byClass[[7]]
+    } else{
+      sens <- mean(cfMat$byClass[,1])
+      spec <- mean(cfMat$byClass[,2])
+      f1 <- mean(cfMat$byClass[,7])
+    }
+    
     cfMatList[[i]] <- cfMat
     accVector[i] <- acc
     sensVector[i] <- sens
     specVector[i] <- spec
+    f1Vector[i] <- f1
 
   }
 

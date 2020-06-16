@@ -73,6 +73,7 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   accVector <- double()
   sensVector <- double()
   specVector <- double()
+  f1Vector <- double()
   cfMatList  <- list()
   
   # Firstly with 1 variable
@@ -92,7 +93,7 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   }
   
   cfMatList[[1]] <- cfMat
-  accVector[1] <- acc
+  accVector[1] <- cfMat$overall[[1]]
   sensVector[1] <- sens
   specVector[1] <- spec
   f1Vector[1] <- f1
@@ -115,7 +116,7 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
     }
     
     cfMatList[[i]] <- cfMat
-    accVector[i] <- acc
+    accVector[i] <- cfMat$overall[[1]]
     sensVector[i] <- sens
     specVector[i] <- spec
     f1Vector[i] <- f1
@@ -126,9 +127,10 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   names(accVector) <- vars_selected
   names(sensVector) <- vars_selected
   names(specVector) <- vars_selected
-
-  results <- list(cfMatList,accVector,sensVector,specVector)
-  names(results) <- c("cfMats","accVector","sensVector","specVector")
+  names(f1Vector) <- vars_selected
+  
+  results <- list(cfMatList,accVector,sensVector,specVector,f1Vector)
+  names(results) <- c("cfMats","accVector","sensVector","specVector","f1Vector")
   invisible(results)
 
 }

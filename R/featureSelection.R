@@ -5,10 +5,10 @@
 #' @param data The data parameter is an expression matrix or data.frame that contains the genes in the columns and the samples in the rows.
 #' @param labels A vector or factor that contains the labels for each samples in data parameter.
 #' @param vars_selected The genes selected to use in the feature selection process. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes.
-#' @param mode The algorithm used to calculate the genes ranking. The possibilities are two: mrmr, rf and da.
+#' @param mode The algorithm used to calculate the genes ranking. The possibilities are three: mrmr, rf and da.
 #' @param disease The name of a disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.
 #' @param subdiseases Vector with the name of the particular subdiseases from disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.
-#' @param maxGenes Integer that indicated the maximun number of genes to be returned. 
+#' @param maxGenes Integer that indicated the maximum number of genes to be returned. 
 #' @return A vector that contains the ranking of genes.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")

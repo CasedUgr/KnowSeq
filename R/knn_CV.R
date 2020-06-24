@@ -55,7 +55,7 @@ knn_CV<-function(data,labels,vars_selected,numFold=10){
   acc_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   sens_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   spec_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
-  
+  f1_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   cfMatList  <- list()
   # compute size of val fold
   lengthValFold <- dim(data)[1]/numFold
@@ -85,24 +85,51 @@ knn_CV<-function(data,labels,vars_selected,numFold=10){
     predicts <- predict(knn_mod, testDataset[, 1, drop=FALSE], type = "class")
     
     cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)
-    acc_cv[i,1]<-confusionMatrix(predicts,labelsTest)$overall[[1]]
-    sens_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
-    spec_cv[i,1]<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
+    acc_cv[i,1] <- cfMatList[[i]]$overall[[1]]
+    
+    if (length(levels(labelsTrain))==2){
+      sens <- cfMatList[[i]]$byClass[[1]]
+      spec <- cfMatList[[i]]$byClass[[2]]
+      f1 <- cfMatList[[i]]$byClass[[7]]
+    } else{
+      sens <- mean(cfMatList[[i]]$byClass[,1])
+      spec <- mean(cfMatList[[i]]$byClass[,2])
+      f1 <- mean(cfMatList[[i]]$byClass[,7])
+    }
+    
+    sens_cv[i,1]<-sens
+    spec_cv[i,1]<-spec
+    f1_cv[i,1]<-f1
     
     if(is.na(sens_cv[i,1])) sens_cv[i,1] <- 0
     if(is.na(spec_cv[i,1])) spec_cv[i,1] <- 0
+    if(is.na(f1_cv[i,1])) f1_cv[i,1] <- 0
+    
     
     for(j in 2:length(vars_selected)){
       knn_mod = knn3(x = trainingDataset[,seq(j)], y = labelsTrain, k = bestK)
       predicts <- predict(knn_mod, testDataset[,seq(j)], type = "class")
       
       cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)
-      acc_cv[i,j]<-confusionMatrix(predicts,labelsTest)$overall[[1]]
-      sens_cv[i,j]<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
-      spec_cv[i,j]<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
+      acc_cv[i,j] <- cfMatList[[i]]$overall[[1]]
+
+      if (length(levels(labelsTrain))==2){
+        sens <- cfMatList[[i]]$byClass[[1]]
+        spec <- cfMatList[[i]]$byClass[[2]]
+        f1 <- cfMatList[[i]]$byClass[[7]]
+      } else{
+        sens <- mean(cfMatList[[i]]$byClass[,1])
+        spec <- mean(cfMatList[[i]]$byClass[,2])
+        f1 <- mean(cfMatList[[i]]$byClass[,7])
+      }
       
+      sens_cv[i,j]<-sens
+      spec_cv[i,j]<-spec
+      f1_cv[i,j]<-f1
+
       if(is.na(sens_cv[i,j])) sens_cv[i,j] <- 0
       if(is.na(spec_cv[i,j])) spec_cv[i,j] <- 0
+      if(is.na(f1_cv[i,j])) f1_cv[i,j] <- 0
       
     }
   }
@@ -113,10 +140,12 @@ knn_CV<-function(data,labels,vars_selected,numFold=10){
   colnames(sens_cv) <- vars_selected
   rownames(spec_cv) <- paste("Fold",seq(numFold),sep = "")
   colnames(spec_cv) <- vars_selected
-  
+  rownames(f1_cv) <- paste("Fold",seq(numFold),sep = "")
+  colnames(f1_cv) <- vars_selected
+
   cat("Classification done successfully!\n")
-  results_cv <- list(cfMatList,acc_cv,sens_cv,spec_cv,bestK)
-  names(results_cv) <- c("cfMats","accMatrix","sensMatrix","specMatrix", "bestK")
+  results_cv <- list(cfMatList,acc_cv,sens_cv,spec_cv,f1_cv,bestK)
+  names(results_cv) <- c("cfMats","accMatrix","sensMatrix","specMatrix","f1Matrix","bestK")
   invisible(results_cv)
   
 }

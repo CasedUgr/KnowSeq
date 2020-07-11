@@ -98,8 +98,8 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
     if(downloadSamples){
 
       cat("Downloading the requested samples...\n")
-      urls <- as.character(data$download_path)
-      lapply(urls,sraToFastq)
+      identifiers <- as.character(data$Run)
+      lapply(identifiers,sraToFastq)
       if(length(list.files(pattern = "*.fastq")) != 0){
         system2("mv", args = "*.fastq ReferenceFiles/Samples/RNAseq/FASTQFiles/")
 

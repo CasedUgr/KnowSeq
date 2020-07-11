@@ -4,19 +4,19 @@
 \alias{sraToFastq}
 \title{sraToFastq downloads and converts the sra files to fastq files. The function admits both gz and sra formats.}
 \usage{
-sraToFastq(urlsVector)
+sraToFastq(identifier)
 }
 \arguments{
-\item{urlsVector}{A vector that contains a list with the URLs requested.}
+\item{identifier}{A vector that contains a list with the URLs requested.}
 }
 \value{
 Nothing.
 }
 \description{
-This function downloads and converts the sra files to fastq files by using the URLs indicated through the urlsVector argument. The function admits both gz and sra formats. This function is used internally by \code{\link{rawAlignment}} but it can be used separatelly.
+This function downloads and converts the sra files to fastq files by using the URLs indicated through the identifier argument. The function admits both gz and sra formats. This function is used internally by \code{\link{rawAlignment}} but it can be used separatelly.
 }
 \examples{
 # This function needs the download of the pre-compiled tools supplied by KnowSeq.
 
-\dontrun{sraToFastq(c("http://urlToSRA1", "http://urlToSRA2"))}
+\dontrun{sraToFastq("SRA1")}
 }

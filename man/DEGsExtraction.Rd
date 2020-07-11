@@ -10,6 +10,8 @@ DEGsExtraction(
   pvalue = 0.05,
   lfc = 1,
   cov = 1,
+  nmax = 1,
+  multiDegsMethod = "cov",
   number = Inf,
   svaCorrection = FALSE,
   svaMod

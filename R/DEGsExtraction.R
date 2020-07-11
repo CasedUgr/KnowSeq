@@ -23,7 +23,7 @@
 #'
 #' DEGsMatrix <- DEGsInformation$DEGsMatrix
 
-DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1,number = Inf, svaCorrection = FALSE, svaMod){
+DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1, nmax = 1, multiDegsMethod = "cov", number = Inf, svaCorrection = FALSE, svaMod){
 
       if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
       if(!is.character(labels)  && !is.factor(labels)){stop("The class of the labels parameter must be character vector or factor.")}
@@ -84,23 +84,66 @@ DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov
         cont.matrixMulti = makeContrasts(contrasts = contrasts, levels=levels(condition))
         fitmicroMultiContrast = contrasts.fit(fitmicroMulti,cont.matrixMulti)
         fitmicroMultiContrast <- eBayes(fitmicroMultiContrast)
+        
+        if(multiDegsMethod == "cov"){
         res = decideTests(fitmicroMultiContrast,p.value=pvalue,lfc=lfc)
         ind = which(apply(res,1,function(x) {length(which(x != 0))>cov}) == TRUE)
 
-        if(length(ind) > 0){
-
-          lfcIndmatrix <- fitmicroMultiContrast$coefficients[ind,]
-          multIndMatches <- res[ind,]
-          multIndMatches <- abs(multIndMatches)
-
-          DEGsMultiClass <- expressionMatrix[names(ind),]
-          results <- list(fitmicroMultiContrast,lfcIndmatrix,DEGsMultiClass)
-          names(results) <- c("Table","MulticlassLFC","DEGsMatrix")
-
-        }else{
-          stop("There are not genes that complains these restrictions, please change the p-value, lfc or cov.")
+          if(length(ind) > 0){
+  
+            lfcIndmatrix <- fitmicroMultiContrast$coefficients[ind,]
+            multIndMatches <- res[ind,]
+            multIndMatches <- abs(multIndMatches)
+  
+            DEGsMultiClass <- expressionMatrix[names(ind),]
+            results <- list(fitmicroMultiContrast,lfcIndmatrix,DEGsMultiClass)
+            names(results) <- c("Table","MulticlassLFC","DEGsMatrix")
+  
+          }else{
+            stop("There are not genes that complains these restrictions, please change the p-value, lfc or cov.")
+          }
+        }else if(multiDegsMethod == "nmax"){
+          
+          res.val <- decideTests(fitmicroMultiContrast,p.value=pvalue,lfc = lfc)
+          ind.val <- which(apply(res.val,1,function(x) {length(which(x != 0))>0}) == T)
+          lfcIndmatrix.sig <- fitmicroMultiContrast$coefficients[ind.val,]
+          lfcIndmatrix.abs <- abs(lfcIndmatrix.sig)
+          
+          lfcs.sig <- as.data.frame(lfcIndmatrix.sig)
+          lfcs.sig <- cbind(rownames(lfcs.sig),lfcs.sig)
+          
+          
+          if(dim(lfcIndmatrix.abs)[1] >= nmax){
+            genesSeveralMaxLFC <- rownames(lfcIndmatrix.abs)[apply(lfcIndmatrix.abs,2, order, decreasing = T)]
+            genesSeveralMaxLFC <- data.frame(matrix(unlist(genesSeveralMaxLFC), nrow = dim(lfcIndmatrix.abs)[1], byrow = F), stringsAsFactors = F)
+            genesSeveralMaxLFC <- genesSeveralMaxLFC[1:nmax,]
+            
+            genesFilteredByLFC <- data.frame(matrix(character(),dim(genesSeveralMaxLFC)[1],dim(genesSeveralMaxLFC)[2]),stringsAsFactors = F)
+            
+            for (i in 1:dim(genesSeveralMaxLFC)[1]){
+              for (j in 1:dim(genesSeveralMaxLFC)[2]){
+                if(lfcIndmatrix.abs[genesSeveralMaxLFC[i,j],j] >= lfc){
+                  genesFilteredByLFC[i,j] <- as.character(genesSeveralMaxLFC[i,j])
+                }
+              }
+            }
+            
+            
+            genesFilteredByLFC <- as.data.frame(genesFilteredByLFC)
+            colnames(genesFilteredByLFC) <- colnames(lfcIndmatrix.abs)
+            genesSeveralMaxLFC <- unique(unlist(genesFilteredByLFC))
+            genesSeveralMaxLFC <- genesSeveralMaxLFC[!is.na(genesSeveralMaxLFC)]
+            
+            DEGsMultiClass <- expressionMatrix[genesSeveralMaxLFC,]
+            results <- list(fitmicroMultiContrast,lfcIndmatrix.abs,DEGsMultiClass)
+            names(results) <- c("Table","MulticlassLFC","DEGsMatrix")
+            
+            
+          }else{
+            stop("There are not genes that complains these restrictions, please change the p-value, lfc or nmax")
+          }
+          
         }
-
       }
 
       invisible(results)

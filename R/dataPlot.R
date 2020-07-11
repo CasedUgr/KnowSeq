@@ -138,19 +138,19 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     names(xx) <- c("Classes", "Gen", "Value")
     
     print(ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) 
-          + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes"))
+          + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylim(0,25) + ylab(ylab) + labs(fill = "Classes") + theme(text = element_text(size=15),axis.text.x = element_text(angle = 90)))
     
     if(toPNG){
       cat("Creating PNG...\n")
-      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
-      
+      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) 
+      + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylim(0,25) + ylab(ylab) + labs(fill = "Classes") + theme(text = element_text(size=15),axis.text.x = element_text(angle = 90))      
       ggsave("genesBoxplot.png", width = 15, height = 10)
       
     }
     if(toPDF){
       cat("Creating PDF...\n")
-      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylab(ylab) + labs(fill = "Classes")
-      
+      ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) 
+      + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylim(0,25) + ylab(ylab) + labs(fill = "Classes") + theme(text = element_text(size=15),axis.text.x = element_text(angle = 90))      
       ggsave("genesBoxplot.pdf", width = 15, height = 10)
       
     }
@@ -242,7 +242,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
       if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
       if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
       
-      plot(data[1,],type='l',col=colours[2], main=main,
+      plot(data[1,],type='l',col=colours[1], main=main,
            xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))
       
       for(i in c(2:dim(data)[1])){
@@ -291,7 +291,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
         if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
         if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
         
-        plot(data[1,],type='l',col=colours[2], main=main,
+        plot(data[1,],type='l',col=colours[1], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))
         
         for(i in c(2:dim(data)[1])){

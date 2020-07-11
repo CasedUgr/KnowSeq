@@ -21,13 +21,13 @@ featureSelection(
 
 \item{vars_selected}{The genes selected to use in the feature selection process. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes.}
 
-\item{mode}{The algorithm used to calculate the genes ranking. The possibilities are two: mrmr, rf and da.}
+\item{mode}{The algorithm used to calculate the genes ranking. The possibilities are three: mrmr, rf and da.}
 
 \item{disease}{The name of a disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.}
 
 \item{subdiseases}{Vector with the name of the particular subdiseases from disease in order to calculate the Disease Association ranking by using the DEGs indicated in the vars_selected parameter.}
 
-\item{maxGenes}{Integer that indicated the maximun number of genes to be returned.}
+\item{maxGenes}{Integer that indicated the maximum number of genes to be returned.}
 }
 \value{
 A vector that contains the ranking of genes.

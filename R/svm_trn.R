@@ -11,9 +11,9 @@
 #' dir <- system.file("extdata", package = "KnowSeq")
 #' load(paste(dir, "/expressionExample.RData", sep = ""))
 #'
-#' svm_CV(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+#' svm_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
 
-svm_CV <- function(data, labels, vars_selected, numFold = 10) {
+svm_trn <- function(data, labels, vars_selected, numFold = 10) {
   if (!is.data.frame(data) && !is.matrix(data)) {
     stop("The data argument must be a dataframe or a matrix.")
   }

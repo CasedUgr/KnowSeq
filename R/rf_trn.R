@@ -11,9 +11,9 @@
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #'
-#' rf_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),2)
+#' rf_trn(t(DEGsMatrix),labels,rownames(DEGsMatrix),2)
 
-rf_CV<-function(data,labels,vars_selected,numFold=10){
+rf_trn <- function(data,labels,vars_selected,numFold=10){
 
 
   if(!is.data.frame(data) && !is.matrix(data)){

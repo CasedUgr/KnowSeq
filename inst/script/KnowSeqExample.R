@@ -70,7 +70,7 @@ DEGsMatrixML <- t(DEGsMatrix)
 mrmrRanking <- featureSelection(DEGsMatrixML,as.factor(labels),colnames(DEGsMatrixML), mode = "mrmr")
 
 # CV function with k-NN
-results_cv_knn <- knn_CV(DEGsMatrixML,as.factor(labels),names(mrmrRanking),10)
+results_cv_knn <- knn_trn(DEGsMatrixML,as.factor(labels),names(mrmrRanking),10)
 
 # Plotting the accuracy of all the folds evaluated in the CV process
 dataPlot(results_cv_knn$accMatrix,mode = "classResults", main = "Accuracy for each fold", xlab = "Genes", ylab = "Accuracy",toPNG = TRUE, toPDF = TRUE)
@@ -97,7 +97,7 @@ trainingLabels <- labels[distribution[1:25]]
 testDataset <- DEGsMatrixML[distribution[26:33],]
 testLabels <- labels[distribution[26:33]]
 
-results_test_svm <- KnowSeq::svm_test(trainingDataset,as.factor(trainingLabels),testDataset,as.factor(testLabels),names(mrmrRanking))
+results_test_svm <- svm_test(trainingDataset,as.factor(trainingLabels),testDataset,as.factor(testLabels),names(mrmrRanking))
 
 # Plotting the accuracy for all the genes evaluated
 dataPlot(results_test_svm$accVector,mode = "classResults", main = "Accuracy for all the genes evaluated", xlab = "Genes", ylab = "Accuracy",toPNG = TRUE, toPDF = TRUE)

@@ -11,9 +11,9 @@
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
 #'
-#' knn_CV(t(DEGsMatrix),labels,rownames(DEGsMatrix),3)
+#' knn_trn(t(DEGsMatrix),labels,rownames(DEGsMatrix),3)
 
-knn_CV<-function(data,labels,vars_selected,numFold=10){
+knn_trn <- function(data,labels,vars_selected,numFold=10){
   
   if(!is.data.frame(data) && !is.matrix(data)){
     

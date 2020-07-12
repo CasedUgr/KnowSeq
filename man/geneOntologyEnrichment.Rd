@@ -8,8 +8,7 @@ geneOntologyEnrichment(
   geneList,
   geneType = "ENTREZ_GENE_ID",
   ontologies = c("BP", "CC", "MF"),
-  pvalCutOff = 1,
-  returnGeneSymbols = FALSE
+  pvalCutOff = 1
 )
 }
 \arguments{
@@ -20,8 +19,6 @@ geneOntologyEnrichment(
 \item{ontologies}{A list that contains ontologies to be searchs. Values must be contained in the following three: BP, CC, MF.}
 
 \item{pvalCutOff}{The maximum p-value to considers that a genes is related with a GO term.}
-
-\item{returnGeneSymbols}{A boolean that indicates if gene symbols must be added to the ontologies matrix.}
 }
 \value{
 A list that contains a matrix for each of the possible ontologies and a matrix with the GOs for the three ontologies together.
@@ -30,5 +27,5 @@ A list that contains a matrix for each of the possible ontologies and a matrix w
 The function obtains the information about GO terms from the three differents ontologies that are related to the DEGs. The function also returns the description about each GO and a list of genes that are inside of each GO.
 }
 \examples{
-\dontrun{GOsList <- geneOntologyEnrichment(data$entrezgene_id,geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = TRUE)}
+\dontrun{GOsList <- geneOntologyEnrichment(data$entrezgene_id,geneType='ENTREZ_GENE_ID',pvalCutOff=0.1)}
 }

@@ -335,8 +335,8 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   
   for (clasifAlg in clasifAlgs){
     if (clasifAlg == 'knn'){ 
-      results_cv_knn <- knn_CV(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
-      markobj <- c(markobj,paste('## Results for 10-CV implementing ',clasifAlg),'\n')
+      results_cv_knn <- knn_trn(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
+      markobj <- c(markobj,paste('## Training Results for 10-CV implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
         if (metric == 'accuracy'){
@@ -402,8 +402,8 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       }
       
     }else if (clasifAlg == 'rf'){
-      results_cv_rf <- rf_CV(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
-      markobj <- c(markobj,paste('## Results for 10-CV implementing ',clasifAlg),'\n')
+      results_cv_rf <- rf_trn(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
+      markobj <- c(markobj,paste('## Training Results for 10-CV implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
         if (metric == 'accuracy'){
@@ -468,8 +468,8 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       }
       
     }else if (clasifAlg == 'svm'){
-      results_cv_svm <- svm_CV(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
-      markobj <- c(markobj,paste('## Results for 10-CV implementing ',clasifAlg),'\n')
+      results_cv_svm <- svm_trn(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
+      markobj <- c(markobj,paste('## Training Results for 10-CV implementing ',clasifAlg),'\n')
       
       for (metric in metrics){
         if (metric == 'accuracy'){

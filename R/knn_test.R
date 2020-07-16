@@ -74,6 +74,7 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   accVector <- double()
   sensVector <- double()
   specVector <- double()
+  f1Vector <- double()
   cfMatList  <- list()
   
   # Firstly with one variable
@@ -82,14 +83,22 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   predicts <- predict(knn_mod, test[, 1, drop=FALSE], type = "class")
   
   cfMat<-confusionMatrix(predicts,labelsTest)
-  acc<-confusionMatrix(predicts,labelsTest)$overall[[1]]
-  sens<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
-  spec<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
-  
+  if (length(levels(labelsTrain))==2){
+    sens <- cfMat$byClass[[1]]
+    spec <- cfMat$byClass[[2]]
+    f1 <- cfMat$byClass[[7]]
+  } else{
+    sens <- mean(cfMat$byClass[,1])
+    spec <- mean(cfMat$byClass[,2])
+    f1 <- mean(cfMat$byClass[,7])
+  }
+
   cfMatList[[1]] <- cfMat
-  accVector[1] <- acc
+  accVector[1] <- cfMat$overall[[1]]
   sensVector[1] <- sens
   specVector[1] <- spec
+  f1Vector[1] <- f1
+  if(is.na(f1Vector[1])) f1Vector[i] <- 0
   
   for(i in c(2:dim(test)[2])){
 
@@ -98,24 +107,34 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
     predicts <- predict(knn_mod, test[,seq(i)], type = "class")
 
     cfMat<-confusionMatrix(predicts,labelsTest)
-    acc<-confusionMatrix(predicts,labelsTest)$overall[[1]]
-    sens<-confusionMatrix(predicts,labelsTest)$byClass[[1]]
-    spec<-confusionMatrix(predicts,labelsTest)$byClass[[2]]
-
+    
+    if (length(levels(labelsTrain))==2){
+      sens <- cfMat$byClass[[1]]
+      spec <- cfMat$byClass[[2]]
+      f1 <- cfMat$byClass[[7]]
+    } else{
+      sens <- mean(cfMat$byClass[,1])
+      spec <- mean(cfMat$byClass[,2])
+      f1 <- mean(cfMat$byClass[,7])
+    }
+    
     cfMatList[[i]] <- cfMat
-    accVector[i] <- acc
+    accVector[i] <- cfMat$overall[[1]]
     sensVector[i] <- sens
     specVector[i] <- spec
-
+    f1Vector[i] <- f1
+    
+    if(is.na(f1Vector[i])) f1Vector[i] <- 0
   }
 
   cat("Classification done successfully!\n")
   names(accVector) <- vars_selected
   names(sensVector) <- vars_selected
   names(specVector) <- vars_selected
+  names(f1Vector) <- vars_selected
 
-  results <- list(cfMatList,accVector,sensVector,specVector)
-  names(results) <- c("cfMats","accVector","sensVector","specVector")
+  results <- list(cfMatList,accVector,sensVector,specVector,f1Vector)
+  names(results) <- c("cfMats","accVector","sensVector","specVector","f1Vector")
   invisible(results)
 
 }

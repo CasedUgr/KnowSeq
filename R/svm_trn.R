@@ -11,9 +11,9 @@
 #' dir <- system.file("extdata", package = "KnowSeq")
 #' load(paste(dir, "/expressionExample.RData", sep = ""))
 #'
-#' svm_CV(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+#' svm_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
 
-svm_CV <- function(data, labels, vars_selected, numFold = 10) {
+svm_trn <- function(data, labels, vars_selected, numFold = 10) {
   if (!is.data.frame(data) && !is.matrix(data)) {
     stop("The data argument must be a dataframe or a matrix.")
   }
@@ -68,6 +68,7 @@ svm_CV <- function(data, labels, vars_selected, numFold = 10) {
   acc_cv <- matrix(0L, nrow = numFold, ncol = dim(data)[2])
   sens_cv <- matrix(0L, nrow = numFold, ncol = dim(data)[2])
   spec_cv <- matrix(0L, nrow = numFold, ncol = dim(data)[2])
+  f1_cv <- matrix(0L, nrow = numFold, ncol = dim(data)[2])
   cfMatList <- list()
   # compute size of val fold
   lengthValFold <- dim(data)[1]/numFold
@@ -98,12 +99,25 @@ svm_CV <- function(data, labels, vars_selected, numFold = 10) {
       predicts <- predict(svm_model, testDataset[, seq(j)], probability = TRUE)
 
       cfMatList[[i]] <- confusionMatrix(predicts, labelsTest)
-      acc_cv[i, j] <- confusionMatrix(predicts, labelsTest)$overall[[1]]
-      sens_cv[i, j] <- confusionMatrix(predicts, labelsTest)$byClass[[1]]
-      spec_cv[i, j] <- confusionMatrix(predicts, labelsTest)$byClass[[2]]
+      acc_cv[i, j] <- cfMatList[[i]]$overall[[1]]
+      
+      if (length(levels(labelsTrain))==2){
+        sens <- cfMatList[[i]]$byClass[[1]]
+        spec <- cfMatList[[i]]$byClass[[2]]
+        f1 <- cfMatList[[i]]$byClass[[7]]
+      } else{
+        sens <- mean(cfMatList[[i]]$byClass[,1])
+        spec <- mean(cfMatList[[i]]$byClass[,2])
+        f1 <- mean(cfMatList[[i]]$byClass[,7])
+      }
+      
+      sens_cv[i, j] <- sens
+      spec_cv[i, j] <- spec
+      f1_cv[i, j] <- f1
       
       if(is.na(sens_cv[i,j])) sens_cv[i,j] <- 0
       if(is.na(spec_cv[i,j])) spec_cv[i,j] <- 0
+      if(is.na(f1_cv[i,j])) f1_cv[i,j] <- 0
     }
   }
   rownames(acc_cv) <- paste("Fold", seq(numFold), sep = "")
@@ -112,9 +126,11 @@ svm_CV <- function(data, labels, vars_selected, numFold = 10) {
   colnames(sens_cv) <- vars_selected
   rownames(spec_cv) <- paste("Fold", seq(numFold), sep = "")
   colnames(spec_cv) <- vars_selected
+  rownames(f1_cv) <- paste("Fold", seq(numFold), sep = "")
+  colnames(f1_cv) <- vars_selected
 
   cat("Classification done successfully!\n")
-  results_cv <- list(cfMatList, acc_cv, sens_cv, spec_cv, bestParameters)
-  names(results_cv) <- c("cfMats", "accMatrix", "sensMatrix", "specMatrix", "bestParameters")
+  results_cv <- list(cfMatList, acc_cv, sens_cv, spec_cv, f1_cv, bestParameters)
+  names(results_cv) <- c("cfMats", "accMatrix", "sensMatrix", "specMatrix","f1Matrix","bestParameters")
   invisible(results_cv)
 }

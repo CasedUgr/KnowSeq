@@ -279,7 +279,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
     }
     return(selected.genes)
   }else{
-    stop("The mode is unrecognized, please use mrmr or rf.")
+    stop("The mode is unrecognized, please use mrmr, rf, da or daRed.")
   }
 }
 

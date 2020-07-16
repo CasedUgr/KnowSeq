@@ -355,11 +355,11 @@ rfRanking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML), mode =
 daRanking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML), mode = "da", disease = "breast")
 
 # CV functions with k-NN, SVM and RF
-results_cv_knn <- knn_CV(DEGsMatrixML,labels,colnames(DEGsMatrixML)[1:10],2)
+results_cv_knn <- knn_trn(DEGsMatrixML,labels,colnames(DEGsMatrixML)[1:10],2)
 
-results_cv_svm <- svm_CV(DEGsMatrixML,labels,rfRanking[1:10],2)
+results_cv_svm <- svm_trn(DEGsMatrixML,labels,rfRanking[1:10],2)
 
-results_cv_rf <- rf_CV(DEGsMatrixML,labels,names(daRanking)[1:10],2)
+results_cv_rf <- rf_trn(DEGsMatrixML,labels,names(daRanking)[1:10],2)
 
 ```
 

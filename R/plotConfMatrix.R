@@ -14,21 +14,24 @@ plotConfMatrix <- function(data){
   layout(matrix(c(1,1,2)))
 
   # The above rescales the confusion matrix such that columns sum to 100.
-  opar <- par(mar=c(5.1, 6.1, 2, 2))
+  opar <- par(mar=c(6.1, 9.1, 1, 2))
   x <- x.orig <- unclass(data)
   x <- log(x + 0.5) * 2.33
   x[x < 0] <- NA
   x[x > 10] <- 10
   diag(x) <- -diag(x)
   image(seq_len(ncol(x)), seq_len(ncol(x)),
-        -(x[, nrow(x):1]), xlab='Actual', ylab='',
+        -(x[, nrow(x):1]), xlab='', ylab='',
         col=colorRampPalette(c(hsv(h = 0, s = 0.9, v = 0.9, alpha = 1),
                                hsv(h = 0, s = 0, v = 0.9, alpha = 1),
                                hsv(h = 2/6, s = 0.9, v = 0.9, alpha = 1)))(41),
         xaxt='n', yaxt='n', zlim=c(-10, 10))
-  axis(1, at=seq_len(ncol(x)), labels=colnames(x), cex.axis=1.2, font = 2)
+  axis(1, at=seq_len(ncol(x)), labels=FALSE, cex.axis=1.2, font = 2)
+  title(xlab='Actual', line=4.5, cex = 1.2)
+  text(seq_len(ncol(x)), par("usr")[3] - 0.8, labels = colnames(x), pos = 1 ,font = 2, xpd = TRUE)
+  
   axis(2, at=ncol(x):1, labels=colnames(x), las=1, cex.axis=1.2,font = 2)
-  title(ylab='Predicted', line=4.5, cex = 1.2)
+  title(ylab='Predicted', line=7.5, cex = 1.2)
   abline(h = 0:ncol(x) + 0.5, col = 'gray')
   abline(v = 0:ncol(x) + 0.5, col = 'gray')
   text(seq_len(ncol(x)), rep(ncol(x):1, each=ncol(x)),

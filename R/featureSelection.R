@@ -1,5 +1,3 @@
-#' featureSelection function calculates the optimal order of DEGs to achieve the best result in the posterior machine learning process by using mRMR algorithm or Random Forest.
-#'
 #' featureSelection function calculates the optimal order of DEGs to achieve the best result in the posterior machine learning process by using mRMR algorithm or Random Forest. Furthermore, the ranking is returned and can be used as input of the parameter vars_selected in the machine learning functions.
 #'
 #' @param data The data parameter is an expression matrix or data.frame that contains the genes in the columns and the samples in the rows.
@@ -56,7 +54,7 @@ featureSelection <-function(data,labels,vars_selected,mode="mrmr",disease="",sub
     cat("Calculating the ranking of the most relevant genes by using Random Forest algorithm...\n")
     
     rfRanking <- randomForest(data[,vars_selected], labels, importance=TRUE,proximity=TRUE)
-    rfRanking <- rfRanking$importance[order(rfRanking$importance[,3],decreasing = TRUE),]
+    rfRanking <- rfRanking$importance[order(rfRanking$importance[, "MeanDecreaseAccuracy"], decreasing = TRUE),]
     
     cat("Random Forest ranking: ")
     cat(rownames(rfRanking))

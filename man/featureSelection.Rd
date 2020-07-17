@@ -2,7 +2,7 @@
 % Please edit documentation in R/featureSelection.R
 \name{featureSelection}
 \alias{featureSelection}
-\title{featureSelection function calculates the optimal order of DEGs to achieve the best result in the posterior machine learning process by using mRMR algorithm or Random Forest.}
+\title{featureSelection function calculates the optimal order of DEGs to achieve the best result in the posterior machine learning process by using mRMR algorithm or Random Forest. Furthermore, the ranking is returned and can be used as input of the parameter vars_selected in the machine learning functions.}
 \usage{
 featureSelection(
   data,

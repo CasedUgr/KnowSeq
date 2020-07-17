@@ -552,7 +552,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                    'Gene ontology (GO) provides information about the biological functions of the genes. 
                       Information from the three different ontologies (BP, MF and CC) will be shown.\n')
       amigo.url <- 'http://amigo.geneontology.org/amigo/term/'
-      GOsMatrix <- geneOntologyEnrichment(as.character(myAnnotation$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1,returnGeneSymbols = FALSE)
+      GOsMatrix <- geneOntologyEnrichment(as.character(myAnnotation$entrezgene_id),geneType='ENTREZ_GENE_ID',pvalCutOff=0.1)
       
       if(dim(GOsMatrix$`BP Ontology GOs`)[1] != 0){
         gene.names <- as.character(GOsMatrix$`BP Ontology GOs`$Genes)

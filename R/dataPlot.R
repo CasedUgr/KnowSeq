@@ -138,19 +138,19 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     names(xx) <- c("Classes", "Gen", "Value")
     
     print(ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) 
-          + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylim(0,25) + ylab(ylab) + labs(fill = "Classes") + theme(text = element_text(size=15),axis.text.x = element_text(angle = 90)))
+          + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylim(min(xx$Value),max(xx$Value)) + ylab(ylab) + labs(fill = "Classes") + theme(text = element_text(size=15),axis.text.x = element_text(angle = 90)))
     
     if(toPNG){
       cat("Creating PNG...\n")
       ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) 
-      + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylim(0,25) + ylab(ylab) + labs(fill = "Classes") + theme(text = element_text(size=15),axis.text.x = element_text(angle = 90))      
+      + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylim(min(xx$Value),max(xx$Value)) + ylab(ylab) + labs(fill = "Classes") + theme(text = element_text(size=15),axis.text.x = element_text(angle = 90))      
       ggsave("genesBoxplot.png", width = 15, height = 10)
       
     }
     if(toPDF){
       cat("Creating PDF...\n")
       ggplot(xx, aes(x=as.factor(Classes),y=Value,fill=as.factor(Classes))) + geom_boxplot() + facet_wrap(~Gen, ncol = 3) 
-      + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylim(0,25) + ylab(ylab) + labs(fill = "Classes") + theme(text = element_text(size=15),axis.text.x = element_text(angle = 90))      
+      + scale_fill_manual(values=coloursPalette) + ggtitle(main) + xlab(xlab) + ylim(min(xx$Value),max(xx$Value)) + ylab(ylab) + labs(fill = "Classes") + theme(text = element_text(size=15),axis.text.x = element_text(angle = 90))      
       ggsave("genesBoxplot.pdf", width = 15, height = 10)
       
     }

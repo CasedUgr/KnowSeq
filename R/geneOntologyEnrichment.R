@@ -82,7 +82,7 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
       
       if (length(remove)>0) act.gos <- act.gos[-remove,]
       act.gos[['GO.ID']] <- ontology.term[,1]
-      act.gos[['Term']] <- ontology.term[,2]
+      act.gos[['Term']] <- ontology.term[,2] 
 
       
       # Add column with gene symbols

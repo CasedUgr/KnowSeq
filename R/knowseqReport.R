@@ -172,7 +172,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
 
   }
   
-  # --- Differencia Expressed Genes --- #
+  # --- Differential Expressed Genes --- #
   markobj <- c(markobj,'\n# Differential Expressed Genes extraction\n')
   
   if(batchEffectTreatment){
@@ -244,10 +244,6 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     
   }
   
-  if(geneOntology || getPathways){
-    myAnnotation <- myAnnotation[myAnnotation$external_gene_name %in% rownames(DEGsMatrix),]
-    myAnnotation <- myAnnotation[complete.cases(myAnnotation), ]
-  }
   
   if(is.infinite(maxGenes)){
     maxGenes <- dim(DEGsMatrix)[1]
@@ -277,6 +273,11 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     
     
   } else{ranking <- topTable.dataframe[,1]}
+  
+  if(geneOntology || getPathways){
+    myAnnotation <- myAnnotation[myAnnotation$external_gene_name %in% as.character(ranking[seq_len(maxGenes)]),]
+    myAnnotation <- myAnnotation[complete.cases(myAnnotation), ]
+  }
   
   genes <- ''
   for (gene in ranking[seq_len(maxGenes)]) genes <- paste(genes,gene,sep=', ')
@@ -640,7 +641,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       
       myAnnotation <- myAnnotation[which(!is.na(myAnnotation$entrezgene_id) == TRUE),]
       
-      commonDEGs <- intersect(rownames(DEGsMatrix),unique(myAnnotation$external_gene_name))
+      commonDEGs <- intersect(as.character(ranking[seq_len(maxGenes)]),unique(myAnnotation$external_gene_name))
       posCommonDEGs <- match(rownames(DEGsMatrix[commonDEGs,]),myAnnotation$external_gene_name)
       pathMatrix <- DEGsMatrix[commonDEGs,]
       rownames(pathMatrix) <- myAnnotation$entrezgene_id[posCommonDEGs]

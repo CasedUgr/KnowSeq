@@ -399,7 +399,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
           
           markobj <- c(markobj,'```{r echo = FALSE}',
                        paste('dataPlot(results_test_knn[["',test.metric,'"]],
-                       mode = "classResults",
+                       mode = "classResults", legend="',metric,'",
                        main = "',s,' test results with ',clasifAlg,'",
                        xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
         }
@@ -475,7 +475,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
           
           markobj <- c(markobj,'```{r echo = FALSE}',
                        paste('dataPlot(results_test_rf[["',test.metric,'"]],
-                       mode = "classResults",
+                       mode = "classResults", legend="',metric,'",
                        main = "',s,' test results with ',clasifAlg,'",
                        xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
         }
@@ -552,7 +552,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
           
           markobj <- c(markobj,'```{r echo = FALSE}',
                        paste('dataPlot(results_test_svm[["',test.metric,'"]],
-                       mode = "classResults",
+                       mode = "classResults", legend="',metric,'",
                        main = "',s,' test results with ',clasifAlg,'",
                        xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
         }
@@ -706,11 +706,11 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                      'Finally, the related diseases enrichment is displayed. Related diseases to the final set of DEGs are searched 
                       from *targetValidation* plastform. For each disease it is also showed a list of evidences. \n')
         
-        diseases <- DEGsToDiseases(rownames(DEGsMatrix), size = 10, getEvidences = TRUE)
+        diseases <- DEGsToDiseases(ranking[seq_len(maxGenes)], size = 10, getEvidences = TRUE)
         evidences.frame <- list()
         for (gene in names(diseases)){
           act.markobj <- c()
-          # If user want to see evidences for all diseases or this diseases match with solicitated disease
+          # If user want to see evidences for all diseases or this diseases match with solicited disease
           check.diseases <- names(diseases[[gene]]$evidences)
           
           for (act.disease in check.diseases){
@@ -746,7 +746,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                      'Finally, the ',dis,' related evidences enrichment is displayed. DEGs related evidences are searched 
                       from *targetValidation* platform.\n')
         
-        r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease,"&size=1&filter=disease",sep = ""))
+        r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",gsub(" ","-",disease),"&size=1&filter=disease",sep = ""))
         respon <- content(r_Ensembl)
         
         if ( 'size' %in% names(respon) && respon$size == 0){
@@ -757,17 +757,17 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
           response <- GET(url)
           response <- content(response)
           found.symbols <- unlist(list.map(response$data,target$gene_info$symbol))
-          found.symbols <- intersect(found.symbols,rownames(DEGsMatrix))
+          found.symbols <- intersect(found.symbols,ranking[seq_len(maxGenes)])
           
           if(length(found.symbols) > 0){
             evidences_ <- c()
             
             if (length(subdiseases)==1 && subdiseases == ''){
-              evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,disease,size=10))
+              evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,gsub("-"," ",disease),size=25))
             }
             else{
               for (subdisease in subdiseases){
-                evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,subdisease,size=10))
+                evidences_ <- rbind(evidences_,DEGsEvidences(found.symbols,gsub("-"," ",subdisease),size=25))
               }
             }
             evidences.frame <- list()
@@ -792,7 +792,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                     act.markobj <- c(act.markobj,paste('####',subdiseases[ev.index]))
                   for ( evidence.type in names(evidences.frame[[as.character(ev.index)]][[gene]]))
                     act.markobj <- c(act.markobj,'```{r echo=FALSE}',
-                                     paste('knitr::kable(data.frame(evidences.frame[["',as.character(ev.index),'"]][["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',disease,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
+                                     paste('knitr::kable(data.frame(evidences.frame[["',as.character(ev.index),'"]][["',gene,'"]][["',evidence.type,'"]]),"',table.format,'",caption="',evidence.type,' evidences for ',dis,'", table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
                 }
               }
               if (length(act.markobj) > 0)

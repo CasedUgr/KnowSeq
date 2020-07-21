@@ -276,8 +276,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     markobj <- c(markobj,paste('First',maxGenes,'selected genes by ',featureSelectionMode,' algorithm/method are:'),ranking[seq_len(maxGenes)],'.\n')
     
     
-  } else{ranking <- rownames(topTable)}
-  
+  } else{ranking <- topTable.dataframe[,1]}
   
   genes <- ''
   for (gene in ranking[seq_len(maxGenes)]) genes <- paste(genes,gene,sep=', ')
@@ -336,18 +335,25 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   for (clasifAlg in clasifAlgs){
     if (clasifAlg == 'knn'){ 
       results_cv_knn <- knn_trn(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
-      markobj <- c(markobj,paste('## Training Results for 10-CV implementing ',clasifAlg),'\n')
+      markobj <- c(markobj,paste('## ',toupper(clasifAlg),' Training Results for 10-CV\n'))
       
       for (metric in metrics){
         if (metric == 'accuracy'){
-          act.metric = 'accMatrix'
-          colour = "red"
+          act.metric = 'accuracyInfo'
+          act.result = "meanAccuracy"
+          colour = "indianred2"
         }else if (metric == 'specificity'){
-          act.metric = 'specMatrix'
-          colour = "blue"
+          act.metric = 'specificityInfo'
+          act.result = "meanSpecificity"
+          colour = "deepskyblue2"
         }else if (metric == 'sensitivity'){
-          act.metric = 'sensMatrix'
-          colour = "green"
+          act.metric = 'sensitivityInfo'
+          act.result = "meanSensitivity"
+          colour = "mediumpurple1"
+        }else if (metric == 'f1'){
+          act.metric = 'F1Info'
+          act.result = "meanF1"
+          colour = "salmon1"
         }
         
         s <- strsplit(metric, " ")[[1]]
@@ -355,10 +361,10 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                    sep = "", collapse = " ")
         
         markobj <- c(markobj,'```{r echo = FALSE}',
-                     paste('dataPlot(colMeans(results_cv_knn[["',act.metric,'"]]),
+                     paste('dataPlot(rbind(results_cv_knn[["',act.metric,'"]][["',act.result,'"]]*100,results_cv_knn[["',act.metric,'"]]$standardDeviation*100),
                        mode = "classResults",
-                       main = "Mean ',s,' results for 10-CV with ',clasifAlg,'",
-                       xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
+                       main = "Mean ',s,'", legend = c("Mean ',metric,'", "Standard Deviation"),
+                       xlab = "Genes", ylab ="',s,'", colours = c("',colour,'","seagreen3"), xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
         
       }
       
@@ -369,19 +375,22 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       
       if(MLTest == TRUE){
         
-        results_test_knn <- knn_test(DEGsMatrixML,labels,t(testData),testLabels,ranking[seq_len(maxGenes)],bestK = results_cv_knn$bestK)
+        results_test_knn <- knn_test(DEGsMatrixML,labels,t(testData),testLabels,as.character(ranking[seq_len(maxGenes)]),bestK = results_cv_knn$bestK)
         markobj <- c(markobj,paste('## Test Results implementing ',clasifAlg),'\n')
         
         for (metric in metrics){
           if (metric == 'accuracy'){
             test.metric = 'accVector'
-            colour = "red"
+            colour = "indianred2"
           }else if (metric == 'specificity'){
             test.metric = 'specVector'
-            colour = "blue"
+            colour = "deepskyblue2"
           }else if (metric == 'sensitivity'){
             test.metric = 'sensVector'
-            colour = "green"
+            colour = "mediumpurple1"
+          }else if (metric == 'f1'){
+            act.metric = 'f1Vector'
+            colour = "salmon1"
           }
           
           s <- strsplit(metric, " ")[[1]]
@@ -403,18 +412,25 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       
     }else if (clasifAlg == 'rf'){
       results_cv_rf <- rf_trn(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
-      markobj <- c(markobj,paste('## Training Results for 10-CV implementing ',clasifAlg),'\n')
+      markobj <- c(markobj,paste('## ',toupper(clasifAlg),' Training Results for 10-CV\n'))
       
       for (metric in metrics){
         if (metric == 'accuracy'){
-          act.metric = 'accMatrix'
-          colour = "red"
+          act.metric = 'accuracyInfo'
+          act.result = "meanAccuracy"
+          colour = "indianred2"
         }else if (metric == 'specificity'){
-          act.metric = 'specMatrix'
-          colour = "blue"
+          act.metric = 'specificityInfo'
+          act.result = "meanSpecificity"
+          colour = "deepskyblue2"
         }else if (metric == 'sensitivity'){
-          act.metric = 'sensMatrix'
-          colour = "green"
+          act.metric = 'sensitivityInfo'
+          act.result = "meanSensitivity"
+          colour = "mediumpurple1"
+        }else if (metric == 'f1'){
+          act.metric = 'F1Info'
+          act.result = "meanF1"
+          colour = "salmon1"
         }
         
         s <- strsplit(metric, " ")[[1]]
@@ -422,10 +438,11 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                    sep = "", collapse = " ")
         
         markobj <- c(markobj,'```{r echo = FALSE}',
-                     paste('dataPlot(colMeans(results_cv_rf[["',act.metric,'"]]),
+                     paste('dataPlot(rbind(results_cv_rf[["',act.metric,'"]][["',act.result,'"]]*100,results_cv_rf[["',act.metric,'"]]$standardDeviation*100),
                        mode = "classResults",
-                       main = "Mean ',s,' results for 10-CV with ',clasifAlg,'",
-                       xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
+                       main = "Mean ',s,'", legend = c("Mean ',metric,'", "Standard Deviation"),
+                       xlab = "Genes", ylab ="',s,'", colours = c("',colour,'","seagreen3"), xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
+        
       }
       
       allCfMats_rf <- results_cv_rf$cfMats[[1]]$table + results_cv_rf$cfMats[[2]]$table + results_cv_rf$cfMats[[3]]$table + results_cv_rf$cfMats[[4]]$table + results_cv_rf$cfMats[[5]]$table + results_cv_rf$cfMats[[6]]$table + results_cv_rf$cfMats[[7]]$table + results_cv_rf$cfMats[[8]]$table + results_cv_rf$cfMats[[9]]$table + results_cv_rf$cfMats[[10]]$table
@@ -434,20 +451,22 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                        mode = "confusionMatrix")',sep=''),'```\n')
       
       if(MLTest == TRUE){
-        
-        results_test_rf <- rf_test(DEGsMatrixML,labels,t(testData),testLabels,ranking[seq_len(maxGenes)])
+        results_test_rf <- rf_test(DEGsMatrixML,labels,t(testData),testLabels,as.character(ranking[seq_len(maxGenes)]))
         markobj <- c(markobj,paste('## Test Results implementing ',clasifAlg),'\n')
         
         for (metric in metrics){
           if (metric == 'accuracy'){
             test.metric = 'accVector'
-            colour = "red"
+            colour = "indianred2"
           }else if (metric == 'specificity'){
             test.metric = 'specVector'
-            colour = "blue"
+            colour = "deepskyblue2"
           }else if (metric == 'sensitivity'){
             test.metric = 'sensVector'
-            colour = "green"
+            colour = "mediumpurple1"
+          }else if (metric == 'f1'){
+            act.metric = 'f1Vector'
+            colour = "salmon1"
           }
           
           s <- strsplit(metric, " ")[[1]]
@@ -469,18 +488,25 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       
     }else if (clasifAlg == 'svm'){
       results_cv_svm <- svm_trn(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
-      markobj <- c(markobj,paste('## Training Results for 10-CV implementing ',clasifAlg),'\n')
+      markobj <- c(markobj,paste('## ',toupper(clasifAlg),' Training Results for 10-CV\n'))
       
       for (metric in metrics){
         if (metric == 'accuracy'){
-          act.metric = 'accMatrix'
-          colour = "red"
+          act.metric = 'accuracyInfo'
+          act.result = "meanAccuracy"
+          colour = "indianred2"
         }else if (metric == 'specificity'){
-          act.metric = 'specMatrix'
-          colour = "blue"
+          act.metric = 'specificityInfo'
+          act.result = "meanSpecificity"
+          colour = "deepskyblue2"
         }else if (metric == 'sensitivity'){
-          act.metric = 'sensMatrix'
-          colour = "green"
+          act.metric = 'sensitivityInfo'
+          act.result = "meanSensitivity"
+          colour = "mediumpurple1"
+        }else if (metric == 'f1'){
+          act.metric = 'F1Info'
+          act.result = "meanF1"
+          colour = "salmon1"
         }
         
         s <- strsplit(metric, " ")[[1]]
@@ -488,10 +514,11 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                    sep = "", collapse = " ")
         
         markobj <- c(markobj,'```{r echo = FALSE}',
-                     paste('dataPlot(colMeans(results_cv_svm[["',act.metric,'"]]),
+                     paste('dataPlot(rbind(results_cv_svm[["',act.metric,'"]][["',act.result,'"]]*100,results_cv_svm[["',act.metric,'"]]$standardDeviation*100),
                        mode = "classResults",
-                       main = "Mean ',s,' results for 10-CV with ',clasifAlg,'",
-                       xlab = "Genes", ylab ="',s,'", colours = "',colour,'", xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
+                       main = "Mean ',s,'", legend = c("Mean ',metric,'", "Standard Deviation"),
+                       xlab = "Genes", ylab ="',s,'", colours = c("',colour,'","seagreen3"), xgrid=TRUE, ygrid=TRUE)',sep=''),'```\n')
+        
       }
       
       allCfMats_svm <- results_cv_svm$cfMats[[1]]$table + results_cv_svm$cfMats[[2]]$table + results_cv_svm$cfMats[[3]]$table + results_cv_svm$cfMats[[4]]$table + results_cv_svm$cfMats[[5]]$table + results_cv_svm$cfMats[[6]]$table + results_cv_svm$cfMats[[7]]$table + results_cv_svm$cfMats[[8]]$table + results_cv_svm$cfMats[[9]]$table + results_cv_svm$cfMats[[10]]$table
@@ -501,19 +528,22 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
       
       if(MLTest == TRUE){
         
-        results_test_svm <- svm_test(DEGsMatrixML,labels,t(testData),testLabels,ranking[seq_len(maxGenes)], bestParameters = results_cv_svm$bestParameters)
+        results_test_svm <- svm_test(DEGsMatrixML,labels,t(testData),testLabels,as.character(ranking[seq_len(maxGenes)]), bestParameters = results_cv_svm$bestParameters)
         markobj <- c(markobj,paste('## Test Results implementing ',clasifAlg),'\n')
         
         for (metric in metrics){
           if (metric == 'accuracy'){
             test.metric = 'accVector'
-            colour = "red"
+            colour = "indianred2"
           }else if (metric == 'specificity'){
             test.metric = 'specVector'
-            colour = "blue"
+            colour = "deepskyblue2"
           }else if (metric == 'sensitivity'){
             test.metric = 'sensVector'
-            colour = "green"
+            colour = "mediumpurple1"
+          }else if (metric == 'f1'){
+            act.metric = 'f1Vector'
+            colour = "salmon1"
           }
           
           s <- strsplit(metric, " ")[[1]]

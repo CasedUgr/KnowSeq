@@ -233,14 +233,19 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
         grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
       }
       
-      if(legend != ""){
+      if(length(legend) != 0){
         legend("bottomright", legend=legend, col=colours[1],lwd = 2.5,cex=0.8,lty = "solid")
       }
       
     }else if(is.matrix(data)){
       
-      if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
-      if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
+      if(length(colours) == dim(data)[1]){
+        colours = colours
+      }else if(length(colours) != dim(data)[1] && dim(data)[1] <= length(c_palette)){
+        colours = c_palette[1:dim(data)[1]]
+      }else {
+        colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])
+      }
       
       plot(data[1,],type='l',col=colours[1], main=main,
            xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))
@@ -258,7 +263,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
         grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
       }
       
-      if(legend == ""){legend = rownames(data)}
+      if(length(legend) == 0){legend = rownames(data)}
       legend("bottomright", legend=legend,
              col=colours, lty=rep("solid",dim(data)[2]), lwd = rep(2.5,dim(data)[2]),cex=0.8)
       
@@ -282,14 +287,19 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
           grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
         }
         
-        if(legend != ""){
+        if(length(legend) != 0){
           legend("bottomright", legend=legend, col=colours[2],lwd = 2.5,cex=0.8,lty = "solid")
         }
         
       }else if(is.matrix(data)){
         
-        if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
-        if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
+        if(length(colours) == dim(data)[1]){
+          colours = colours
+        }else if(length(colours) != dim(data)[1] && dim(data)[1] <= length(c_palette)){
+          colours = c_palette[1:dim(data)[1]]
+        }else {
+          colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])
+        }
         
         plot(data[1,],type='l',col=colours[1], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))
@@ -307,7 +317,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
           grid(nx = NULL, ny = TRUE, col = "gray", lty = "dashed")
         }
         
-        if(legend == ""){legend = rownames(data)}
+        if(length(legend) != 0){legend = rownames(data)}
         legend("bottomright", legend=legend,
                col=colours, lty=rep("solid",dim(data)[2]), lwd = rep(2.5,dim(data)[2]),cex=0.8)
         
@@ -339,8 +349,13 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
         
       }else if(is.matrix(data)){
         
-        if(length(colours) <= dim(data)[1]){colours = c_palette[1:dim(data)[1]]}
-        if(length(colours) > dim(data)[1]){ colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])}
+        if(length(colours) == dim(data)[1]){
+          colours = colours
+        }else if(length(colours) != dim(data)[1] && dim(data)[1] <= length(c_palette)){
+          colours = c_palette[1:dim(data)[1]]
+        }else {
+          colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])
+        }
         
         plot(data[1,],type='l',col=colours[2], main=main,
              xlab=xlab,ylab=ylab,axes=TRUE,frame.plot=TRUE,lwd = 2.5, ylim = c(min(data),max(data)))

@@ -50,7 +50,6 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
     stop("The length of the rows of the argument test must be the same than the length of the lablesTest. Please, ensures that the rows are the samples and the columns are the variables.")
 
   }
-
   train <- as.data.frame(apply(train,2,as.double))
   train <- train[,vars_selected]
   test <- as.data.frame(apply(test,2,as.double))

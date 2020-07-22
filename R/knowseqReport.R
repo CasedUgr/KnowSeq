@@ -254,67 +254,13 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   }
   
   
-  # --- Feature Selection --- #
-  DEGsMatrixML <- t(DEGsMatrix)
-  
-  if(featureSelectionMode != 'nofs'){
-    
-    markobj <- c(markobj,'## Feature Selection',
-                 paste('With the purpose of finding the best combination of DEGs to assess the data, the',featureSelectionMode,'method
-                     will be used in order to select the',maxGenes,'most relevant genes for the classification process.\n'))
-    
-    ranking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML)[seq_len(maxGenes)], mode = featureSelectionMode)
-
-    if (featureSelectionMode == 'mrmr') ranking <- names(ranking)
-    else if (featureSelectionMode == 'rf') ranking <- ranking
-    else if (featureSelectionMode == 'da') ranking <- names(ranking)
-    
-    markobj <- c(markobj,paste('First',maxGenes,'selected genes by ',featureSelectionMode,' algorithm/method are:'),ranking[seq_len(maxGenes)],'.\n')
-    
-    
-  } else{ranking <- topTable.dataframe[,1]}
-  
   if(geneOntology || getPathways){
     myAnnotation <- myAnnotation[myAnnotation$external_gene_name %in% as.character(ranking[seq_len(maxGenes)]),]
     myAnnotation <- myAnnotation[complete.cases(myAnnotation), ]
   }
   
-  genes <- ''
-  for (gene in ranking[seq_len(maxGenes)]) genes <- paste(genes,gene,sep=', ')
-  
-  markobj <- c(markobj,'## Visualization\n',
-               'DEGs are genes that have a truly different expression among the studied classes, 
-               so it is important to see graphically if those DEGs comply with this requirement. 
-               In order to provide a tool to perform this task, the function dataPlot encapsulates a set of 
-               graphs that allows plotting in different ways the expression of the DEGs.\n')
-  
-  if(maxGenes > 12)
-    boxplotGenes <- 12
-  else
-    boxplotGenes <- maxGenes
-  
-  markobj <- c(markobj,paste('\nIn the next boxplot, the expression of the first',maxGenes,'DEGs for each sample ordered by classes its showed.\n'),
-               '```{r echo=FALSE}',
-               paste("dataPlot(DEGsMatrix[ranking[1:",maxGenes,"],],labels,mode = 'orderedBoxplot',toPNG = FALSE,toPDF = FALSE)",sep=''),
-               '```\n')
-  
-  markobj <- c(markobj,paste("However it is of interest to observe the differentiation at gene expression level for each of the top",
-                             boxplotGenes,"genes previously used. This information is plotted below.\n"))
-  
-  markobj <- c(markobj,
-               '```{r echo=FALSE}',
-               paste("dataPlot(DEGsMatrix[ranking[1:",boxplotGenes,"],],labels,mode = 'genesBoxplot',toPNG = FALSE,toPDF = FALSE)",sep=''),
-               '```\n')
-  
-  markobj <- c(markobj,paste('Finally, the heatmap of those',maxGenes,'DEGs separatelly for all the samples is plotted below\n'))
-  markobj <- c(markobj,
-               '```{r echo=FALSE}',
-               paste('dataPlot(DEGsMatrix[ranking[1:',maxGenes,'],],labels,mode = "heatmap",toPNG = FALSE,toPDF = FALSE)',sep=''),
-               '```\n')
-  
   
   # --- Machine learning --- #
-  # --- ---  Training --- --- #
   markobj <- c(markobj,'# Machine Learning Assessment \n')
   clasifNames <- paste(clasifAlgs,collapse = ',')
   clasifNames <- str_replace(clasifNames,'knn','K-Nearest Neighbors (K-NN)')
@@ -333,6 +279,28 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                     To evaluate obtained results the Mean Accuracy,Mean Specificity, Mean Sensitivity and the Confusion Matrix will be shown in the following plots:\n'))
   }
   
+  # --- Feature Selection --- #
+  DEGsMatrixML <- t(DEGsMatrix)
+  
+  if(featureSelectionMode != 'nofs'){
+    
+    markobj <- c(markobj,'## Feature Selection',
+                 paste('With the aim of finding a better combination of DEGs to assess the data, the',featureSelectionMode,'method
+                     will be used in order to select the',maxGenes,'most relevant genes for the classification process.\n'))
+    
+    ranking <- featureSelection(DEGsMatrixML,labels,colnames(DEGsMatrixML)[seq_len(maxGenes)], mode = featureSelectionMode)
+    
+    if (featureSelectionMode == 'mrmr') ranking <- names(ranking)
+    else if (featureSelectionMode == 'rf') ranking <- ranking
+    else if (featureSelectionMode == 'da') ranking <- names(ranking)
+    
+    markobj <- c(markobj,paste('First',maxGenes,'selected genes by ',featureSelectionMode,' algorithm are:'),ranking[seq_len(maxGenes)],'.\n')
+    
+    
+  } else{ranking <- topTable.dataframe[,1]}
+  
+  
+  # --- ---  Training --- --- #
   for (clasifAlg in clasifAlgs){
     if (clasifAlg == 'knn'){ 
       results_cv_knn <- knn_trn(DEGsMatrixML,labels,ranking[seq_len(maxGenes)],10)
@@ -567,9 +535,38 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     
   }
   
+  
+  # --- Visualization --- #
+  genes <- ''
+  for (gene in ranking[seq_len(maxGenes)]) genes <- paste(genes,gene,sep=', ')
+  
+  markobj <- c(markobj,'# DEGs Visualization\n',
+               'In order to provide a tool to perform this task, the function dataPlot encapsulates a set of 
+               graphs that allows plotting in different ways the expression of the DEGs.\n')
+  
+  if(maxGenes > 12)
+    boxplotGenes <- 12
+  else
+    boxplotGenes <- maxGenes
+  
+  markobj <- c(markobj,paste("However it is of interest to observe the differentiation at gene expression level for each of the top",
+                             boxplotGenes,"genes previously used. This information is plotted below.\n"))
+  
+  markobj <- c(markobj,
+               '```{r echo=FALSE}',
+               paste("dataPlot(DEGsMatrix[ranking[1:",boxplotGenes,"],],labels,mode = 'genesBoxplot',toPNG = FALSE,toPDF = FALSE)",sep=''),
+               '```\n')
+  
+  markobj <- c(markobj,paste('Finally, the heatmap of those',maxGenes,'DEGs separatelly for all the samples is plotted below\n'))
+  markobj <- c(markobj,
+               '```{r echo=FALSE}',
+               paste('dataPlot(DEGsMatrix[ranking[1:',maxGenes,'],],labels,mode = "heatmap",toPNG = FALSE,toPDF = FALSE)',sep=''),
+               '```\n')
+  
+  
   if(geneOntology | getPathways | getDiseases){
     # --- DEGs enrichment methodology --- #
-    markobj <- c(markobj,'\n# DEGs enrichment\n',
+    markobj <- c(markobj,'\n# Functional Enrichment\n',
                  'The main goal of the this process is the extraction of biological relevant information from the DEGs.
                    The enrichment process has three different approaches:\n
                    \t- The gene ontology information.\n
@@ -714,11 +711,15 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
           # If user want to see evidences for all diseases or this diseases match with solicited disease
           check.diseases <- names(diseases[[gene]]$evidences)
           
+          act.markobj <- c(act.markobj,'#### Disease Relation Scores','```{r echo=FALSE}',
+                           paste('knitr::kable(data.frame(Disease=diseases[["',gene,'"]]$summary[,1], Final.Score=round(as.numeric(diseases[["',gene,'"]]$summary[,2]),4), Literat.=round(as.numeric(diseases[["',gene,'"]]$summary[,3]),4), RNA.Exprs.=round(as.numeric(diseases[["',gene,'"]]$summary[,4]),4), Gen.Assoc.=round(as.numeric(diseases[["',gene,'"]]$summary[,5]),4), Soma.Mut.=round(as.numeric(diseases[["',gene,'"]]$summary[,6]),4),Known.Drug=round(as.numeric(diseases[["',gene,'"]]$summary[,7]),4), Animal.Model=round(as.numeric(diseases[["',gene,'"]]$summary[,8]),4), Affec.Paths=round(as.numeric(diseases[["',gene,'"]]$summary[,9]),4)),"',table.format,'",table.attr = "class=\'paleBlueRows\'")',sep=''),'```')
+                           
+                           
           for (act.disease in check.diseases){
             if ( is.list(diseases[[gene]]$evidences[[act.disease]])){
               if (!gene %in% names(evidences.frame)) evidences.frame[[gene]] <- list()
               
-              act.markobj <- c(act.markobj,paste('####',act.disease,sep=' '))
+              act.markobj <- c(act.markobj,paste('####',act.disease,'evidences',sep=' '))
               for ( evidence.type in names(diseases[[gene]]$evidences[[act.disease]]) ){
                 act.evidences.frame <- c()
                 for (act.evidence in diseases[[gene]]$evidences[[act.disease]][[evidence.type]]){

@@ -420,7 +420,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                        mode = "confusionMatrix")',sep=''),'```\n')
       
       if(MLTest == TRUE){
-        results_test_rf <- rf_test(DEGsMatrixML,labels,t(testData),testLabels,as.character(ranking[seq_len(maxGenes)]))
+        results_test_rf <- rf_test(DEGsMatrixML,labels,t(testData),testLabels,as.character(ranking[seq_len(maxGenes)]),results_cv_rf$bestParameters)
         markobj <- c(markobj,paste('## Test Results implementing ',clasifAlg),'\n')
         
         for (metric in metrics){

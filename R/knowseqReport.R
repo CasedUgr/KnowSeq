@@ -253,13 +253,6 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     maxGenes <- dim(DEGsMatrix)[1]
   }
   
-  
-  if(geneOntology || getPathways){
-    myAnnotation <- myAnnotation[myAnnotation$external_gene_name %in% as.character(ranking[seq_len(maxGenes)]),]
-    myAnnotation <- myAnnotation[complete.cases(myAnnotation), ]
-  }
-  
-  
   # --- Machine learning --- #
   markobj <- c(markobj,'# Machine Learning Assessment \n')
   clasifNames <- paste(clasifAlgs,collapse = ',')
@@ -298,6 +291,12 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     
     
   } else{ranking <- topTable.dataframe[,1]}
+  
+  
+  if(geneOntology || getPathways){
+    myAnnotation <- myAnnotation[myAnnotation$external_gene_name %in% as.character(ranking[seq_len(maxGenes)]),]
+    myAnnotation <- myAnnotation[complete.cases(myAnnotation), ]
+  }
   
   
   # --- ---  Training --- --- #

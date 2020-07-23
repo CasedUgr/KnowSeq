@@ -7,6 +7,7 @@
 #' @param test The test parameter is an expression matrix or data.frame that contains the test dataset with the genes in the columns and the samples in the rows.
 #' @param labelsTest A vector or factor that contains the test labels for each of the samples in the test object.
 #' @param vars_selected The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.
+#' @param bestParameters Best values for ntree and mtry parameters selected during the training phase.
 #' @return A list that contains four objects. The confusion matrix, the accuracy, the sensitibity and the specificity for each genes.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
@@ -19,7 +20,7 @@
 #'
 #' rf_test(trainingMatrix, trainingLabels, testMatrix, testLabels,rownames(DEGsMatrix)[1:10])
 
-rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
+rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameters){
 
   if(!is.data.frame(train) && !is.matrix(train)){
 
@@ -50,7 +51,6 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
     stop("The length of the rows of the argument test must be the same than the length of the lablesTest. Please, ensures that the rows are the samples and the columns are the variables.")
 
   }
-
   train <- as.data.frame(apply(train,2,as.double))
   train <- train[,vars_selected]
   test <- as.data.frame(apply(test,2,as.double))
@@ -78,7 +78,7 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected){
   
   # Firstly with 1 variable
   cat(paste("Testing with ", 1," variables...\n",sep=""))
-  rf_mod = randomForest(x = train[, 1, drop=FALSE], y = labelsTrain, ntree = 100)
+  rf_mod = randomForest(x = train[, 1, drop=FALSE], y = labelsTrain)
   predicts <- predict(rf_mod , test[, 1, drop=FALSE])
   
   cfMat<-confusionMatrix(predicts,labelsTest)

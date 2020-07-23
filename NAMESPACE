@@ -1,9 +1,9 @@
 import(stringr,sva, RCurl, XML, jsonlite, multtest, kernlab)
 
-importFrom(randomForest, randomForest)
+importFrom(randomForest, randomForest, tuneRF)
 importFrom(R.utils, mkdirs, gunzip)
 importFrom(gplots, heatmap.2, redgreen)
-importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal,scale_fill_manual,ggtitle, ylab, xlab, labs, geom_tile, theme, element_text, geom_point, geom_segment, scale_y_discrete, theme_classic, scale_x_discrete, geom_vline, xlim, annotate)
+importFrom(ggplot2, ggplot, ggsave, geom_boxplot, facet_wrap, aes, theme_minimal,scale_fill_manual,ggtitle, ylab, xlab, labs, geom_tile, theme, element_text, geom_point, geom_segment, scale_y_discrete, theme_classic, scale_x_discrete, geom_vline, xlim, ylim, annotate)
 importFrom(grDevices, colorRampPalette, dev.off, hsv, pdf, png)
 importFrom(graphics, abline, axis, box, boxplot, image, layout, lines, par, text, title, grid, smoothScatter)
 importFrom(stats, model.matrix, p.adjust, setNames, complete.cases, ecdf,dist, ks.test, quantile, IQR)

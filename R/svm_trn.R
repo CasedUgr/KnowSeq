@@ -120,17 +120,37 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
       if(is.na(f1_cv[i,j])) f1_cv[i,j] <- 0
     }
   }
-  rownames(acc_cv) <- paste("Fold", seq(numFold), sep = "")
-  colnames(acc_cv) <- vars_selected
-  rownames(sens_cv) <- paste("Fold", seq(numFold), sep = "")
-  colnames(sens_cv) <- vars_selected
-  rownames(spec_cv) <- paste("Fold", seq(numFold), sep = "")
-  colnames(spec_cv) <- vars_selected
-  rownames(f1_cv) <- paste("Fold", seq(numFold), sep = "")
-  colnames(f1_cv) <- vars_selected
-
+  
+  meanAcc <- colMeans(acc_cv)
+  names(meanAcc) <- colnames(acc_cv)
+  sdAcc <- apply(acc_cv, 2, sd)
+  accuracyInfo <- list(meanAcc, sdAcc)
+  names(accuracyInfo) <- c("meanAccuracy","standardDeviation")
+  
+  
+  meanSens <- colMeans(sens_cv)
+  names(meanSens) <- colnames(sens_cv)
+  sdSens <- apply(sens_cv, 2, sd)
+  sensitivityInfo <- list(meanSens, sdSens)
+  names(sensitivityInfo) <- c("meanSensitivity","standardDeviation")
+  
+  
+  meanSpec <- colMeans(spec_cv)
+  names(meanSpec) <- colnames(spec_cv)
+  sdSpec <- apply(spec_cv, 2, sd)
+  specificityInfo <- list(meanSpec, sdSpec)
+  names(specificityInfo) <- c("meanSpecificity","standardDeviation")
+  
+  
+  meanF1 <- colMeans(f1_cv)
+  names(meanF1) <- colnames(f1_cv)
+  sdF1 <- apply(f1_cv, 2, sd)
+  F1Info <- list(meanF1, sdF1)
+  names(F1Info) <- c("meanF1","standardDeviation")
+  
   cat("Classification done successfully!\n")
-  results_cv <- list(cfMatList, acc_cv, sens_cv, spec_cv, f1_cv, bestParameters)
-  names(results_cv) <- c("cfMats", "accMatrix", "sensMatrix", "specMatrix","f1Matrix","bestParameters")
+  results_cv <- list(cfMatList,accuracyInfo,sensitivityInfo,specificityInfo,F1Info,bestParameters)
+  names(results_cv) <- c("cfMats","accuracyInfo","sensitivityInfo","specificityInfo","F1Info","bestParameters")
   invisible(results_cv)
+  
 }

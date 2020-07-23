@@ -46,6 +46,25 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
   
   data <- as.data.frame(data)
   
+  cat("Tuning the optimal mtry and ntrees...\n")
+  
+  bestParamsMatrix <- matrix(,nrow = 10,ncol = 3)
+  i = 1
+  
+  for(tree in seq(100,1000, by=100)){
+  
+    tuning <- tuneRF(data, labels, ntreeTry = tree, doBest = T)
+    bestParamsMatrix[i,1] <- tuning$mtry
+    bestParamsMatrix[i,2] <- tree
+    bestParamsMatrix[i,3] <- mean(tuning$confusion[,4])
+  
+    i = i + 1
+    
+  }
+  
+  bestParamsPos <- which(bestParamsMatrix[,3] == min(bestParamsMatrix[,3]))
+  bestParameters <- bestParamsMatrix[bestParamsPos, 1:2]
+
   acc_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   sens_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   spec_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
@@ -76,7 +95,7 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
     
     # first iteration is performed outside of the foor lopp
     # in order to avoid having a if inside
-    rf_mod = randomForest(x = trainingDataset[, 1, drop=FALSE], y = labelsTrain, ntree = 100)
+    rf_mod = randomForest(x = trainingDataset[, 1, drop=FALSE], y = labelsTrain)
     predicts <- predict(rf_mod , testDataset[, 1, drop=FALSE])
     cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)
     acc_cv[i,1]<-cfMatList[[i]]$overall[[1]]
@@ -101,7 +120,7 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
     
     for(j in 2:length(vars_selected)){
 
-      rf_mod = randomForest(x = trainingDataset[,seq(j)], y = labelsTrain, ntree = 100)
+      rf_mod = randomForest(x = trainingDataset[,seq(j)], y = labelsTrain, ntree = bestParameters[2], mtry = bestParameters[1])
       predicts <- predict(rf_mod , testDataset[,seq(j)])
       cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)
       acc_cv[i,j]<-cfMatList[[i]]$overall[[1]]
@@ -127,18 +146,36 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
     }
   }
 
-  rownames(acc_cv) <- paste("Fold",seq(numFold),sep = "")
-  colnames(acc_cv) <- vars_selected
-  rownames(sens_cv) <- paste("Fold",seq(numFold),sep = "")
-  colnames(sens_cv) <- vars_selected
-  rownames(spec_cv) <- paste("Fold",seq(numFold),sep = "")
-  colnames(spec_cv) <- vars_selected
-  rownames(f1_cv) <- paste("Fold",seq(numFold),sep = "")
-  colnames(f1_cv) <- vars_selected
-
+  meanAcc <- colMeans(acc_cv)
+  names(meanAcc) <- colnames(acc_cv)
+  sdAcc <- apply(acc_cv, 2, sd)
+  accuracyInfo <- list(meanAcc, sdAcc)
+  names(accuracyInfo) <- c("meanAccuracy","standardDeviation")
+  
+  
+  meanSens <- colMeans(sens_cv)
+  names(meanSens) <- colnames(sens_cv)
+  sdSens <- apply(sens_cv, 2, sd)
+  sensitivityInfo <- list(meanSens, sdSens)
+  names(sensitivityInfo) <- c("meanSensitivity","standardDeviation")
+  
+  
+  meanSpec <- colMeans(spec_cv)
+  names(meanSpec) <- colnames(spec_cv)
+  sdSpec <- apply(spec_cv, 2, sd)
+  specificityInfo <- list(meanSpec, sdSpec)
+  names(specificityInfo) <- c("meanSpecificity","standardDeviation")
+  
+  
+  meanF1 <- colMeans(f1_cv)
+  names(meanF1) <- colnames(f1_cv)
+  sdF1 <- apply(f1_cv, 2, sd)
+  F1Info <- list(meanF1, sdF1)
+  names(F1Info) <- c("meanF1","standardDeviation")
+  
   cat("Classification done successfully!\n")
-  results_cv <- list(cfMatList,acc_cv,sens_cv,spec_cv,f1_cv)
-  names(results_cv) <- c("cfMats","accMatrix","sensMatrix","specMatrix","f1Matrix")
+  results_cv <- list(cfMatList,accuracyInfo,sensitivityInfo,specificityInfo,F1Info,bestParameters)
+  names(results_cv) <- c("cfMats","accuracyInfo","sensitivityInfo","specificityInfo","F1Info","bestParameters")
   invisible(results_cv)
 
 }

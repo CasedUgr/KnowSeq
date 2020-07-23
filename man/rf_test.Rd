@@ -4,7 +4,7 @@
 \alias{rf_test}
 \title{rf_test allows assessing the final DEGs through a machine learning step by using Random Forest with a test dataset.}
 \usage{
-rf_test(train, labelsTrain, test, labelsTest, vars_selected)
+rf_test(train, labelsTrain, test, labelsTest, vars_selected, bestParameters)
 }
 \arguments{
 \item{train}{The train parameter is an expression matrix or data.frame that contains the training dataset with the genes in the columns and the samples in the rows.}
@@ -16,6 +16,8 @@ rf_test(train, labelsTrain, test, labelsTest, vars_selected)
 \item{labelsTest}{A vector or factor that contains the test labels for each of the samples in the test object.}
 
 \item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
+
+\item{bestParameters}{Best values for ntree and mtry parameters selected during the training phase.}
 }
 \value{
 A list that contains four objects. The confusion matrix, the accuracy, the sensitibity and the specificity for each genes.

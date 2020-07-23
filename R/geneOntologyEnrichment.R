@@ -35,7 +35,7 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
   genes.annotations <- getGenesAnnotation(geneList,attributes=c("external_gene_name","entrezgene_id"),filter=gene.type)
   
 
-  cat('Retrieving Gene Ontology terms related to the list of DEGs...')
+  cat('Retrieving Gene Ontology terms related to the list of DEGs...\n')
   geneList <- paste(genes.annotations$entrezgene_id, collapse=",")
   base  <- 'https://david.ncifcrf.gov/'
   
@@ -82,7 +82,7 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
       
       if (length(remove)>0) act.gos <- act.gos[-remove,]
       act.gos[['GO.ID']] <- ontology.term[,1]
-      act.gos[['Term']] <- ontology.term[,2]
+      act.gos[['Term']] <- ontology.term[,2] 
 
       
       # Add column with gene symbols

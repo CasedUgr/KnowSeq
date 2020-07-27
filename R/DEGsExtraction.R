@@ -5,7 +5,9 @@
 #' @param labels A vector or factors that contains the labels for each of the samples in the expressionMatrix parameter.
 #' @param pvalue The value of the p-value which determines the DEGs. If one or more genes have a p-value lower or equal to the selected p-value, they would be considered as DEGs.
 #' @param lfc The value of the LFC which determines the DEGs. If one or more genes have a LFC greater or equal to the selected LFC, they would be considered as DEGs.
-#' @param cov This value only works when there are more than two classes in the labels. This parameter stablishs a minimum number of pair of classes combination in which exists differential expression to consider a genes as expressed genes.
+#' @param cov This value only works when there are more than two classes in the labels. This parameter establishes a minimum number of pair of classes combination in which exists differential expression to consider a genes as expressed genes.
+#' @param nmax This value only works when there are more than two classes in the labels. NMAX indicates the maximum number of DEGs selected for each class pair comparison.
+#' @param multiDegsMethod Select the multiclass extraction method for the process: cov or nmax
 #' @param number The maximum number of desired genes as output of limma. As default, the function returns all the extracted DEGs with the selected parameters.
 #' @param svaCorrection A logical variable that represents if the model for limma is calculated or indicated by parameter from the output of \code{\link{batchEffectRemoval}} function by using sva method.
 #' @param svaMod The model calculated by \code{\link{batchEffectRemoval}} function by using sva method.

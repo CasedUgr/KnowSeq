@@ -2,7 +2,7 @@
 % Please edit documentation in R/rf_trn.R
 \name{rf_trn}
 \alias{rf_trn}
-\title{rf_CV allows assessing the final DEGs through a machine learning step by using Random Forest in a cross validation process.}
+\title{rf_trn allows assessing the final DEGs through a machine learning step by using Random Forest in a cross validation process.}
 \usage{
 rf_trn(data, labels, vars_selected, numFold = 10)
 }
@@ -19,11 +19,11 @@ rf_trn(data, labels, vars_selected, numFold = 10)
 A list that contains four objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes.
 }
 \description{
-rf_CV allows assessing the final DEGs through a machine learning step by using Random Forest in a cross validation process. This function applies a cross validation of n folds with representation of all classes in each fold. The 80\% of the data are used for training and the 20\% for test.
+rf_trn allows assessing the final DEGs through a machine learning step by using Random Forest in a cross validation process. This function applies a cross validation of n folds with representation of all classes in each fold. The 80\% of the data are used for training and the 20\% for test.
 }
 \examples{
 dir <- system.file("extdata", package="KnowSeq")
 load(paste(dir,"/expressionExample.RData",sep = ""))
 
-rf_trn(t(DEGsMatrix),labels,rownames(DEGsMatrix),2)
+rf_trn(t(DEGsMatrix),labels,rownames(DEGsMatrix),5)
 }

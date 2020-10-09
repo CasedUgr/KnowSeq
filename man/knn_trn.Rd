@@ -2,7 +2,7 @@
 % Please edit documentation in R/knn_trn.R
 \name{knn_trn}
 \alias{knn_trn}
-\title{knn_CV allows assessing the final DEGs through a machine learning step by using k-NN in a cross validation process.}
+\title{knn_trn allows assessing the final DEGs through a machine learning step by using k-NN in a cross validation process.}
 \usage{
 knn_trn(data, labels, vars_selected, numFold = 10)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/svm_trn.R
 \name{svm_trn}
 \alias{svm_trn}
-\title{svm_CV allows assessing the final DEGs through a machine learning step by using svm in a cross validation process.}
+\title{svm_trn allows assessing the final DEGs through a machine learning step by using svm in a cross validation process.}
 \usage{
 svm_trn(data, labels, vars_selected, numFold = 10)
 }

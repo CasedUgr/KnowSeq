@@ -1,6 +1,6 @@
-#' knn_CV allows assessing the final DEGs through a machine learning step by using k-NN in a cross validation process.
+#' knn_trn allows assessing the final DEGs through a machine learning step by using k-NN in a cross validation process.
 #'
-#' knn_CV allows assessing the final DEGs through a machine learning step by using k-NN in a cross validation process. This function applies a cross validation of n folds with representation of all classes in each fold. The 80\% of the data are used for training and the 20\% for test. An optimization of the k neighbours is done at the start of the process.
+#' knn_trn allows assessing the final DEGs through a machine learning step by using k-NN in a cross validation process. This function applies a cross validation of n folds with representation of all classes in each fold. The 80\% of the data are used for training and the 20\% for test. An optimization of the k neighbours is done at the start of the process.
 #'
 #' @param data The data parameter is an expression matrix or data.frame that contains the genes in the columns and the samples in the rows.
 #' @param labels A vector or factor that contains the labels for each of the samples in the data object.

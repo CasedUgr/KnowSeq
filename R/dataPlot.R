@@ -11,7 +11,8 @@
 #' @param xgrid Shows the x grid into the plot
 #' @param ygrid Shows the y grid into the plot
 #' @param legend A vector with the elements in the legend of the plot.
-#' @param mode The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, confusionMatrix and classResults.
+#' @param mode The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, confusionMatrix, classResults and heatmapResults.
+#' @param heatmapResultsN Number of genes to show if mode is heatmapResults.
 #' @param toPNG Boolean variable to indicate if a plot would be save to PNG.
 #' @param toPDF Boolean variable to indicate if a plot would be save to PDF.
 #' @return Nothing to return.
@@ -23,9 +24,11 @@
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = TRUE,toPDF = TRUE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = TRUE,toPDF = FALSE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE,toPDF = TRUE)
+#'
+#' results <- svm_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+#' dataPlot(results, labels = "", mode = "heatmapResults", main = "Plot to show indicators of trained model")
 
-
-dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot", toPNG = FALSE, toPDF = FALSE){
+dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot", heatmapResultsN = 0, toPNG = FALSE, toPDF = FALSE){
   
   if(!is.logical(toPNG)){stop("toPNG parameter can only take the values TRUE or FALSE.")}
   if(!is.logical(toPDF)){stop("toPDF parameter can only take the values TRUE or FALSE.")}
@@ -111,6 +114,54 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     
     boxplot(data[,sortedLabels] , col=coloursAux, ylab=ylab , xlab=xlab, main=main)
     
+  }else if(mode == "heatmapResults"){
+    
+    # data is the output of svm_trn, knn_trn or rf_trn
+    acc <- data$accuracyInfo$meanAccuracy
+    sen <- data$sensitivityInfo$meanSensitivity
+    spe <- data$specificityInfo$meanSpecificity
+    f1 <- data$F1Info$meanF1
+    
+    data2 <- data.frame(acc, sen, spe, f1)
+    
+    
+    # Only showing first heatmapResultsN genes
+    heatmapResultsN <- ifelse(heatmapResultsN != 0, heatmapResultsN, nrow(data2))
+    data2 <- data2[1:heatmapResultsN, ]
+    names(data2) <- c("Accuracy", "Sensitivity", "Specificity", "F1-Score")
+    data2 <- melt(t(data2))
+
+    graph <- ggplot(data2, aes(Var1, Var2, fill = value)) +
+      geom_tile(colour = "black") + 
+      scale_fill_gradient(low = colours[1], high = colours[2]) +
+      labs(x = ifelse(xlab != "Samples", xlab, ""),
+           y = ifelse(ylab != "Expression", ylab, "Number of genes used"),
+           fill = "",
+           title = main,
+           subtitle = "") +
+      theme_minimal() + 
+      theme(plot.title = element_text(hjust = .5),
+            panel.grid = element_blank(),
+            panel.spacing = unit(c(0, 0, 0, 0), "null"),
+            axis.text.x = element_text(size = 11),
+            panel.grid.major.x = element_blank(),
+            axis.text = element_text(color = "black"))
+    
+    if(toPNG){
+      cat("Creating PNG...\n")
+      png("heatmapResults.png",width = 1024, height = 720)
+      print(graph)
+      dev.off()
+    }
+    
+    if(toPDF){
+      cat("Creating PDF...\n")
+      pdf("heatmapResults.pdf")
+      print(graph)
+      dev.off()
+    }
+    
+    print(graph)
     
   }else if(mode == "genesBoxplot"){
     

@@ -34,8 +34,9 @@ downloadPublicSeries <- function(samplesVector) {
 
         cat("\n******************************** NCBI/GEO format detected ********************************\n\n")
 
-        webpage <- getURL(paste("https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",serie,sep = ""))
-        webpage <- readLines(tc <- textConnection(webpage)); close(tc)
+        webpage <- GET(paste("https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",serie,sep = ""))
+        webpage_content <- content(webpage, as = "text", encoding = "ISO-8859-1")
+        webpage <- readLines(tc <- textConnection(webpage_content)); close(tc)
         pagetree <- htmlTreeParse(webpage, error=function(...){}, useInternalNodes = TRUE)
 
         # parse the tree by tables
@@ -50,23 +51,22 @@ downloadPublicSeries <- function(samplesVector) {
 
           cat("******************************** MICROARRAY series detected *******************************\n\n")
           cat(paste("Searching the RAW data from the microarray series ",serie,"\n",sep = ""))
-
           if(url.exists(paste("ftp://ftp.ncbi.nlm.nih.gov/geo/series/",substring(serie,1,nchar(serie)-3),"nnn/",serie,"/suppl/",serie,"_RAW.tar",sep = ""))){
 
             cat("The RAW data have been found correctly...\n")
-            system2("wget", args = paste("ftp://ftp.ncbi.nlm.nih.gov/geo/series/",substring(serie,1,nchar(serie)-3),"nnn/",serie,"/suppl/",serie,"_RAW.tar",sep = ""))
+            POST(paste("ftp://ftp.ncbi.nlm.nih.gov/geo/series/",substring(serie,1,nchar(serie)-3),"nnn/",serie,"/suppl/",serie,"_RAW.tar",sep = ""), write_disk(paste(serie,"_RAW.tar",sep = ""), overwrite=TRUE))
             cat(paste("Decompressing ", serie,"_RAW.tar...\n",sep=""))
 
             if(dir.exists("ReferenceFiles/Samples")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/")}
             if(dir.exists("ReferenceFiles/Samples/Microarray/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/Microarray/")}
 
             fileMove(from = paste(serie,"_RAW.tar",sep = ""),
-                      to =  paste("ReferenceFiles/Samples/Microarray/",serie,"_RAW.tar",sep = ""))
+                      to =  paste("ReferenceFiles/Samples/Microarray/",serie,"/",serie,"_RAW.tar",sep = ""))
 
             if(dir.exists(paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))){}else{ system2("mkdir", args = paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))}
 
-            system2("tar", args = paste("-xf ReferenceFiles/Samples/Microarray/", serie,"_RAW.tar -C ", "ReferenceFiles/Samples/Microarray/",serie,sep = ""))
-            system2("rm", args = paste("ReferenceFiles/Samples/Microarray/", serie,"_RAW.tar",sep = ""))
+            system2("tar", args = paste("-xf ReferenceFiles/Samples/Microarray/", serie,"/",serie,"_RAW.tar -C ", "ReferenceFiles/Samples/Microarray/",serie,sep = ""))
+            system2("rm", args = paste("ReferenceFiles/Samples/Microarray/", serie,"/",serie,"_RAW.tar",sep = ""))
 
             CELFiles <- list.files(paste("ReferenceFiles/Samples/Microarray/",serie,"/",sep=""))
 
@@ -104,8 +104,9 @@ downloadPublicSeries <- function(samplesVector) {
 
           for(gsm in gsmList){
 
-            webpage <- getURL(paste("https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",gsm,sep = ""))
-            webpage <- readLines(tc <- textConnection(webpage)); close(tc)
+            webpage <- GET(paste("https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=",gsm,sep = ""))
+            webpage_content <- content(webpage, as = "text", encoding = "ISO-8859-1")
+            webpage <- readLines(tc <- textConnection(webpage_content)); close(tc)
             pagetree <- htmlTreeParse(webpage, error=function(...){}, useInternalNodes = TRUE)
 
             # parse the tree by tables
@@ -118,8 +119,9 @@ downloadPublicSeries <- function(samplesVector) {
 
             srxID <- unique(unlist(xx[grep("\\bSRX.*\\d", xx)])[1])
 
-            webpage <- getURL(paste("https://www.ncbi.nlm.nih.gov/sra?term=",srxID,sep = ""))
-            webpage.treated <- readLines(tc <- textConnection(webpage)); close(tc)
+            webpage <- GET(paste("https://www.ncbi.nlm.nih.gov/sra?term=",srxID,sep = ""))
+            webpage_content <- content(webpage, as = "text", encoding = "ISO-8859-1")
+            webpage.treated <- readLines(tc <- textConnection(webpage_content)); close(tc)
             pagetree <- htmlTreeParse(webpage.treated, error=function(...){}, useInternalNodes = TRUE)
 
             # parse the tree by tables
@@ -141,8 +143,8 @@ downloadPublicSeries <- function(samplesVector) {
 
             }
 
-            m <- gregexpr("\\brun=SRR(.*?)\"", webpage)
-            regx <- regmatches(webpage,m)
+            m <- gregexpr("\\brun=SRR(.*?)\"", webpage_content)
+            regx <- regmatches(webpage_content,m)
             RunElement <- as.character(unlist(regx))
 
             m <- gregexpr("\\bSRP/.*\\d", x)
@@ -198,8 +200,9 @@ downloadPublicSeries <- function(samplesVector) {
 
         cat("\n******************************** ArrayExpress format detected ********************************\n\n")
 
-        webpage <- getURL(paste("https://www.ebi.ac.uk/arrayexpress/experiments/",serie,"/",sep = ""))
-        webpage <- readLines(tc <- textConnection(webpage)); close(tc)
+        webpage <- GET(paste("https://www.ebi.ac.uk/arrayexpress/experiments/",serie,"/",sep = ""))
+        webpage_content <- content(webpage, as = "text", encoding = "ISO-8859-1")
+        webpage <- readLines(tc <- textConnection(webpage_content)); close(tc)
         pagetree <- htmlTreeParse(webpage, error=function(...){}, useInternalNodes = TRUE)
 
         # parse the tree by tables
@@ -227,21 +230,19 @@ downloadPublicSeries <- function(samplesVector) {
             regx <- unique(regx)
 
             for(raw in regx){
-
-              system2("wget", args = paste("https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",raw,sep = ""))
-              cat(paste("Decompressing ",raw,sep=""))
+              cat(paste("https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",raw,"\n",sep = ""))
+              POST(paste("https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",raw,sep = ""), write_disk(raw), overwrite=TRUE)
+              
+              cat(paste("Decompressing ",raw,"\n",sep=""))
 
               if(dir.exists("ReferenceFiles/Samples")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/")}
               if(dir.exists("ReferenceFiles/Samples/Microarray/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/Microarray/")}
 
+              if(dir.exists(paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))){}else{ system2("mkdir", args = paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))}
+
               fileMove(from = paste(raw,sep = ""),
-                        to =  paste("ReferenceFiles/Samples/Microarray/",raw,sep = ""))
-
-              if(dir.exists(paste("ReferenceFiles/Samples/Microarray/",serie,sep=""))){}else{ system2(paste("mkdir", args = "ReferenceFiles/Samples/Microarray/",serie,sep=""))}
-
-              system2("unzip", args = paste("ReferenceFiles/Samples/Microarray/", raw," -d ", "ReferenceFiles/Samples/Microarray/",serie,sep = ""))
-              system2("rm", args = paste("ReferenceFiles/Samples/Microarray/", raw,sep = ""))
-
+                       to =  paste("ReferenceFiles/Samples/Microarray/",serie,"/",raw,sep = ""))
+              
             }
 
           }else{
@@ -257,39 +258,12 @@ downloadPublicSeries <- function(samplesVector) {
 
           if(grepl(paste(serie,".sdrf.txt",sep = ""),x[1])){
 
-            cat("Downloading the sdrf.txt and converting to CSV...\n")
+            cat("Downloading the sdrf.txt and converting to TSV...\n")
 
-            system2("wget", args = paste("https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",serie,".sdrf.txt",sep = ""))
-
-            system2("tr", args = paste("-s \"[\t]\" < ", serie,".sdrf.txt | sed 's/[\t]/;/g' > ", serie,".csv",sep = ""))
-
-            fileMove(from = paste(serie,".csv",sep = ""),
-                      to =  paste("ReferenceFiles/",serie,".csv",sep = ""))
-
-            system2("rm", args = paste(serie,".sdrf.txt",sep = ""))
-
-          }else{
-
-            cat("There isn't any sdrf file available for this series or the series doesn't exist\n")
-
-          }
-
-        }else if(any(grepl("DNA-seq", x))){
-
-          cat("******************************** DNA-SEQ series detected ********************************\n\n")
-
-          if(grepl(paste(serie,".sdrf.txt",sep = ""),x[1])){
-
-            cat("Downloading the sdrf.txt and converting to CSV...\n")
-
-            system2("wget", args = paste("https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",serie,".sdrf.txt",sep = ""))
-
-            system2("tr", args = paste("-s \"[\t]\" < ", serie,".sdrf.txt | sed 's/[\t]/;/g' > ", serie,".csv",sep = ""))
-
-            fileMove(from = paste(serie,".csv",sep = ""),
-                      to =  paste("ReferenceFiles/",serie,".csv",sep = ""))
-
-            system2("rm", args = paste(serie,".sdrf.txt",sep = ""))
+            POST(paste("https://www.ebi.ac.uk/arrayexpress/files/",serie,"/",serie,".sdrf.txt",sep = ""), write_disk(paste(serie,".sdrf.txt",sep = "")), overwrite=TRUE)
+            
+            fileMove(from = paste(serie,".sdrf.txt",sep = ""),
+                      to =  paste("ReferenceFiles/",serie,".tsv",sep = ""))
 
           }else{
 

@@ -1,4 +1,4 @@
-import(stringr,sva, RCurl, XML, jsonlite, multtest, kernlab)
+import(stringr,sva, XML, jsonlite, multtest, kernlab)
 
 importFrom(randomForest, randomForest, tuneRF)
 importFrom(R.utils, mkdirs, gunzip)

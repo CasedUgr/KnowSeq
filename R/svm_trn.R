@@ -61,7 +61,7 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
 
   Rsvm_sb <- train(labels ~ ., data = dataForTunning, type = "C-svc", method = "svmRadial", preProc = c("center", "scale"), trControl = fitControl, tuneGrid = grid_radial)
   
-  bestParameters <- c(cost = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma)
+  bestParameters <- c(C = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma)
   cat(paste("Optimal cost:", bestParameters[1], "\n"))
   cat(paste("Optimal gamma:", bestParameters[2], "\n"))
   
@@ -92,10 +92,13 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
     labelsTest <- labels[valFold]
 
     for (j in seq_len(length(vars_selected))) {
-      svm_model <- svm(trainingDataset[, seq(j)], labelsTrain,
-        kernel = "radial",
-        cost = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma, probability = TRUE
-      )
+      svm_model <- train(labels ~ ., data = dataForTunning, type = "C-svc", 
+                         method = "svmRadial", preProc = c("center", "scale"),
+                         tuneGrid = bestParameters)
+      #svm_model <- svm(trainingDataset[, seq(j)], labelsTrain,
+      #  kernel = "radial",
+      #  cost = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma, probability = TRUE
+      #)
       predicts <- predict(svm_model, testDataset[, seq(j)], probability = TRUE)
 
       cfMatList[[i]] <- confusionMatrix(predicts, labelsTest)

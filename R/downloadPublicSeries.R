@@ -51,7 +51,7 @@ downloadPublicSeries <- function(samplesVector) {
 
           cat("******************************** MICROARRAY series detected *******************************\n\n")
           cat(paste("Searching the RAW data from the microarray series ",serie,"\n",sep = ""))
-          if(url.exists(paste("ftp://ftp.ncbi.nlm.nih.gov/geo/series/",substring(serie,1,nchar(serie)-3),"nnn/",serie,"/suppl/",serie,"_RAW.tar",sep = ""))){
+          if(!http_error(paste("ftp://ftp.ncbi.nlm.nih.gov/geo/series/",substring(serie,1,nchar(serie)-3),"nnn/",serie,"/suppl/",serie,"_RAW.tar",sep = ""))){
 
             cat("The RAW data have been found correctly...\n")
             POST(paste("ftp://ftp.ncbi.nlm.nih.gov/geo/series/",substring(serie,1,nchar(serie)-3),"nnn/",serie,"/suppl/",serie,"_RAW.tar",sep = ""), write_disk(paste(serie,"_RAW.tar",sep = ""), overwrite=TRUE))

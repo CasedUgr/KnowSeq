@@ -4,8 +4,9 @@
 
 [![Bioconductor Time](https://bioconductor.org/shields/years-in-bioc/KnowSeq.svg)](https://bioconductor.org/packages/release/bioc/html/KnowSeq "How long has been KnowSeq in a release of Bioconductor")
 [![Support posts](https://bioconductor.org/shields/posts/KnowSeq.svg)](https://support.bioconductor.org/t/KnowSeq/ "Support site activity on KnowSeq, last 6 months: tagged questions/avg. answers per question/avg. comments per question/accepted answers, or 0 if no tagged posts.")
-
-
+[![GitHub contributors](https://img.shields.io/github/contributors/CasedUgr/KnowSeq)](https://github.com/CasedUgr/KnowSeq/graphs/contributors)
+[![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?hashtags=KnowSeq&url=https://bioconductor.org/packages/release/bioc/html/KnowSeq.html&screen_name=CasedUgr)
+[![GitHub followers](https://img.shields.io/github/followers/CasedUgr?label=Follow%20us%21&style=social)](https://github.com/CasedUgr)
 
 
 **Current build status**

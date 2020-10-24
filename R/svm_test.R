@@ -77,14 +77,23 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
   specVector <- double()
   f1Vector <- double()
   cfMatList  <- list()
-
+  colNames <- colnames(train)
   for(i in seq_len(dim(test)[2])){
 
     cat(paste("Testing with ", i," variables...\n",sep=""))
-    svm_model<-svm(train[,seq(i)],labelsTrain,kernel='radial',
-                   cost=getElement(bestParameters, "cost"),gamma=getElement(bestParameters, "gamma"),probability=TRUE)
-    predicts<-predict(svm_model,test[,seq(i)],probability=TRUE)
-
+    browser()
+    columns <- c(colNames[seq(i)])
+    tr_ctr <- caret::trainControl(method="none")
+    dataForTrt <- data.frame(cbind(subset(train, select=columns),labelsTrain))
+    colnames(train)[seq(i)] <- columns
+    svm_model <- train(labelsTrain ~ ., data = dataForTrt, type = "C-svc", 
+                       method = "svmRadial", preProc = c("center", "scale"),
+                       trControl = tr_ctr, 
+                       tuneGrid=data.frame(sigma=getElement(bestParameters, "gamma"), 
+                                           C = getElement(bestParameters, "C")))
+    
+    predicts <- caret::predict.train(svm_model, new_data=subset(test, select=columns))
+    
     cfMat<-confusionMatrix(predicts,labelsTest)
     
     if (length(levels(labelsTrain))==2){

@@ -90,16 +90,18 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
     trainingDataset <- data[trainDataCV,]
     labelsTrain <- labels[trainDataCV]
     labelsTest <- labels[valFold]
-
+    colNames <- colnames(trainingDataset)
     for (j in seq_len(length(vars_selected))) {
-      svm_model <- train(labels ~ ., data = dataForTunning, type = "C-svc", 
+      columns <- c(colNames[seq(j)])
+      tr_ctr <- caret::trainControl(method="none")
+      dataForTrt <- data.frame(cbind(subset(trainingDataset, select=columns),labelsTrain))
+      colnames(dataForTrt)[seq(j)] <- columns
+      svm_model <- train(labelsTrain ~ ., data = dataForTrt, type = "C-svc", 
                          method = "svmRadial", preProc = c("center", "scale"),
-                         tuneGrid = bestParameters)
-      #svm_model <- svm(trainingDataset[, seq(j)], labelsTrain,
-      #  kernel = "radial",
-      #  cost = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma, probability = TRUE
-      #)
-      predicts <- predict(svm_model, testDataset[, seq(j)], probability = TRUE)
+                         trControl = tr_ctr, 
+                         tuneGrid=data.frame(sigma = bestParameters[2], C = bestParameters[1]))
+      
+      predicts <- caret::predict.train(svm_model, new_data=subset(testDataset, select=columns))
 
       cfMatList[[i]] <- confusionMatrix(predicts, labelsTest)
       acc_cv[i, j] <- cfMatList[[i]]$overall[[1]]

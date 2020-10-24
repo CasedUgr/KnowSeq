@@ -81,7 +81,6 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
   for(i in seq_len(dim(test)[2])){
 
     cat(paste("Testing with ", i," variables...\n",sep=""))
-    browser()
     columns <- c(colNames[seq(i)])
     tr_ctr <- caret::trainControl(method="none")
     dataForTrt <- data.frame(cbind(subset(train, select=columns),labelsTrain))

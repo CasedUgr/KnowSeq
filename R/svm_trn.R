@@ -100,9 +100,12 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
                          method = "svmRadial", preProc = c("center", "scale"),
                          trControl = tr_ctr, 
                          tuneGrid=data.frame(sigma = bestParameters[2], C = bestParameters[1]))
-      
-      predicts <- caret::predict.train(svm_model, new_data=subset(testDataset, select=columns))
 
+      unkX <- subset(testDataset, select=columns)
+      predicts <- extractPrediction(list(my_svm=svm_model), testX = subset(testDataset, select=columns), unkX = unkX,
+                                    unkOnly = !is.null(unkX) & !is.null(subset(testDataset, select=columns)))
+      
+      predicts <- predicts$pred
       cfMatList[[i]] <- confusionMatrix(predicts, labelsTest)
       acc_cv[i, j] <- cfMatList[[i]]$overall[[1]]
       

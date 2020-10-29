@@ -43,7 +43,7 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
 
   data <- as.data.frame(data)
 
-  fitControl <- caret::trainControl(method = "cv", number = 10)
+  fitControl <- trainControl(method = "cv", number = 10)
   cat("Tuning the optimal C and G...\n")
 
   grid_radial <- expand.grid(
@@ -61,7 +61,7 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
 
   Rsvm_sb <- train(labels ~ ., data = dataForTunning, type = "C-svc", method = "svmRadial", preProc = c("center", "scale"), trControl = fitControl, tuneGrid = grid_radial)
   
-  bestParameters <- c(cost = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma)
+  bestParameters <- c(C = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma)
   cat(paste("Optimal cost:", bestParameters[1], "\n"))
   cat(paste("Optimal gamma:", bestParameters[2], "\n"))
   
@@ -90,13 +90,23 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
     trainingDataset <- data[trainDataCV,]
     labelsTrain <- labels[trainDataCV]
     labelsTest <- labels[valFold]
-
+    colNames <- colnames(trainingDataset)
+    
     for (j in seq_len(length(vars_selected))) {
-      svm_model <- svm(trainingDataset[, seq(j)], labelsTrain,
-        kernel = "radial",
-        cost = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma, probability = TRUE
-      )
-      predicts <- predict(svm_model, testDataset[, seq(j)], probability = TRUE)
+      columns <- c(colNames[seq(j)])
+      tr_ctr <- trainControl(method="none")
+      dataForTrt <- data.frame(cbind(subset(trainingDataset, select=columns),labelsTrain))
+      colnames(dataForTrt)[seq(j)] <- columns
+      svm_model <- train(labelsTrain ~ ., data = dataForTrt, type = "C-svc", 
+                         method = "svmRadial", preProc = c("center", "scale"),
+                         trControl = tr_ctr, 
+                         tuneGrid=data.frame(sigma = bestParameters[2], C = bestParameters[1]))
+
+      unkX <- subset(testDataset, select=columns)
+      predicts <- extractPrediction(list(my_svm=svm_model), testX = subset(testDataset, select=columns), unkX = unkX,
+                                    unkOnly = !is.null(unkX) & !is.null(subset(testDataset, select=columns)))
+      
+      predicts <- predicts$pred
 
       cfMatList[[i]] <- confusionMatrix(predicts, labelsTest)
       acc_cv[i, j] <- cfMatList[[i]]$overall[[1]]

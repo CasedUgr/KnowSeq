@@ -77,14 +77,25 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
   specVector <- double()
   f1Vector <- double()
   cfMatList  <- list()
-
+  colNames <- colnames(train)
   for(i in seq_len(dim(test)[2])){
 
     cat(paste("Testing with ", i," variables...\n",sep=""))
-    svm_model<-svm(train[,seq(i)],labelsTrain,kernel='radial',
-                   cost=getElement(bestParameters, "cost"),gamma=getElement(bestParameters, "gamma"),probability=TRUE)
-    predicts<-predict(svm_model,test[,seq(i)],probability=TRUE)
-
+    columns <- c(colNames[seq(i)])
+    tr_ctr <- trainControl(method="none")
+    dataForTrt <- data.frame(cbind(subset(train, select=columns),labelsTrain))
+    colnames(train)[seq(i)] <- columns
+    svm_model <- train(labelsTrain ~ ., data = dataForTrt, type = "C-svc", 
+                       method = "svmRadial", preProc = c("center", "scale"),
+                       trControl = tr_ctr, 
+                       tuneGrid=data.frame(sigma=getElement(bestParameters, "gamma"), 
+                                           C = getElement(bestParameters, "C")))
+    unkX <- subset(test, select=columns)
+    predicts <- extractPrediction(list(my_svm=svm_model), testX = subset(test, select=columns), unkX = unkX,
+                                  unkOnly = !is.null(unkX) & !is.null(subset(test, select=columns)))
+    
+    predicts <- predicts$pred
+    
     cfMat<-confusionMatrix(predicts,labelsTest)
     
     if (length(levels(labelsTrain))==2){

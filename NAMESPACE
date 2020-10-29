@@ -23,7 +23,7 @@ importFrom(rmarkdown, render)
 importFrom(Hmisc,hoeffd)
 importFrom(gridExtra,grid.arrange)
 
-export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsPathwayVisualization, DEGsToDiseases,
+export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getGenesAnnotation,
               hisatAlignment, knn_trn, knn_test, DEGsExtraction, plotConfMatrix, RNAseqQA, rawAlignment, rf_trn, rf_test
               , sraToFastq, svm_trn, svm_test, DEGsEvidences, knowseqReport)

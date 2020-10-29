@@ -92,7 +92,7 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
     labelsTest <- labels[valFold]
     colNames <- colnames(trainingDataset)
     
-    for (j in seq_len(length(10))) {
+    for (j in seq_len(length(vars_selected))) {
       columns <- c(colNames[seq(j)])
       tr_ctr <- trainControl(method="none")
       dataForTrt <- data.frame(cbind(subset(trainingDataset, select=columns),labelsTrain))

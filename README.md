@@ -48,10 +48,10 @@ BiocManager::install("KnowSeq")
 library(KnowSeq)
 ```
 
-KnowSeq is now available on Docker by running the next command:
+KnowSeq is now available on Docker by running the next command and opening the URL localhost:8787 at your browser
 
 ```
-Docker run -it casedugr/knowseq
+Docker run -e PASSWORD=<your_password> -p 8787:8787 casedugr/knowseq
 ```
 
 # Contributors

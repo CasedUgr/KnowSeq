@@ -90,8 +90,12 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
                        trControl = tr_ctr, 
                        tuneGrid=data.frame(sigma=getElement(bestParameters, "gamma"), 
                                            C = getElement(bestParameters, "C")))
+    browser()
+    unkX <- subset(test, select=columns)
+    predicts <- extractPrediction(list(my_svm=svm_model), testX = subset(test, select=columns), unkX = unkX,
+                                  unkOnly = !is.null(unkX) & !is.null(subset(test, select=columns)))
     
-    predicts <- predict.train(svm_model, new_data=subset(test, select=columns))
+    predicts <- predicts$pred
     
     cfMat<-confusionMatrix(predicts,labelsTest)
     

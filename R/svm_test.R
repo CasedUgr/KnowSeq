@@ -82,7 +82,7 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
 
     cat(paste("Testing with ", i," variables...\n",sep=""))
     columns <- c(colNames[seq(i)])
-    tr_ctr <- caret::trainControl(method="none")
+    tr_ctr <- trainControl(method="none")
     dataForTrt <- data.frame(cbind(subset(train, select=columns),labelsTrain))
     colnames(train)[seq(i)] <- columns
     svm_model <- train(labelsTrain ~ ., data = dataForTrt, type = "C-svc", 
@@ -91,7 +91,7 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
                        tuneGrid=data.frame(sigma=getElement(bestParameters, "gamma"), 
                                            C = getElement(bestParameters, "C")))
     
-    predicts <- caret::predict.train(svm_model, new_data=subset(test, select=columns))
+    predicts <- predict.train(svm_model, new_data=subset(test, select=columns))
     
     cfMat<-confusionMatrix(predicts,labelsTest)
     

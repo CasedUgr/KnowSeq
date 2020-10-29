@@ -43,7 +43,7 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
 
   data <- as.data.frame(data)
 
-  fitControl <- caret::trainControl(method = "cv", number = 10)
+  fitControl <- trainControl(method = "cv", number = 10)
   cat("Tuning the optimal C and G...\n")
 
   grid_radial <- expand.grid(
@@ -91,9 +91,10 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
     labelsTrain <- labels[trainDataCV]
     labelsTest <- labels[valFold]
     colNames <- colnames(trainingDataset)
-    for (j in seq_len(length(vars_selected))) {
+    
+    for (j in seq_len(length(10))) {
       columns <- c(colNames[seq(j)])
-      tr_ctr <- caret::trainControl(method="none")
+      tr_ctr <- trainControl(method="none")
       dataForTrt <- data.frame(cbind(subset(trainingDataset, select=columns),labelsTrain))
       colnames(dataForTrt)[seq(j)] <- columns
       svm_model <- train(labelsTrain ~ ., data = dataForTrt, type = "C-svc", 
@@ -106,6 +107,7 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
                                     unkOnly = !is.null(unkX) & !is.null(subset(testDataset, select=columns)))
       
       predicts <- predicts$pred
+
       cfMatList[[i]] <- confusionMatrix(predicts, labelsTest)
       acc_cv[i, j] <- cfMatList[[i]]$overall[[1]]
       

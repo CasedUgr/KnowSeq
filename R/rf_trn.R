@@ -46,25 +46,21 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
   
   data <- as.data.frame(data)
   
-  cat("Tuning the optimal mtry and ntrees...\n")
+  fitControl <- trainControl(method = "cv", number = 10)
+  cat("Tuning the optimal mtry...\n")
   
-  bestParamsMatrix <- matrix(,nrow = 10,ncol = 3)
-  i = 1
+  dataForTunning <- cbind(data, labels)
+  tunegrid <- expand.grid(.mtry = (1:30)) 
+ 
+  rf_gridsearch <- train(labels ~ ., 
+                         data = dataForTunning,
+                         method = 'rf',
+                         metric = 'Accuracy',
+                         preProc = c("center", "scale"),
+                         ntree=1000,
+                         tuneGrid = tunegrid)
+  mtryTune <- rf_gridsearch$bestTune$mtry
   
-  for(tree in seq(100,1000, by=100)){
-  
-    tuning <- tuneRF(data, labels, ntreeTry = tree, doBest = T, stepFactor = 1)
-    bestParamsMatrix[i,1] <- tuning$mtry
-    bestParamsMatrix[i,2] <- tree
-    bestParamsMatrix[i,3] <- mean(tuning$confusion[, "class.error"])
-  
-    i = i + 1
-    
-  }
-  
-  bestParamsPos <- which(bestParamsMatrix[,3] == min(bestParamsMatrix[,3]))
-  bestParameters <- bestParamsMatrix[bestParamsPos, 1:2]
-
   acc_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   sens_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
   spec_cv<-matrix(0L,nrow = numFold,ncol = dim(data)[2])
@@ -92,11 +88,28 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
     trainingDataset <- data[trainDataCV,]
     labelsTrain <- labels[trainDataCV]
     labelsTest <- labels[valFold]
+    colNames <- colnames(trainingDataset)
     
     # first iteration is performed outside of the foor lopp
     # in order to avoid having a if inside
-    rf_mod = randomForest(x = trainingDataset[, 1, drop=FALSE], y = labelsTrain)
-    predicts <- predict(rf_mod , testDataset[, 1, drop=FALSE])
+    columns <- c(colNames[1])
+    tr_ctr <- trainControl(method="none")
+    dataForTrt <- data.frame(cbind(subset(trainingDataset, select=columns),labelsTrain))
+    colnames(dataForTrt)[seq(1)] <- columns
+    rf_mod <- train(labelsTrain ~ ., 
+          data = dataForTrt,
+          method = 'rf',
+          metric = 'Accuracy',
+          preProc = c("center", "scale"),
+          ntree=1000,
+          tuneGrid = data.frame(.mtry= mtryTune))
+    
+    unkX <- subset(testDataset, select=columns)
+    predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(testDataset, select=columns), unkX = unkX,
+                                  unkOnly = !is.null(unkX) & !is.null(subset(testDataset, select=columns)))
+    
+    predicts <- predicts$pred
+
     cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)
     acc_cv[i,1]<-cfMatList[[i]]$overall[[1]]
     
@@ -120,8 +133,23 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
     
     for(j in 2:length(vars_selected)){
 
-      rf_mod = randomForest(x = trainingDataset[,seq(j)], y = labelsTrain, ntree = bestParameters[2], mtry = bestParameters[1])
-      predicts <- predict(rf_mod , testDataset[,seq(j)])
+      columns <- c(colNames[seq(j)])
+      tr_ctr <- trainControl(method="none")
+      dataForTrt <- data.frame(cbind(subset(trainingDataset, select=columns),labelsTrain))
+      colnames(dataForTrt)[seq(j)] <- columns
+      rf_mod <- train(labelsTrain ~ ., 
+                      data = dataForTrt,
+                      method = 'rf',
+                      metric = 'Accuracy',
+                      preProc = c("center", "scale"),
+                      ntree=1000,
+                      tuneGrid = data.frame(.mtry= mtryTune))
+      
+      unkX <- subset(testDataset, select=columns)
+      predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(testDataset, select=columns), unkX = unkX,
+                                    unkOnly = !is.null(unkX) & !is.null(subset(testDataset, select=columns)))
+      
+      predicts <- predicts$pred
       cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)
       acc_cv[i,j]<-cfMatList[[i]]$overall[[1]]
       
@@ -174,7 +202,7 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
   names(F1Info) <- c("meanF1","standardDeviation")
   
   cat("Classification done successfully!\n")
-  results_cv <- list(cfMatList,accuracyInfo,sensitivityInfo,specificityInfo,F1Info,bestParameters)
+  results_cv <- list(cfMatList,accuracyInfo,sensitivityInfo,specificityInfo,F1Info,mtryTune)
   names(results_cv) <- c("cfMats","accuracyInfo","sensitivityInfo","specificityInfo","F1Info","bestParameters")
   invisible(results_cv)
 

@@ -93,8 +93,8 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameter
                   ntree=1000,
                   tuneGrid = data.frame(.mtry= bestParameters))
   
-  unkX <- subset(testDataset, select=columns)
-  predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(testt, select=columns), unkX = unkX,
+  unkX <- subset(test, select=columns)
+  predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(test, select=columns), unkX = unkX,
                                 unkOnly = !is.null(unkX) & !is.null(subset(test, select=columns)))
   
   predicts <- predicts$pred
@@ -131,8 +131,8 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameter
                     ntree=1000,
                     tuneGrid = data.frame(.mtry= bestParameters))
     
-    unkX <- subset(testDataset, select=columns)
-    predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(testt, select=columns), unkX = unkX,
+    unkX <- subset(test, select=columns)
+    predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(test, select=columns), unkX = unkX,
                                   unkOnly = !is.null(unkX) & !is.null(subset(test, select=columns)))
     
     predicts <- predicts$pred

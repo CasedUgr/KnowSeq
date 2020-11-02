@@ -16,7 +16,6 @@ importFrom(praznik, MRMR)
 importFrom(caret, trainControl, train, knn3, confusionMatrix, predict.train)
 importFrom(class, knn)
 importFrom(limma, eBayes, topTable, lmFit, makeContrasts, contrasts.fit, decideTests)
-importFrom(pathview, pathview)
 importFrom(httr, GET, content, POST, write_disk, http_error)
 importFrom(rlist,list.map)
 importFrom(rmarkdown, render)
@@ -26,5 +25,5 @@ importFrom(gridExtra,grid.arrange)
 export(batchEffectRemoval, calculateGeneExpressionValues, countsToMatrix, dataPlot, DEGsToDiseases,
               downloadPublicSeries, featureSelection, fileMove, gdcClientDownload, geneOntologyEnrichment, getGenesAnnotation,
               hisatAlignment, knn_trn, knn_test, DEGsExtraction, plotConfMatrix, RNAseqQA, rawAlignment, rf_trn, rf_test
-              , sraToFastq, svm_trn, svm_test, DEGsEvidences, knowseqReport)
+              , sraToFastq, svm_trn, svm_test, DEGsEvidences, knowseqReport, DEGsToPathways)
 

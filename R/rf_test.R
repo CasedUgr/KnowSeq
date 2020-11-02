@@ -48,7 +48,7 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameter
 
   if(dim(test)[1] != length(labelsTest)){
 
-    stop("The length of the rows of the argument test must be the same than the length of the lablesTest. Please, ensures that the rows are the samples and the columns are the variables.")
+    stop("The length of the rows of the argument test must be the same than the length of the labelsTest. Please, ensures that the rows are the samples and the columns are the variables.")
 
   }
   train <- as.data.frame(apply(train,2,as.double))
@@ -69,7 +69,9 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameter
     x = ((x-min)/(max-min))*2-1}, double(nrow(test)))
   
   test <- as.data.frame(test)
-
+  
+  colNames <- colnames(train)
+  
   accVector <- double()
   sensVector <- double()
   specVector <- double()
@@ -78,8 +80,24 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameter
   
   # Firstly with 1 variable
   cat(paste("Testing with ", 1," variables...\n",sep=""))
-  rf_mod = randomForest(x = train[, 1, drop=FALSE], y = labelsTrain)
-  predicts <- predict(rf_mod , test[, 1, drop=FALSE])
+
+  columns <- c(colNames[1])
+  tr_ctr <- trainControl(method="none")
+  dataForTrt <- data.frame(cbind(subset(train, select=columns),labelsTrain))
+  colnames(dataForTrt)[seq(1)] <- columns
+  rf_mod <- train(labelsTrain ~ ., 
+                  data = dataForTrt,
+                  method = 'rf',
+                  metric = 'Accuracy',
+                  preProc = c("center", "scale"),
+                  ntree=1000,
+                  tuneGrid = data.frame(.mtry= bestParameters))
+  
+  unkX <- subset(test, select=columns)
+  predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(test, select=columns), unkX = unkX,
+                                unkOnly = !is.null(unkX) & !is.null(subset(test, select=columns)))
+  
+  predicts <- predicts$pred
   
   cfMat<-confusionMatrix(predicts,labelsTest)
   if (length(levels(labelsTrain))==2){
@@ -101,8 +119,23 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameter
   for(i in c(2:dim(train)[2])){
 
     cat(paste("Testing with ", i," variables...\n",sep=""))
-    rf_mod = randomForest(x = train[,seq(i)], y = labelsTrain, ntree = 100)
-    predicts <- predict(rf_mod , test[,seq(i)])
+    columns <- c(colNames[seq(i)])
+    tr_ctr <- trainControl(method="none")
+    dataForTrt <- data.frame(cbind(subset(train, select=columns),labelsTrain))
+    colnames(dataForTrt)[seq(i)] <- columns
+    rf_mod <- train(labelsTrain ~ ., 
+                    data = dataForTrt,
+                    method = 'rf',
+                    metric = 'Accuracy',
+                    preProc = c("center", "scale"),
+                    ntree=1000,
+                    tuneGrid = data.frame(.mtry= bestParameters))
+    
+    unkX <- subset(test, select=columns)
+    predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(test, select=columns), unkX = unkX,
+                                  unkOnly = !is.null(unkX) & !is.null(subset(test, select=columns)))
+    
+    predicts <- predicts$pred
 
     cfMat<-confusionMatrix(predicts,labelsTest)
     if (length(levels(labelsTrain))==2){

@@ -12,6 +12,6 @@ Encoding: UTF-8
 LazyData: false
 RoxygenNote: 7.1.1
 biocViews: GeneExpression, DifferentialExpression, GeneSetEnrichment, DataImport, Classification, FeatureExtraction, Sequencing, RNASeq, BatchEffect, Normalization, Preprocessing, QualityControl, Genetics, Transcriptomics, Microarray, Alignment, Pathways, SystemsBiology, GO, ImmunoOncology
-Imports: stringr, kernlab, ggplot2 (>= 3.3.0), rlist, rmarkdown, reshape2, gplots, caret, XML, class, praznik, R.utils, randomForest, httr, jsonlite, sva (>= 3.30.1), edgeR (>= 3.24.3), limma (>= 3.38.3), Biobase, multtest, grDevices, graphics, stats, utils, Hmisc (>= 4.4.0), gridExtra
+Imports: stringr, ggplot2 (>= 3.3.0), jsonlite, rlist, rmarkdown, reshape2, gplots, caret, XML, praznik, R.utils, httr, sva (>= 3.30.1), edgeR (>= 3.24.3), limma (>= 3.38.3), grDevices, graphics, stats, utils, Hmisc (>= 4.4.0)
 Suggests: knitr
 git_url: https://github.com/CasedUgr/KnowSeq

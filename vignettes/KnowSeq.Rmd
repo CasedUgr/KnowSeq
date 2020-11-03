@@ -475,7 +475,7 @@ Finally, the last enrichment method implemented is the related diseases enrichme
 ```{r Downloading_diseases}
 # Downloading the information about the DEGs related diseases
 
-diseasesTargetValidation <- DEGsToDiseases(rownames(DEGsMatrix), getEvidences = FALSE)
+diseasesTargetValidation <- DEGsToDiseases(rownames(DEGsMatrix)[1:5], getEvidences = FALSE)
 
 ``` 
 
@@ -491,7 +491,7 @@ Finally DEGs enrichment is obtained, showing Gene Ontologies and found evidences
 
 ```{r, eval=FALSE} 
 # Performing the automatic and intelligent KnowSeq report 
-knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('knn','svm','rf'),disease='breast-cancer', lfc = 2, pvalue = 0.001)
+knowseqReport(expressionMatrix,labels,'knowSeq-report',clasifAlgs=c('knn'),disease='breast-cancer', lfc = 2, pvalue = 0.001, geneOntology = T, getPathways = T)
 ```
 
 

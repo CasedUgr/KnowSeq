@@ -1,4 +1,4 @@
-import(stringr,sva, XML, jsonlite, multtest, kernlab)
+import(stringr,sva, XML, multtest)
 
 importFrom(randomForest, randomForest, tuneRF)
 importFrom(R.utils, mkdirs, gunzip)
@@ -9,7 +9,6 @@ importFrom(graphics, abline, axis, box, boxplot, image, layout, lines, par, text
 importFrom(stats, model.matrix, p.adjust, setNames, complete.cases, ecdf,dist, ks.test, quantile, IQR)
 importFrom(utils, read.csv, untar, write.csv, write.table, download.file, capture.output, tail, read.table, URLencode)
 importFrom(cqn, cqn)
-importFrom(Biobase, ExpressionSet)
 importFrom(edgeR, readDGE, cpm)
 importFrom(reshape2, melt)
 importFrom(praznik, MRMR)

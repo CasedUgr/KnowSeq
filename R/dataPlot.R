@@ -283,12 +283,16 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     
     if(toPNG){
       cat("Creating PNG...\n")
-      ggsave(filename = "heatmap.png")
+      png("heatmap.png", width = 1024, height = 720)
+      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
+      dev.off()
     }
     
     if(toPDF){
       cat("Creating PDF...\n")
-      ggsave(filename = "heatmap.pdf")
+      pdf("heatmap.pdf")
+      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
+      dev.off()
     }
   
   }else if(mode == "confusionMatrix"){

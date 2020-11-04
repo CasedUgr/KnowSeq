@@ -19,7 +19,7 @@
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#'
+#' 
 #' dataPlot(expressionMatrix,labels,mode = "boxplot",toPNG = TRUE,toPDF = TRUE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = TRUE,toPDF = TRUE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = TRUE,toPDF = FALSE)
@@ -216,6 +216,13 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
       
     }
     
+    # Shorten long labels if one of them is longer than 20 characters
+    limit_characters <- 20
+    if(sum(nchar(labels) > limit_characters) > 0){
+      labels <- substr(labels, 1, limit_characters)
+      cat(paste0("Warning! The labels were too long (>", limit_characters, " characters) and were shortened for the plot. \n"))
+    }
+    
     # Reorder data and labels
     labels_levels <- levels(as.factor(labels))
     for(i in 1:length(labels_levels)){
@@ -229,8 +236,10 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
       }
     }
     
+    # Prepare data for ggplot2::geom_tile
+    colnames(data_heatmap) <- seq_len(ncol(data_heatmap))
     data_heatmap <- melt(data_heatmap)
-
+    
     # Add labels_heatmap to data_heatmap
     data_heatmap$labels <- NA
     j <- 1
@@ -258,8 +267,9 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
             axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 10, color = "white"),
             axis.text.y = element_blank(),
             plot.title = element_text(hjust = .5),
-            axis.ticks = element_blank(),
-            legend.position="left",
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            legend.position = "left",
             legend.margin=margin(t = 0, unit='cm'))
     
     # Second graph: data
@@ -274,12 +284,12 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
       theme(axis.text = element_text(color = "black"),
             axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 10),
             axis.text.y = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
             plot.title = element_text(hjust = .5))
     
     # Join the two graphs
     grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
-    
-    cat("Warning! If you can't see the plot of the labels, you should use shorter labels. \n")
     
     if(toPNG){
       cat("Creating PNG...\n")
@@ -294,7 +304,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
       grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
       dev.off()
     }
-  
+    
   }else if(mode == "confusionMatrix"){
     
     plotConfMatrix(data)

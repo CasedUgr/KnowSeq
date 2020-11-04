@@ -448,25 +448,14 @@ For example, in this example, the top 10 GOs from the BP ontology for the extrac
 ![](GOExample.png)
 
 ## Pathways visualization
-Another important step in the enrichment methodology in this pipeline is the pathway visualization. The function uses the DEGs to show graphically the expression of the samples in the pathways in which those genes appear. For that, the function makes use of a DEGsMatrix with the expression of the DEGs and the annotation of those DEGs in which appear the pathway or pathways of each DEGs. Internally, the function *DEGsPathwayVisualization* uses *pathview* package [26] to retrieve and colour the pathways, but a maximum number of 24 samples can be used, for that, if the input matrix has more than 24 samples, only the first 24 will be used by the operation. Furthermore, the function needs the expression matrix with all the genes in order to use them to colour the rest of the elements in the pathways. It is important to retrieve the annotation from Ensembl for both the DEGsMatrix and the expressionMatrix because the entrezgene IDs and the KEGG enzyme of each gene are necessary.
-
+Another important step in the enrichment methodology in this pipeline is the related pathway information. The function uses the DEGs to retrieve pathways with any relation with DEGs. For that, DEGsToPathways makes use of the information gathered from KEGG along with reactome databases in order to supply as more details as possible .
 
 ```{r Downloading_pathways eval} 
-# Downloading and filling with expression the pathways of the DEGs
+# Retrieving the pathways related to the DEGs
+paths <- DEGsToPathways(names(mrmrRanking)[1:10])
+print(paths)
 
-myDEGsAnnotation <- getGenesAnnotation(rownames(DEGsMatrix)[1:3],
-referenceGenome=38,attributes = c("external_gene_name","entrezgene_id"), 
-filter = "external_gene_name")
-
-allMyAnnotation <-  getGenesAnnotation(rownames(expressionMatrix),
-referenceGenome=38,attributes = c("external_gene_name","entrezgene_id"), 
-filter = "external_gene_name")
-
-DEGsPathwayVisualization(DEGsMatrix[1:3,], myDEGsAnnotation, expressionMatrix,
-allMyAnnotation, labels)
 ``` 
-
-![](pathway.png){ width=90% height=90% }
 
 
 ## Related diseases

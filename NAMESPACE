@@ -1,4 +1,4 @@
-import(stringr, XML)
+import(stringr, XML, kernlab, e1071, randomForest)
 
 importFrom(sva, sva, f.pvalue, num.sv, ComBat)
 importFrom(jsonlite, fromJSON)

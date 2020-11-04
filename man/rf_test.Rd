@@ -33,6 +33,6 @@ trainingMatrix <- t(DEGsMatrix)[c(1:4,6:9),]
 trainingLabels <- labels[c(1:4,6:9)]
 testMatrix <- t(DEGsMatrix)[c(5,10),]
 testLabels <- labels[c(5,10)]
-
-rf_test(trainingMatrix, trainingLabels, testMatrix, testLabels,rownames(DEGsMatrix)[1:10])
+bestParameters <- 30
+rf_test(trainingMatrix, trainingLabels, testMatrix, testLabels,rownames(DEGsMatrix)[1:10], bestParameters = bestParameters)
 }

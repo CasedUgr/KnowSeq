@@ -19,7 +19,7 @@
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))
-#'
+#' 
 #' dataPlot(expressionMatrix,labels,mode = "boxplot",toPNG = TRUE,toPDF = TRUE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = TRUE,toPDF = TRUE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = TRUE,toPDF = FALSE)
@@ -130,7 +130,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     data2 <- data2[1:heatmapResultsN, ]
     names(data2) <- c("Accuracy", "Sensitivity", "Specificity", "F1-Score")
     data2 <- melt(t(data2))
-
+    
     graph <- ggplot(data2, aes(Var1, Var2, fill = value)) +
       geom_tile(colour = "black") + 
       scale_fill_gradient(low = colours[1], high = colours[2]) +
@@ -216,35 +216,94 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
       
     }
     
-    coloursAux <- labels
-    
-    for(i in seq_len(length(levels(as.factor(labels))))){
-      
-      coloursAux <- gsub(levels(as.factor(labels))[i],coloursPalette[i], coloursAux)
-      
+    # Shorten long labels if one of them is longer than 20 characters
+    limit_characters <- 20
+    if(sum(nchar(labels) > limit_characters) > 0){
+      labels <- substr(labels, 1, limit_characters)
+      cat(paste0("Warning! The labels were too long (>", limit_characters, " characters) and were shortened for the plot. \n"))
     }
+    
+    # Reorder data and labels
+    labels_levels <- levels(as.factor(labels))
+    for(i in 1:length(labels_levels)){
+      if(i == 1) {
+        data_heatmap <- data[, which(labels == labels_levels[1])]
+        labels_heatmap <- labels[which(labels == labels_levels[1])]
+      }
+      else {
+        data_heatmap <- cbind(data_heatmap, data[, which(labels == labels_levels[i])])
+        labels_heatmap <- c(labels_heatmap, labels[which(labels == labels_levels[i])])
+      }
+    }
+    
+    # Prepare data for ggplot2::geom_tile
+    colnames(data_heatmap) <- seq_len(ncol(data_heatmap))
+    data_heatmap <- melt(data_heatmap)
+    
+    # Add labels_heatmap to data_heatmap
+    data_heatmap$labels <- NA
+    j <- 1
+    for(i in 1:nrow(data_heatmap)){
+      if(i == 1) data_heatmap$labels[i] <- labels_heatmap[1]
+      else {
+        if(data_heatmap$Var2[i] == data_heatmap$Var2[i - 1]) data_heatmap$labels[i] <- data_heatmap$labels[i - 1]
+        else{
+          j <- j + 1
+          data_heatmap$labels[i] <- labels_heatmap[j]
+        }
+      }
+    }
+    
+    # First graph: labels
+    g1 <- ggplot(data = data_heatmap, aes(x = Var2, y = Var1)) +
+      geom_tile(aes(fill = labels), size = 0, linetype = "blank") +
+      scale_fill_manual(values = coloursPalette) +
+      ggtitle("") + 
+      xlab("") + 
+      ylab("") + 
+      coord_flip() + 
+      theme_minimal() + 
+      theme(axis.text = element_text(color = "black"),
+            axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 10, color = "white"),
+            axis.text.y = element_blank(),
+            plot.title = element_text(hjust = .5),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            legend.position = "left",
+            legend.margin=margin(t = 0, unit='cm'))
+    
+    # Second graph: data
+    g2 <- ggplot(data = data_heatmap, aes(x = Var2, y = Var1)) +
+      geom_tile(aes(fill = value), size = 0, linetype = "blank") +
+      scale_fill_gradientn(colors = c("red", "black", "green")) +
+      ggtitle(main) + 
+      xlab(xlab) + 
+      ylab(ylab) + 
+      coord_flip() + 
+      theme_minimal() + 
+      theme(axis.text = element_text(color = "black"),
+            axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 10),
+            axis.text.y = element_blank(),
+            panel.grid.major = element_blank(),
+            panel.grid.minor = element_blank(),
+            plot.title = element_text(hjust = .5))
+    
+    # Join the two graphs
+    grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
     
     if(toPNG){
       cat("Creating PNG...\n")
-      png("heatmap.png",width = 1024, height = 720)
-      heatmap.2(t(data), col=redgreen(75), scale="row", RowSideColors=coloursAux,
-                key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=1,
-                cexCol=1, margins=c(6,11),srtCol=45)
+      png("heatmap.png", width = 1024, height = 720)
+      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
       dev.off()
     }
     
     if(toPDF){
       cat("Creating PDF...\n")
       pdf("heatmap.pdf")
-      heatmap.2(t(data), col=redgreen(75), scale="row", RowSideColors=coloursAux,
-                key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=1,
-                cexCol=1, margins=c(6,11),srtCol=45)
+      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
       dev.off()
     }
-    
-    heatmap.2(t(data), col=redgreen(75), scale="row", RowSideColors=coloursAux ,
-              key=TRUE, symkey=FALSE, density.info="none", trace="none", cexRow=1,
-              cexCol=1, margins=c(6,11),srtCol=45)
     
   }else if(mode == "confusionMatrix"){
     

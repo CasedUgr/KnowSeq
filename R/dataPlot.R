@@ -289,19 +289,19 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
             plot.title = element_text(hjust = .5))
     
     # Join the two graphs
-    grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
+    grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1/3, 2/3))
     
     if(toPNG){
       cat("Creating PNG...\n")
       png("heatmap.png", width = 1024, height = 720)
-      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
+      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(0.15, 0.85))
       dev.off()
     }
     
     if(toPDF){
       cat("Creating PDF...\n")
       pdf("heatmap.pdf")
-      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
+      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(0.3, 0.7))
       dev.off()
     }
     

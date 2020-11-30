@@ -41,7 +41,7 @@ dataPlot(
 
 \item{mode}{The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, confusionMatrix, classResults and heatmapResults.}
 
-\item{heatmapResultsN}{Number of genes to show if mode is heatmapResults.}
+\item{heatmapResultsN}{Number of genes to show when mode is equal to heatmapResults.}
 
 \item{toPNG}{Boolean variable to indicate if a plot would be save to PNG.}
 
@@ -60,4 +60,8 @@ load(paste(dir,"/expressionExample.RData",sep = ""))
 dataPlot(expressionMatrix,labels,mode = "boxplot",toPNG = TRUE,toPDF = TRUE)
 dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = TRUE,toPDF = TRUE)
 dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = TRUE,toPDF = FALSE)
+dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE,toPDF = TRUE)
+
+results <- knn_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 3)
+dataPlot(results, labels = "", mode = "heatmapResults", main = "Plot to show indicators of trained model")
 }

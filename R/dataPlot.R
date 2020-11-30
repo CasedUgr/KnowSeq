@@ -12,7 +12,7 @@
 #' @param ygrid Shows the y grid into the plot
 #' @param legend A vector with the elements in the legend of the plot.
 #' @param mode The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, confusionMatrix, classResults and heatmapResults.
-#' @param heatmapResultsN Number of genes to show if mode is heatmapResults.
+#' @param heatmapResultsN Number of genes to show when mode is equal to heatmapResults.
 #' @param toPNG Boolean variable to indicate if a plot would be save to PNG.
 #' @param toPDF Boolean variable to indicate if a plot would be save to PDF.
 #' @return Nothing to return.
@@ -23,6 +23,10 @@
 #' dataPlot(expressionMatrix,labels,mode = "boxplot",toPNG = TRUE,toPDF = TRUE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = TRUE,toPDF = TRUE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = TRUE,toPDF = FALSE)
+#' dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE,toPDF = TRUE)
+#'
+#' results <- knn_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 3)
+#' dataPlot(results, labels = "", mode = "heatmapResults", main = "Plot to show indicators of trained model")
 
 dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot", heatmapResultsN = 0, toPNG = FALSE, toPDF = FALSE){
   
@@ -35,7 +39,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     
     if(length(levels(as.factor(labels))) != 2 && length(levels(as.factor(labels))) != length(colours)){
       
-      coloursPalette <- c("green","red",sample(colors()[grep('gr(a|e)y', colors(), invert = TRUE)],length(levels(as.factor(labels))) - 2))
+      coloursPalette <- c("green","red",sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],length(levels(as.factor(labels))) - 2))
       
     }else{
       
@@ -77,7 +81,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     
     if(length(levels(as.factor(sortedLabelsNames))) != 2 && length(levels(as.factor(sortedLabelsNames))) != length(colours)){
       
-      coloursPalette <- c("green","red",sample(colors()[grep('gr(a|e)y', colors(), invert = TRUE)],length(levels(as.factor(sortedLabelsNames))) - 2))
+      coloursPalette <- c("green","red",sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],length(levels(as.factor(sortedLabelsNames))) - 2))
       
     }else{
       
@@ -163,7 +167,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     
     if(length(levels(as.factor(labels))) != 2 && length(levels(as.factor(labels))) != length(colours)){
       
-      coloursPalette <- c("green","red",sample(colors()[grep('gr(a|e)y', colors(), invert = TRUE)],length(levels(as.factor(labels))) - 2))
+      coloursPalette <- c("green","red",sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],length(levels(as.factor(labels))) - 2))
       
     }else{
       
@@ -204,7 +208,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     
     if(length(levels(as.factor(labels))) != 2 && length(levels(as.factor(labels))) != length(colours)){
       
-      coloursPalette <- c("green","red",sample(colors()[grep('gr(a|e)y', colors(), invert = TRUE)],length(levels(as.factor(labels))) - 2))
+      coloursPalette <- c("green","red",sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],length(levels(as.factor(labels))) - 2))
       
     }else{
       
@@ -285,19 +289,19 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
             plot.title = element_text(hjust = .5))
     
     # Join the two graphs
-    grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
+    grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1/3, 2/3))
     
     if(toPNG){
       cat("Creating PNG...\n")
       png("heatmap.png", width = 1024, height = 720)
-      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
+      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(0.15, 0.85))
       dev.off()
     }
     
     if(toPDF){
       cat("Creating PDF...\n")
       pdf("heatmap.pdf")
-      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(1, 1.5))
+      grid.arrange(g1, g2, ncol = 2, nrow = 1, widths = c(0.3, 0.7))
       dev.off()
     }
     
@@ -348,7 +352,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
       }else if(length(colours) != dim(data)[1] && dim(data)[1] <= length(c_palette)){
         colours = c_palette[1:dim(data)[1]]
       }else {
-        colours = sample(colors()[grep('gr(a|e)y', colors(), invert = TRUE)],dim(data)[1])
+        colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])
       }
       
       plot(data[1,],type='l',col=colours[1], main=main,
@@ -402,7 +406,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
         }else if(length(colours) != dim(data)[1] && dim(data)[1] <= length(c_palette)){
           colours = c_palette[1:dim(data)[1]]
         }else {
-          colours = sample(colors()[grep('gr(a|e)y', colors(), invert = TRUE)],dim(data)[1])
+          colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])
         }
         
         plot(data[1,],type='l',col=colours[1], main=main,
@@ -458,7 +462,7 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
         }else if(length(colours) != dim(data)[1] && dim(data)[1] <= length(c_palette)){
           colours = c_palette[1:dim(data)[1]]
         }else {
-          colours = sample(colors()[grep('gr(a|e)y', colors(), invert = TRUE)],dim(data)[1])
+          colours = sample(grDevices::colors()[grep('gr(a|e)y', grDevices::colors(), invert = TRUE)],dim(data)[1])
         }
         
         plot(data[1,],type='l',col=colours[2], main=main,

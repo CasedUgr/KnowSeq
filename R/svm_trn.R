@@ -11,7 +11,7 @@
 #' dir <- system.file("extdata", package = "KnowSeq")
 #' load(paste(dir, "/expressionExample.RData", sep = ""))
 #'
-#' svm_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+#' svm_trn(t(DEGsMatrix)[,1:10], labels, rownames(DEGsMatrix)[1:10], 2)
 
 svm_trn <- function(data, labels, vars_selected, numFold = 10) {
   if (!is.data.frame(data) && !is.matrix(data)) {

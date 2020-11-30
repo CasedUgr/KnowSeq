@@ -10,7 +10,7 @@
 plotConfMatrix <- function(data){
 
   res <- confusionMatrix(data)
-
+  
   layout(matrix(c(1,1,2)))
 
   # The above rescales the confusion matrix such that columns sum to 100.
@@ -27,11 +27,11 @@ plotConfMatrix <- function(data){
                                hsv(h = 2/6, s = 0.9, v = 0.9, alpha = 1)))(41),
         xaxt='n', yaxt='n', zlim=c(-10, 10))
   axis(1, at=seq_len(ncol(x)), labels=FALSE, cex.axis=1.2, font = 2)
-  title(xlab='Actual', line=4.5, cex = 1.2)
-  text(seq_len(ncol(x)), par("usr")[3] - 0.8, labels = colnames(x), pos = 1 ,font = 2, xpd = TRUE)
+  title(xlab='Prediction', line=4.5, cex = 1.2)
+  text(seq_len(ncol(x)), par("usr")[3] - 0.1, labels = colnames(x), pos = 1 ,font = 2, xpd = TRUE)
   
   axis(2, at=ncol(x):1, labels=colnames(x), las=1, cex.axis=1.2,font = 2)
-  title(ylab='Predicted', line=7.5, cex = 1.2)
+  title(ylab='Reference', line=7.5, cex = 1.2)
   abline(h = 0:ncol(x) + 0.5, col = 'gray')
   abline(v = 0:ncol(x) + 0.5, col = 'gray')
   text(seq_len(ncol(x)), rep(ncol(x):1, each=ncol(x)),

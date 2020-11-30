@@ -107,7 +107,7 @@ DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov
         }else if(multiDegsMethod == "nmax"){
           
           res.val <- decideTests(fitmicroMultiContrast,p.value=pvalue,lfc = lfc)
-          ind.val <- which(apply(res.val,1,function(x) {length(which(x != 0))>0}) == T)
+          ind.val <- which(apply(res.val,1,function(x) {length(which(x != 0))>0}) == TRUE)
           lfcIndmatrix.sig <- fitmicroMultiContrast$coefficients[ind.val,]
           lfcIndmatrix.abs <- abs(lfcIndmatrix.sig)
           
@@ -116,11 +116,11 @@ DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov
           
           
           if(dim(lfcIndmatrix.abs)[1] >= nmax){
-            genesSeveralMaxLFC <- rownames(lfcIndmatrix.abs)[apply(lfcIndmatrix.abs,2, order, decreasing = T)]
-            genesSeveralMaxLFC <- data.frame(matrix(unlist(genesSeveralMaxLFC), nrow = dim(lfcIndmatrix.abs)[1], byrow = F), stringsAsFactors = F)
+            genesSeveralMaxLFC <- rownames(lfcIndmatrix.abs)[apply(lfcIndmatrix.abs,2, order, decreasing = TRUE)]
+            genesSeveralMaxLFC <- data.frame(matrix(unlist(genesSeveralMaxLFC), nrow = dim(lfcIndmatrix.abs)[1], byrow = FALSE), stringsAsFactors = FALSE)
             genesSeveralMaxLFC <- genesSeveralMaxLFC[1:nmax,]
             
-            genesFilteredByLFC <- data.frame(matrix(character(),dim(genesSeveralMaxLFC)[1],dim(genesSeveralMaxLFC)[2]),stringsAsFactors = F)
+            genesFilteredByLFC <- data.frame(matrix(character(),dim(genesSeveralMaxLFC)[1],dim(genesSeveralMaxLFC)[2]),stringsAsFactors = FALSE)
             
             for (i in 1:dim(genesSeveralMaxLFC)[1]){
               for (j in 1:dim(genesSeveralMaxLFC)[2]){

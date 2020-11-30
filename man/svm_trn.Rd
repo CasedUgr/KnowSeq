@@ -25,5 +25,5 @@ svm_trn allows assessing the final DEGs through a machine learning step by using
 dir <- system.file("extdata", package = "KnowSeq")
 load(paste(dir, "/expressionExample.RData", sep = ""))
 
-svm_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+svm_trn(t(DEGsMatrix)[,1:10], labels, rownames(DEGsMatrix)[1:10], 2)
 }

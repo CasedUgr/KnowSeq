@@ -12,7 +12,7 @@
 #' @param ygrid Shows the y grid into the plot
 #' @param legend A vector with the elements in the legend of the plot.
 #' @param mode The different plots supported by this package. The possibilities are boxplot, orderedBoxplot, genesBoxplot, heatmap, confusionMatrix, classResults and heatmapResults.
-#' @param heatmapResultsN Number of genes to show if mode is heatmapResults.
+#' @param heatmapResultsN Number of genes to show when mode is equal to heatmapResults.
 #' @param toPNG Boolean variable to indicate if a plot would be save to PNG.
 #' @param toPDF Boolean variable to indicate if a plot would be save to PDF.
 #' @return Nothing to return.
@@ -25,7 +25,7 @@
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = TRUE,toPDF = FALSE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE,toPDF = TRUE)
 #'
-#' results <- svm_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+#' results <- knn_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
 #' dataPlot(results, labels = "", mode = "heatmapResults", main = "Plot to show indicators of trained model")
 
 dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot", heatmapResultsN = 0, toPNG = FALSE, toPDF = FALSE){

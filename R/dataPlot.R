@@ -25,7 +25,7 @@
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = TRUE,toPDF = FALSE)
 #' dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE,toPDF = TRUE)
 #'
-#' results <- knn_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+#' results <- knn_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 3)
 #' dataPlot(results, labels = "", mode = "heatmapResults", main = "Plot to show indicators of trained model")
 
 dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab = "Expression", xlab = "Samples", xgrid = FALSE, ygrid = FALSE, legend = "", mode="boxplot", heatmapResultsN = 0, toPNG = FALSE, toPDF = FALSE){

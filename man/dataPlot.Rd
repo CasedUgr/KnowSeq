@@ -62,6 +62,6 @@ dataPlot(DEGsMatrix[1:12,],labels,mode = "orderedBoxplot",toPNG = TRUE,toPDF = T
 dataPlot(DEGsMatrix[1:12,],labels,mode = "genesBoxplot",toPNG = TRUE,toPDF = FALSE)
 dataPlot(DEGsMatrix[1:12,],labels,mode = "heatmap",toPNG = TRUE,toPDF = TRUE)
 
-results <- knn_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 2)
+results <- knn_trn(t(DEGsMatrix), labels, rownames(DEGsMatrix), 3)
 dataPlot(results, labels = "", mode = "heatmapResults", main = "Plot to show indicators of trained model")
 }

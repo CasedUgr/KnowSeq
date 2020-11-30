@@ -67,7 +67,7 @@ Contributions are welcomed and each PR would be reviewed by KnowSeq maintainers.
 If you find KnowSeq useful and you use it in your work, please cite it as follows:
 
 ```
-Castillo-Secilla D, Galvez JM, Carrillo-Perez F, Almeida MV, Ortuno FM, Herrera LJ, Rojas. I (2020). KnowSeq: KnowSeq R/Bioc package: Beyond the traditional RNA-seq pipeline.. R package version 1.1.20. 
+Castillo-Secilla D, Galvez JM, Carrillo-Perez F, Verona-Almeida M, Redondo-Sanchez D, Ortuno FM, Herrera LJ, Rojas. I (2020). KnowSeq: KnowSeq R/Bioc package: Beyond the traditional Transcriptomic pipeline. R package version 1.4.1.
 ```
 # References
 

@@ -76,6 +76,7 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   specVector <- double()
   f1Vector <- double()
   cfMatList  <- list()
+  predictsVector <- list()
   
   # Firstly with one variable
   cat(paste("Testing with ", 1," variables...\n",sep=""))
@@ -98,6 +99,7 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   sensVector[1] <- sens
   specVector[1] <- spec
   f1Vector[1] <- f1
+  predictsVector[[1]] <- predicts
   if(is.na(f1Vector[1])) f1Vector[i] <- 0
   
   for(i in c(2:dim(test)[2])){
@@ -123,7 +125,7 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
     sensVector[i] <- sens
     specVector[i] <- spec
     f1Vector[i] <- f1
-    
+    predictsVector[[i]] <- predicts
     if(is.na(f1Vector[i])) f1Vector[i] <- 0
   }
 
@@ -133,8 +135,8 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   names(specVector) <- vars_selected
   names(f1Vector) <- vars_selected
 
-  results <- list(cfMatList,accVector,sensVector,specVector,f1Vector)
-  names(results) <- c("cfMats","accVector","sensVector","specVector","f1Vector")
+  results <- list(cfMatList,accVector,sensVector,specVector,f1Vector,predictsVector)
+  names(results) <- c("cfMats","accVector","sensVector","specVector","f1Vector","predictions")
   invisible(results)
 
 }

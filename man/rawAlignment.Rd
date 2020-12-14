@@ -17,7 +17,8 @@ rawAlignment(
   customGTF = "",
   fromGDC = FALSE,
   tokenPath = "",
-  manifestPath = ""
+  manifestPath = "",
+  hisatParameters = "-p 8 --dta-cufflinks"
 )
 }
 \arguments{
@@ -46,12 +47,14 @@ rawAlignment(
 \item{tokenPath}{The path to the GDC portal user token. It is required to downloads the controlled BAM files.}
 
 \item{manifestPath}{The path to the manifest with the information required to downloads the controlled BAM files selected in GDC Portal.}
+
+\item{hisatParameters}{Parameter that allow to modify the default configuration for the Hisat2 aligner.}
 }
 \value{
 Nothing to return.
 }
 \description{
-This function allows downloading and processing the fastq samples in a CSV file. Also, different alignment methods can be used such as Hisat2, Salmon and Kallisto. Finally, the function can downloads the reference files required: FASTA Reference Genome and GTF file.
+This function allows downloading and processing the fastq samples in a CSV file. Also, samples can be aligned by using hisat2. Finally, the function can downloads the reference files required: FASTA Reference Genome and GTF file.
 }
 \examples{
 # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:

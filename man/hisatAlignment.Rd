@@ -14,7 +14,8 @@ hisatAlignment(
   countFiles = TRUE,
   referenceGenome = 38,
   customFA = "",
-  customGTF = ""
+  customGTF = "",
+  hisatParameters = "-p 8 --dta-cufflinks"
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ hisatAlignment(
 \item{customFA}{The path to the custom FASTA file of the reference genome.}
 
 \item{customGTF}{The path to the custom GTF file.}
+
+\item{hisatParameters}{Parameter that allow to modify the default configuration for the Hisat2 aligner.}
 }
 \value{
 Nothing to return.

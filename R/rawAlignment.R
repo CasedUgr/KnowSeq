@@ -1,6 +1,6 @@
 #' rawAlignment allows downloading and processing the fastq samples in a CSV file.
 #'
-#' This function allows downloading and processing the fastq samples in a CSV file. Also, different alignment methods can be used such as Hisat2, Salmon and Kallisto. Finally, the function can downloads the reference files required: FASTA Reference Genome and GTF file.
+#' This function allows downloading and processing the fastq samples in a CSV file. Also, samples can be aligned by using hisat2. Finally, the function can downloads the reference files required: FASTA Reference Genome and GTF file.
 #' @param data The ID of the variable which contains the samples. Our recommendation is to load this variable from a CSV file.
 #' @param downloadRef A logical parameter that represents if the reference files will be downloaded or not.
 #' @param downloadSamples A logical parameter that represents if the samples of the CSV file will be downloaded or not.
@@ -14,6 +14,7 @@
 #' @param fromGDC A logical parameter that allows processing BAM files from GDC portal by using the custom reference genome from GDC.
 #' @param tokenPath The path to the GDC portal user token. It is required to downloads the controlled BAM files.
 #' @param manifestPath The path to the manifest with the information required to downloads the controlled BAM files selected in GDC Portal.
+#' @param hisatParameters Parameter that allow to modify the default configuration for the Hisat2 aligner.
 #' @return Nothing to return.
 #' @examples
 #' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
@@ -26,19 +27,18 @@
 #' \dontrun{rawAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "")}
 
 
-rawAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = ""){
+rawAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", fromGDC = FALSE, tokenPath = "", manifestPath = "", hisatParameters="-p 8 --dta-cufflinks"){
 
   if(version$os == "linux-gnu"){
 
-    cat("\nGNU/Linux OS detected. All the tools and aligners are available for these type of operative systems.\n")
+    cat("\nGNU/Linux OS detected. All the tools are available for these type of operative systems.\n")
 
     if(dir.exists("unixUtils/")){
       cat("Directory unixUtils found. Checking the tools...\n")
       if(file.exists("unixUtils/hisat2/hisat2")){cat("Hisat2 found!\n")}else{stop("Hisat2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/bowtie2/bowtie2")){cat("Bowtie2 found!\n")}else{stop("Bowtie2 not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/samtools/samtools")){cat("Samtools found!\n")}else{stop("Samtools not found, please remove unixUtils folder and re-run the function to download it.\n")}
-      if(file.exists("unixUtils/sratoolkit/bin/fastq-dump.2.8.0")){cat("Sratoolkit found!\n")}else{stop("Sratoolkit not found, please remove unixUtils folder and re-run the function to download it.\n")}
-      if(file.exists("unixUtils/htseq/scripts-2.7/htseq-count")){cat("Htseq found!\n")}else{stop("Htseq not found, please remove unixUtils folder and re-run the function to download it.\n")}
+      if(file.exists("unixUtils/sratoolkit/bin/fastq-dump")){cat("Sratoolkit found!\n")}else{stop("Sratoolkit not found, please remove unixUtils folder and re-run the function to download it.\n")}
       if(file.exists("unixUtils/gdcClient/gdc-client")){cat("GDC client found!\n")}else{stop("GDC client not found, please remove unixUtils folder and re-run the function to download it.\n")}
 
     }else{
@@ -51,16 +51,16 @@ rawAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createInd
 
         if(decission == 'Y' || decission == 'y'){
 
-          cat("Downloading the pre-compiled version of the aligners...\n")
+          cat("Downloading the pre-compiled version of the tools...\n")
           download.file(url = "http://iwbbio.ugr.es/utils/unixUtils.tar.gz",destfile="unixUtils.tar.gz",method="libcurl")
-          cat("Decompressing unixUtils folders with the aligners...\n")
+          cat("Decompressing unixUtils.tar.gz...\n")
           untar("unixUtils.tar.gz")
-          file.remove("rm unixUtils.tar.gz")
+          system2("rm", args="unixUtils.tar.gz")
           download.sucess = TRUE
 
         } else if(decission == 'N' || decission == 'n'){
 
-          stop("Alignment aborted because the pre-compiled aligners are necessaries.")
+          stop("Alignment aborted because the pre-compiled tools are necessaries.")
 
         }
 
@@ -75,10 +75,6 @@ rawAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createInd
   if(!is.data.frame(data)){
 
     stop("Please, use a dataframe for the data parameter.")
-
-  }else if(!is.character(seq)){
-
-    stop("Please, use a string or character for the seq parameter.")
 
   }else if(!is.logical(downloadRef)){
 
@@ -100,6 +96,25 @@ rawAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createInd
     if(dir.exists("ReferenceFiles/Samples/RNAseq/FASTQFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/FASTQFiles/")}
     if(dir.exists("ReferenceFiles/Samples/RNAseq/QuantFiles/")){}else{ system2("mkdir", args = "ReferenceFiles/Samples/RNAseq/QuantFiles/")}
 
+    if(file.exists("/usr/bin/python3")){
+      cat("Python3 found!\n")
+      if(file.exists("/usr/bin/pip3")){
+        
+        cat("Pip3 found!\n")
+        output = system2("python3", args = "-c 'import HTSeq;'")
+        
+        if(output == 0){
+          cat("HTSeq found!\n")
+        }else{
+          stop("HTSeq is required to calculate the counts. To install it just the next command:\n sudo pip3 install HTSeq\n")
+        }
+      }else{
+        stop("Pip3 is required to install HTSeq. To install it just the next command:\n sudo apt install python3-pip\n")
+      }
+    }else{
+      stop("Python3 is required to carry out this step. Please, install it and rerun the function.\n")
+    }
+    
     if(fromGDC){
 
       if(downloadRef){
@@ -137,12 +152,12 @@ rawAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createInd
         filePathBamSorted = paste("ReferenceFiles/Samples/RNAseq/BAMFiles/", data$Sample.ID[i],"Sorted.bam", sep = "")
         system2("unixUtils/samtools/samtools", args = paste("sort -n ", filePathBam , " -o ",filePathBamSorted,sep = ""))
 
-        system2("unixUtils/samtools/samtools", args = paste("view -f 0x0002 ", filePathBamSorted ," |  awk '!/\t\\*\t/' - | unixUtils/htseq/scripts-2.7/htseq-count -s no -a 10 - ", gtf, sep=""))
+        system2("unixUtils/samtools/samtools", args = paste("view -f 0x0002 ", filePathBamSorted ," |  awk '!/\t\\*\t/' - | htseq-count -s no -a 10 - ", gtf, sep=""))
 
       }
 
     }else{
-        hisatAlignment(data,downloadRef=downloadRef,downloadSamples=downloadSamples,createIndex=createIndex,BAMfiles=BAMfiles,SAMfiles=SAMfiles,countFiles=countFiles,referenceGenome=referenceGenome,customFA = customFA,customGTF = customGTF)
+        hisatAlignment(data,downloadRef=downloadRef,downloadSamples=downloadSamples,createIndex=createIndex,BAMfiles=BAMfiles,SAMfiles=SAMfiles,countFiles=countFiles,referenceGenome=referenceGenome,customFA = customFA,customGTF = customGTF, hisatParameters = hisatParameters)
     }
   }
 }

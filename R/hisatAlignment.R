@@ -11,6 +11,7 @@
 #' @param referenceGenome This parameter allows choosing the reference genome that will be used for the alignment. The options are 37,38 or custom. The two first are human genomes, but with the third option you can choose any genome stored in the computer.
 #' @param customFA The path to the custom FASTA file of the reference genome.
 #' @param customGTF The path to the custom GTF file.
+#' @param hisatParameters Parameter that allow to modify the default configuration for the Hisat2 aligner.
 #' @return Nothing to return.
 #' @examples
 #' # Due to the high computational cost, we strongly recommend it to see the offical documentation and the complete example included in this package:
@@ -22,7 +23,7 @@
 #' 
 #' \dontrun{hisatAlignment(GSE74251csv,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "")}
 
-hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = ""){
+hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createIndex = TRUE, BAMfiles = TRUE, SAMfiles = TRUE, countFiles = TRUE, referenceGenome = 38, customFA = "", customGTF = "", hisatParameters="-p 8 --dta-cufflinks"){
 
   if(version$os != "linux-gnu"){stop("This function is only supported by GNU/Linux distributions due to the external pre-compiled tools are designed for these type of operating system. The version of MAC-OS will be added in the future if all the tools are available for it.")}
 
@@ -31,10 +32,10 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
   if(referenceGenome == 38){
 
     cat("Using Reference Genome 38\n")
-    faurl = "ftp://ftp.ensembl.org/pub/release-90/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz"
+    faurl = "http://ftp.ensembl.org/pub/release-102/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz"
     fatargz = "Homo_sapiens.GRCh38.dna.toplevel.fa.gz"
     fa = "Homo_sapiens.GRCh38.dna.toplevel.fa"
-    gtfurl = "ftp://ftp.ensembl.org/pub/release-90/gtf/homo_sapiens/Homo_sapiens.GRCh38.90.gtf.gz"
+    gtfurl = "http://ftp.ensembl.org/pub/release-102/gtf/homo_sapiens/Homo_sapiens.GRCh38.102.gtf.gz"
     gtftargz = "Homo_sapiens.GRCh38.90.gtf.gz"
     gtf = "Homo_sapiens.GRCh38.90.gtf"
 
@@ -44,10 +45,10 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
   }else if(referenceGenome == 37){
 
     cat("Using Reference Genome 37\n")
-    faurl = "ftp://ftp.ensembl.org/pub/release-75//fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.toplevel.fa.gz"
+    faurl = "http://ftp.ensembl.org/pub/release-75//fasta/homo_sapiens/dna/Homo_sapiens.GRCh37.75.dna.toplevel.fa.gz"
     fatargz = "Homo_sapiens.GRCh37.75.dna.toplevel.fa.gz"
     fa = "Homo_sapiens.GRCh37.75.dna.toplevel.fa"
-    gtfurl = "ftp://ftp.ensembl.org/pub/release-75//gtf/homo_sapiens/Homo_sapiens.GRCh37.75.gtf.gz"
+    gtfurl = "http://ftp.ensembl.org/pub/release-75//gtf/homo_sapiens/Homo_sapiens.GRCh37.75.gtf.gz"
     gtftargz = "Homo_sapiens.GRCh37.75.gtf.gz"
     gtf = "Homo_sapiens.GRCh37.75.gtf"
 
@@ -71,8 +72,6 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
   }else{
     stop("The version of the reference genome is wrong. Please use 37, 38 or custom.")
   }
-
-  cat("Using hisat2 sequencing tool...\n")
 
   BAMPath = "ReferenceFiles/Samples/RNAseq/BAMFiles/"
   SAMPath = "ReferenceFiles/Samples/RNAseq/SAMFiles/"
@@ -108,13 +107,12 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
 
     if(downloadRef){
 
-      cat(paste("Downloading reference human genomee from url ", faurl,"\n",sep = ""))
-      f = CFILE(fatargz, mode = "wb")
-      curlPerform(url = faurl, writedata = f@ref, noprogress=FALSE)
+      cat(paste("Downloading reference human genome from url ", faurl,"\n",sep = ""))
+      GET(faurl, write_disk(fatargz, overwrite=TRUE))
       cat ("Decompressing reference genome...\n")
       gunzip(fatargz, overwrite = TRUE)
       cat("Downloading GTF file from url\n")
-      download.file(url = gtfurl,destfile=gtftargz,method="libcurl")
+      GET(gtfurl, write_disk(gtftargz, overwrite=TRUE))
       cat ("Decompressing GTF file genome...\n")
       gunzip(gtftargz, overwrite = TRUE)
 
@@ -130,7 +128,7 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
 
       cat("Building index file for hisat2...\n")
 
-      if(dir.exists("ReferenceFiles/hisatIndex/")){}else{ system2("mkdir ReferenceFiles/hisatIndex/")}
+      if(dir.exists("ReferenceFiles/hisatIndex/")){}else{ system2("mkdir", args = "ReferenceFiles/hisatIndex/")}
 
       system2("unixUtils/hisat2/hisat2-build", args = genomeIndexCommand)
 
@@ -145,9 +143,9 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
         cat(paste("Converting ", samples[i,]$Run, " sample to SAM file...\n",sep = ""))
 
         if(samples[i,]$LibraryLayout == "PAIRED"){
-          hisatCommand = paste("-p 8 --dta-cufflinks -x ", indexName," -1 ", samples[i,]$fastq1, " -2 ", samples[i,]$fastq2," -S ", SAMPath,samples[i,]$Run,".sam",sep="")
+          hisatCommand = paste(hisatParameters, " -x ", indexName," -1 ", samples[i,]$fastq1, " -2 ", samples[i,]$fastq2," -S ", SAMPath,samples[i,]$Run,".sam",sep="")
         }else{
-          hisatCommand = paste("-p 8 --dta-cufflinks -x ", indexName," -U ", samples[i,]$fastq1," -S ", SAMPath,samples[i,]$Run,".sam",sep="")
+          hisatCommand = paste(hisatParameters, " -x ", indexName," -U ", samples[i,]$fastq1," -S ", SAMPath,samples[i,]$Run,".sam",sep="")
         }
         system2("unixUtils/hisat2/hisat2", args = hisatCommand)
       }
@@ -162,12 +160,13 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
 
       if(countFiles){
 
-        cat(paste("Converting to count file...\n",sep = ""))
         commandHtseq = paste("-s no -a 10 ", SAMPath,samples[i,]$Run,".sam",sep = "")
         countFile = paste(countPath, samples[i,]$Run, ".count", sep = "")
         gf = paste(gtf,"  >", countFile)
         commandHtseq = paste(commandHtseq, gf)
-        system2("unixUtils/htseq/scripts-2.7/htseq-count", args = commandHtseq)
+
+        cat(paste("Converting to count file...\n",sep = ""))
+        system2("htseq-count", args = commandHtseq)
 
       }
 
@@ -205,12 +204,11 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
     if(downloadRef){
 
       cat(paste("Downloading reference human genome from url ", faurl,"\n",sep = ""))
-      f = CFILE(fatargz, mode = "wb")
-      curlPerform(url = faurl, writedata = f@ref, noprogress=FALSE)
+      GET(faurl, write_disk(fatargz, overwrite=TRUE))
       cat ("Decompressing reference genome...\n")
       gunzip(fatargz, overwrite = TRUE)
       cat("Downloading GTF file from url\n")
-      download.file(url = gtfurl,destfile=gtftargz,method="libcurl")
+      GET(gtfurl, write_disk(gtftargz, overwrite=TRUE))
       cat ("Decompressing GTF file genome...\n")
       gunzip(gtftargz, overwrite = TRUE)
 
@@ -226,7 +224,7 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
 
       cat("Building index file for hisat2...\n")
 
-      if(dir.exists("ReferenceFiles/hisatIndex/")){}else{ system2("mkdir ReferenceFiles/hisatIndex/")}
+      if(dir.exists("ReferenceFiles/hisatIndex/")){}else{ system2("mkdir", args = "ReferenceFiles/hisatIndex/")}
       system2("unixUtils/hisat2/hisat2-build", args = genomeIndexCommand)
       
     }
@@ -241,9 +239,9 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
         cat(paste("Converting ", samples[i,]$Comment.ENA_RUN., " sample to SAM file...\n",sep = ""))
 
         if(samples[i,]$Comment.LIBRARY_LAYOUT. == "PAIRED"){
-          hisatCommand = paste("-p 8 --dta-cufflinks -x ", indexName," -1 ", samples[i,]$fastq1, " -2 ", samples[i,]$fastq2," -S ", SAMPath,samples[i,]$Comment.ENA_RUN.,".sam",sep="")
+          hisatCommand = paste(hisatParameters, " -x ", indexName," -1 ", samples[i,]$fastq1, " -2 ", samples[i,]$fastq2," -S ", SAMPath,samples[i,]$Comment.ENA_RUN.,".sam",sep="")
         }else{
-          hisatCommand = paste("-p 8 --dta-cufflinks -x ", indexName," -U ", samples[i,]$fastq1," -S ", SAMPath,samples$Comment.ENA_RUN.,".sam",sep="")
+          hisatCommand = paste(hisatParameters, " -x ", indexName," -U ", samples[i,]$fastq1," -S ", SAMPath,samples$Comment.ENA_RUN.,".sam",sep="")
         }
         system2("unixUtils/hisat2/hisat2", args = hisatCommand)
 
@@ -264,9 +262,9 @@ hisatAlignment <- function(data,downloadRef=FALSE,downloadSamples=FALSE, createI
         countFile = paste(countPath, samples[i,]$Comment.ENA_RUN., ".count", sep = "")
         gf = paste(gtf,"  >", countFile)
         commandHtseq = paste(commandHtseq, gf)
-        system2("unixUtils/htseq/scripts-2.7/htseq-count", args = commandHtseq)
-
-
+        cat(paste("Converting to count file...\n",sep = ""))
+        system2("htseq-count", args = commandHtseq)
+            
       }
 
     }

@@ -50,6 +50,7 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
   cat("Tuning the optimal mtry...\n")
   
   dataForTunning <- cbind(data, labels)
+  colnames(dataForTunning) <- make.names(colnames(dataForTunning))
   tunegrid <- expand.grid(.mtry = (1:30)) 
  
   rf_gridsearch <- train(labels ~ ., 
@@ -95,7 +96,7 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
     columns <- c(colNames[1])
     tr_ctr <- trainControl(method="none")
     dataForTrt <- data.frame(cbind(subset(trainingDataset, select=columns),labelsTrain))
-    colnames(dataForTrt)[seq(1)] <- columns
+    colnames(dataForTrt)[seq(1)] <- make.names(columns)
     rf_mod <- train(labelsTrain ~ ., 
           data = dataForTrt,
           method = 'rf',
@@ -104,9 +105,12 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
           ntree=1000,
           tuneGrid = data.frame(.mtry= mtryTune))
     
-    unkX <- subset(testDataset, select=columns)
-    predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(testDataset, select=columns), unkX = unkX,
-                                  unkOnly = !is.null(unkX) & !is.null(subset(testDataset, select=columns)))
+    testX = subset(testDataset, select=columns)
+    unkX <- testX
+    colnames(unkX) <- make.names(colnames(testX))
+    colnames(testX) <- make.names(colnames(testX))
+    predicts <- extractPrediction(list(my_rf=rf_mod), testX = testX, unkX = unkX,
+                                  unkOnly = !is.null(unkX) & !is.null(testX))
     
     predicts <- predicts$pred
 
@@ -136,7 +140,7 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
       columns <- c(colNames[seq(j)])
       tr_ctr <- trainControl(method="none")
       dataForTrt <- data.frame(cbind(subset(trainingDataset, select=columns),labelsTrain))
-      colnames(dataForTrt)[seq(j)] <- columns
+      colnames(dataForTrt)[seq(j)] <- make.names(columns)
       rf_mod <- train(labelsTrain ~ ., 
                       data = dataForTrt,
                       method = 'rf',
@@ -145,9 +149,12 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
                       ntree=1000,
                       tuneGrid = data.frame(.mtry= mtryTune))
       
-      unkX <- subset(testDataset, select=columns)
-      predicts <- extractPrediction(list(my_rf=rf_mod), testX = subset(testDataset, select=columns), unkX = unkX,
-                                    unkOnly = !is.null(unkX) & !is.null(subset(testDataset, select=columns)))
+      testX = subset(testDataset, select=columns)
+      unkX <- testX
+      colnames(unkX) <- make.names(colnames(testX))
+      colnames(testX) <- make.names(colnames(testX))
+      predicts <- extractPrediction(list(my_rf=rf_mod), testX = testX, unkX = unkX,
+                                    unkOnly = !is.null(unkX) & !is.null(testX))
       
       predicts <- predicts$pred
       cfMatList[[i]] <- confusionMatrix(predicts,labelsTest)

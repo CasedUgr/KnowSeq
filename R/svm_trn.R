@@ -38,7 +38,12 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
   data <- vapply(data, function(x) {
     max <- max(x)
     min <- min(x)
-    x <- ((x - min) / (max - min)) * 2 - 1
+    if(max >  min){
+      x <- ((x - min) / (max - min)) * 2 - 1
+    }
+    else{
+      x
+    }
   }, double(nrow(data)))
 
   data <- as.data.frame(data)

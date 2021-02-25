@@ -58,16 +58,26 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   test <- test[,vars_selected]
   
   train = vapply(train, function(x){ 
-    max = max(x)
-    min = min(x)
-    x = ((x-min)/(max-min))*2-1}, double(nrow(train)))
+    max <- max(x)
+    min <- min(x)
+    if(max >  min){
+      x <- ((x - min) / (max - min)) * 2 - 1
+    }
+    else{
+      x
+    }}, double(nrow(train)))
   
   train <- as.data.frame(train)
   
   test = vapply(test, function(x){ 
-    max = max(x)
-    min = min(x)
-    x = ((x-min)/(max-min))*2-1}, double(nrow(test)))
+    max <- max(x)
+    min <- min(x)
+    if(max >  min){
+      x <- ((x - min) / (max - min)) * 2 - 1
+    }
+    else{
+      x
+    }}, double(nrow(test)))
   
   test <- as.data.frame(test)
 

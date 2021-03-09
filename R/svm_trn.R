@@ -20,21 +20,21 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
   if (dim(data)[1] != length(labels)) {
     stop("The length of the rows of the argument data must be the same than the length of the lables. Please, ensures that the rows are the samples and the columns are the variables.")
   }
-
+  
   if (!is.character(labels) && !is.factor(labels)) {
     stop("The class of the labels parameter must be character vector or factor.")
   }
   if (is.character(labels)) {
     labels <- as.factor(labels)
   }
-
+  
   if (numFold %% 1 != 0 || numFold == 0) {
     stop("The numFold argument must be integer and greater than 0.")
   }
-
+  
   data <- as.data.frame(apply(data, 2, as.double))
   data <- data[, vars_selected]
-
+  
   data <- vapply(data, function(x) {
     max <- max(x)
     min <- min(x)
@@ -45,12 +45,12 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
       x
     }
   }, double(nrow(data)))
-
+  
   data <- as.data.frame(data)
-
+  
   fitControl <- trainControl(method = "cv", number = 10)
   cat("Tuning the optimal C and G...\n")
-
+  
   grid_radial <- expand.grid(
     sigma = c(
       0, 0.01, 0.02, 0.025, 0.03, 0.04,
@@ -63,7 +63,7 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
   )
   
   dataForTunning <- cbind(data, labels)
-
+  colnames(dataForTunning) <- make.names(colnames(dataForTunning))
   Rsvm_sb <- train(labels ~ ., data = dataForTunning, type = "C-svc", method = "svmRadial", preProc = c("center", "scale"), trControl = fitControl, tuneGrid = grid_radial)
   
   bestParameters <- c(C = Rsvm_sb$bestTune$C, gamma = Rsvm_sb$bestTune$sigma)
@@ -84,7 +84,7 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
   randomPositions <- sample(positions)
   data <- data[randomPositions,]
   labels <- labels[randomPositions]
-  
+
   for (i in seq_len(numFold)) {
     cat(paste("Training fold ", i, "...\n", sep = ""))
     
@@ -101,18 +101,21 @@ svm_trn <- function(data, labels, vars_selected, numFold = 10) {
       columns <- c(colNames[seq(j)])
       tr_ctr <- trainControl(method="none")
       dataForTrt <- data.frame(cbind(subset(trainingDataset, select=columns),labelsTrain))
-      colnames(dataForTrt)[seq(j)] <- columns
+      colnames(dataForTrt)[seq(j)] <- make.names(columns)
       svm_model <- train(labelsTrain ~ ., data = dataForTrt, type = "C-svc", 
                          method = "svmRadial", preProc = c("center", "scale"),
                          trControl = tr_ctr, 
                          tuneGrid=data.frame(sigma = bestParameters[2], C = bestParameters[1]))
-
-      unkX <- subset(testDataset, select=columns)
-      predicts <- extractPrediction(list(my_svm=svm_model), testX = subset(testDataset, select=columns), unkX = unkX,
-                                    unkOnly = !is.null(unkX) & !is.null(subset(testDataset, select=columns)))
+      
+      testX = subset(testDataset, select=columns)
+      unkX <- testX
+      colnames(unkX) <- make.names(colnames(testX))
+      colnames(testX) <- make.names(colnames(testX))
+      predicts <- extractPrediction(list(my_svm=svm_model), testX = testX, unkX = unkX,
+                                    unkOnly = !is.null(unkX) & !is.null(testX))
       
       predicts <- predicts$pred
-
+      
       cfMatList[[i]] <- confusionMatrix(predicts, labelsTest)
       acc_cv[i, j] <- cfMatList[[i]]$overall[[1]]
       

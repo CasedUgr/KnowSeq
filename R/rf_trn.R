@@ -40,9 +40,14 @@ rf_trn <- function(data,labels,vars_selected,numFold=10){
   data <- data[,vars_selected]
 
   data = vapply(data, function(x){ 
-    max = max(x)
-    min = min(x)
-    x = ((x-min)/(max-min))*2-1}, double(nrow(data)))
+    max <- max(x)
+    min <- min(x)
+    if(max >  min){
+      x <- ((x - min) / (max - min)) * 2 - 1
+    }
+    else{
+      x
+    }}, double(nrow(data)))
   
   data <- as.data.frame(data)
   

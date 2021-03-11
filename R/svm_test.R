@@ -17,7 +17,7 @@
 #' trainingLabels <- labels[c(1:4,6:9)]
 #' testMatrix <- t(DEGsMatrix)[c(5,10),]
 #' testLabels <- labels[c(5,10)]
-#' results_svm_cv <- svm_trn(trainingMatrix, trainingLabels, rownames(DEGsMatrix), 2)
+#' results_svm_cv <- svm_trn(trainingMatrix, trainingLabels, rownames(DEGsMatrix)[1:10], 2)
 #' bestParameters <- results_svm_cv$bestParameters
 #' svm_test(trainingMatrix, trainingLabels, testMatrix, testLabels,rownames(DEGsMatrix)[1:10], bestParameters)
 
@@ -94,13 +94,13 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
     columns <- c(colNames[seq(i)])
     tr_ctr <- trainControl(method="none")
     dataForTrt <- data.frame(cbind(subset(train, select=columns),labelsTrain))
-    colnames(train)[seq(j)] <- make.names(columns)
+    colnames(train)[seq(i)] <- make.names(columns)
     svm_model <- train(labelsTrain ~ ., data = dataForTrt, type = "C-svc", 
                        method = "svmRadial", preProc = c("center", "scale"),
                        trControl = tr_ctr, 
                        tuneGrid=data.frame(sigma=getElement(bestParameters, "gamma"), 
                                            C = getElement(bestParameters, "C")))
-    testX = subset(testDataset, select=columns)
+    testX = subset(test, select=columns)
     unkX <- testX
     colnames(unkX) <- make.names(colnames(testX))
     colnames(testX) <- make.names(colnames(testX))

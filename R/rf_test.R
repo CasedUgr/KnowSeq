@@ -103,7 +103,7 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameter
                   ntree=1000,
                   tuneGrid = data.frame(.mtry= bestParameters))
   
-  testX = subset(testDataset, select=columns)
+  testX = subset(test, select=columns)
   unkX <- testX
   colnames(unkX) <- make.names(colnames(testX))
   colnames(testX) <- make.names(colnames(testX))
@@ -144,7 +144,7 @@ rf_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParameter
                     ntree=1000,
                     tuneGrid = data.frame(.mtry= bestParameters))
     
-    testX = subset(testDataset, select=columns)
+    testX = subset(test, select=columns)
     unkX <- testX
     colnames(unkX) <- make.names(colnames(testX))
     colnames(testX) <- make.names(colnames(testX))

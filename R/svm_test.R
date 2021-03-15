@@ -100,7 +100,7 @@ svm_test <-function(train,labelsTrain,test,labelsTest,vars_selected,bestParamete
                        trControl = tr_ctr, 
                        tuneGrid=data.frame(sigma=getElement(bestParameters, "gamma"), 
                                            C = getElement(bestParameters, "C")))
-    testX = subset(testDataset, select=columns)
+    testX = subset(test, select=columns)
     unkX <- testX
     colnames(unkX) <- make.names(colnames(testX))
     colnames(testX) <- make.names(colnames(testX))

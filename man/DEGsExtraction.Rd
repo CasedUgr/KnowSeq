@@ -12,9 +12,7 @@ DEGsExtraction(
   cov = 1,
   nmax = 1,
   multiDegsMethod = "cov",
-  number = Inf,
-  svaCorrection = FALSE,
-  svaMod
+  number = Inf
 )
 }
 \arguments{
@@ -33,10 +31,6 @@ DEGsExtraction(
 \item{multiDegsMethod}{Select the multiclass extraction method for the process: cov or nmax}
 
 \item{number}{The maximum number of desired genes as output of limma. As default, the function returns all the extracted DEGs with the selected parameters.}
-
-\item{svaCorrection}{A logical variable that represents if the model for limma is calculated or indicated by parameter from the output of \code{\link{batchEffectRemoval}} function by using sva method.}
-
-\item{svaMod}{The model calculated by \code{\link{batchEffectRemoval}} function by using sva method.}
 }
 \value{
 A list that contains two objects. The table with statistics of the different DEGs and a reduced expression matrix which contains the DEGs and the samples.

@@ -33,5 +33,5 @@ load(paste(dir,"/expressionExample.RData",sep = ""))
 batchGroups <- c(1,1,1,1,2,2,1,2,1,2)
 
 expressionMatrixNoBatch <- batchEffectRemoval(expressionMatrix, labels, batchGroups = batchGroups)
-svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
+expressionMatrixNoBatch <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 }

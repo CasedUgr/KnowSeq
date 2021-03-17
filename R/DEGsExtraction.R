@@ -9,8 +9,6 @@
 #' @param nmax This value only works when there are more than two classes in the labels. NMAX indicates the maximum number of DEGs selected for each class pair comparison.
 #' @param multiDegsMethod Select the multiclass extraction method for the process: cov or nmax
 #' @param number The maximum number of desired genes as output of limma. As default, the function returns all the extracted DEGs with the selected parameters.
-#' @param svaCorrection A logical variable that represents if the model for limma is calculated or indicated by parameter from the output of \code{\link{batchEffectRemoval}} function by using sva method.
-#' @param svaMod The model calculated by \code{\link{batchEffectRemoval}} function by using sva method.
 #' @return A list that contains two objects. The table with statistics of the different DEGs and a reduced expression matrix which contains the DEGs and the samples.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
@@ -25,11 +23,10 @@
 #'
 #' DEGsMatrix <- DEGsInformation$DEGsMatrix
 
-DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1, nmax = 1, multiDegsMethod = "cov", number = Inf, svaCorrection = FALSE, svaMod){
+DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1, nmax = 1, multiDegsMethod = "cov", number = Inf){
 
       if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
       if(!is.character(labels)  && !is.factor(labels)){stop("The class of the labels parameter must be character vector or factor.")}
-      if(!is.logical(svaCorrection)){stop("svaCorrection parameter can only takes the values TRUE or FALSE.")}
       if(!is.numeric(pvalue)){stop("The class of pvalue parameter must be numeric.")}
       if(!is.numeric(lfc)){stop("The class of lfc parameter must be numeric.")}
       if(!is.numeric(cov)){stop("The class of cov parameter must be numeric.")}
@@ -40,18 +37,10 @@ DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov
       if(length(levels(labels)) == 2){
 
           cat("Two classes detected, applying limma biclass\n")
-          if(!svaCorrection){
 
-            condition <- labels
-            DE.design <- model.matrix(~condition)
-            fit <- lmFit(expressionMatrix,DE.design)
-
-          }else{
-
-            fit <- lmFit(expressionMatrix,svaMod)
-
-          }
-
+          condition <- labels
+          DE.design <- model.matrix(~condition)
+          fit <- lmFit(expressionMatrix,DE.design)
           fit <- eBayes(fit)
           table <- topTable(fit, number = number, coef = 2, sort.by = "logFC", p.value = pvalue, adjust = "fdr", lfc = lfc)
           DEGsMatrix <- expressionMatrix[rownames(table),]

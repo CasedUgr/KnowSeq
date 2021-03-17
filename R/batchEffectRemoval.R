@@ -14,7 +14,7 @@
 #' batchGroups <- c(1,1,1,1,2,2,1,2,1,2)
 #' 
 #' expressionMatrixNoBatch <- batchEffectRemoval(expressionMatrix, labels, batchGroups = batchGroups)
-#' svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
+#' expressionMatrixNoBatch <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 
 batchEffectRemoval <- function(expressionMatrix,labels,method = "combat", batchGroups = c()){
   
@@ -37,7 +37,7 @@ batchEffectRemoval <- function(expressionMatrix,labels,method = "combat", batchG
     
     expressionMatrixBatchCorrected <- ComBat(expressionMatrix, batch = batchGroups, mod = NULL, par.prior = TRUE, mean.only = TRUE)
     
-    return(expressionMatrixBatchCorrected)
+    invisible(expressionMatrixBatchCorrected)
     
   }else if(method == "sva"){
     
@@ -49,14 +49,14 @@ batchEffectRemoval <- function(expressionMatrix,labels,method = "combat", batchG
     mod0 = model.matrix(~1, data = labels)
     n.sv = num.sv(expressionMatrix,mod,method="leek")
     svobj = sva(expressionMatrix,mod,mod0,n.sv=n.sv)
-    pValues = f.pvalue(expressionMatrix,mod,mod0)
-    qValues = p.adjust(pValues,method="BH")
-    modSv = cbind(mod,svobj$sv)
-    mod0Sv = cbind(mod0,svobj$sv)
-    pValuesSv = f.pvalue(expressionMatrix,modSv,mod0Sv)
-    qValuesSv = p.adjust(pValuesSv,method="BH")
-    
-    return(modSv)
+    ndb = dim(expressionMatrix)[2]
+    nmod = dim(mod)[2]
+    n.sv<-svobj$n.sv
+    mod1 = cbind(mod,svobj$sv)
+    gammahat = (expressionMatrix %*% mod1 %*% solve(t(mod1) %*% mod1))[,(nmod+1):(nmod + svobj$n.sv)]
+    expressionMatrixBatchCorrected = expressionMatrix - gammahat %*% t(svobj$sv)
+
+    invisible(expressionMatrixBatchCorrected)
     
   }else{
     stop("The batch effect correction method selected is wrong. Please use combat or sva")

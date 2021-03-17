@@ -1,26 +1,29 @@
 ---
-subtitle: "KnowSeq: R/Bioconductor package"
-title: "Transcriptomic Intelligent Pipeline: The KnowSeq user guide <img src='https://github.com/CasedUgr/KnowSeq/blob/master/logoKnow.png?raw=true' style='position:absolute;top:0px;right:0px;' width=265px height=200px />"
-author: "Daniel Castillo-Secilla, Juan Manuel Galvez, Marta Verona-Almeida, Francisco <br> Carrillo-Perez, Francisco Manuel Ortuno, Luis Javier Herrera and Ignacio Rojas"
+title: 'Transcriptomic Intelligent Pipeline: The KnowSeq user guide <img src=''https://github.com/CasedUgr/KnowSeq/blob/master/logoKnow.png?raw=true''
+  style=''position:absolute;top:0px;right:0px;'' width=265px height=200px />'
+author: Daniel Castillo-Secilla, Juan Manuel Galvez, Marta Verona-Almeida, Francisco
+  <br> Carrillo-Perez, Francisco Manuel Ortuno, Luis Javier Herrera and Ignacio Rojas
 date: "march, 29 of 2020"
 output:
-  html_document: 
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
+  html_document:
     number_sections: yes
     toc: yes
     toc_depth: 3
     toc_float: yes
     highlight: tango
     css: vignette_style.css
+subtitle: 'KnowSeq: R/Bioconductor package'
 header-includes:
-  - \pdfminorversion=5
-  - \pdfcompresslevel=9
-  - \pdfobjcompresslevel=2
+- \pdfminorversion=5
+- \pdfcompresslevel=9
+- \pdfobjcompresslevel=2
 BiocStyle::html_vignette:
   md_extensions: -autolink_bare_uris
-vignette: >
-  %\VignetteIndexEntry{The KnowSeq users guide} 
-  \usepackage[UTF-8]{inputenc} 
-  %\VignetteEngine{knitr::rmarkdown}
+vignette: |
+  %\VignetteIndexEntry{The KnowSeq users guide}  \usepackage[UTF-8]{inputenc}  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r setup, cache = F, echo = FALSE}
@@ -265,12 +268,12 @@ batchGroups = batchGroups, method = "combat")
 
 ```
 
-There is another method in the function that removes the batch effect that uses surrogate variable analysis or sva. The only requirement to use it is to set the parameter method equal to *"sva"*. This methodt does not return a matrix with the batch effect corrected, instead of this, the function returns a model that has to be used as single input parameter of the function *DEGsExtraction*.
+There is another method in the function that removes the batch effect that uses surrogate variable analysis or sva. The only requirement to use it is to set the parameter method equal to *"sva"*. This method returns a matrix with the batch effect corrected which has to be used as input of the function *DEGsExtraction*.
 
 ```{r Removing_batch_effect_sva}
 # Calculating the surrogate variable analysis to remove batch effect
 
-svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
+expressionMatrixCorrected <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
 ```
 
 ## Differential Expressed Genes extraction and visualization
@@ -284,20 +287,6 @@ The function *DEGsExtraction* receives an expression matrix, the labels of the s
 
 DEGsInformation <- DEGsExtraction(expressionMatrixCorrected, labels,
 lfc = 1.0, pvalue = 0.01, number = 100, cov = 1)
-
-topTable <- DEGsInformation$Table
-
-DEGsMatrix <- DEGsInformation$DEGsMatrix
-```
-
-Furthermore, if in the batch effect step the method used was sva, this function has two parameters to indicate that the model of limma would take into account the sva model calculated previously for the expression matrix. To achieve this, *svaCorrection* parameter has to be set to *TRUE* and the sva model has to be passed in the parameter *svaMod*. An example of this is the following:
-
-```{r Extracting_DEGs_sva}
-# Extracting DEGs that pass the imposed restrictions but using sva model
-# calculated before to remove batch effect
-
-DEGsInformation <- DEGsExtraction(expressionMatrix, labels, lfc = 2.0,
-pvalue = 0.01, number = Inf, svaCorrection = TRUE, svaMod = svaMod, cov = 1)
 
 topTable <- DEGsInformation$Table
 

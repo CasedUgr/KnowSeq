@@ -6,7 +6,8 @@
 \usage{
 getGenesAnnotation(
   values,
-  attributes = c("ensembl_gene_id", "external_gene_name", "percentage_gene_gc_content"),
+  attributes = c("ensembl_gene_id", "external_gene_name", "percentage_gene_gc_content",
+    "entrezgene_id"),
   filter = "ensembl_gene_id",
   notHSapiens = FALSE,
   notHumandataset = "",

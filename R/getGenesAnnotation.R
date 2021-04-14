@@ -11,7 +11,7 @@
 #' @examples
 #' myAnnotation <- getGenesAnnotation(c("KRT19","BRCA1"), filter="external_gene_name",notHSapiens=FALSE)
 
-getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content"), filter="ensembl_gene_id", notHSapiens = FALSE, notHumandataset = "",referenceGenome=38){
+getGenesAnnotation <- function(values,attributes=c("ensembl_gene_id","external_gene_name","percentage_gene_gc_content","entrezgene_id"), filter="ensembl_gene_id", notHSapiens = FALSE, notHumandataset = "",referenceGenome=38){
   
   if(typeof(attributes) != "character"){stop("The parameter attributes must be a character vector that contains the wanted ensembl attributes.")}
   if(typeof(values) != "character"){stop("The parameter values must be a character vector that contains the genes IDs.")}

@@ -22,7 +22,7 @@ knowseqReport(
   featureSelectionMode = "nofs",
   disease = "",
   subdiseases = c(""),
-  maxGenes = Inf,
+  maxGenes = 150,
   clasifAlgs = c("knn", "rf", "svm"),
   metrics = c("accuracy", "specificity", "sensitivity")
 )

@@ -9,6 +9,8 @@
 #' @param nmax This value only works when there are more than two classes in the labels. NMAX indicates the maximum number of DEGs selected for each class pair comparison.
 #' @param multiDegsMethod Select the multiclass extraction method for the process: cov or nmax
 #' @param number The maximum number of desired genes as output of limma. As default, the function returns all the extracted DEGs with the selected parameters.
+#' @param CV A boolean value that has to be setted to TRUE if the user would to run a Cross-Validation DEGs extraction process.
+#' @param numFolds This parameter indicates the number of folds for the Cross-Validation process.
 #' @return A list that contains two objects. The table with statistics of the different DEGs and a reduced expression matrix which contains the DEGs and the samples.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
@@ -23,7 +25,7 @@
 #'
 #' DEGsMatrix <- DEGsInformation$DEGsMatrix
 
-DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1, nmax = 1, multiDegsMethod = "cov", number = Inf){
+DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov = 1, nmax = 1, multiDegsMethod = "cov", number = Inf, CV = FALSE, numFolds = 5){
 
       if(!is.matrix(expressionMatrix)){stop("The class of expressionMatrix parameter must be matrix.")}
       if(!is.character(labels)  && !is.factor(labels)){stop("The class of the labels parameter must be character vector or factor.")}
@@ -33,21 +35,63 @@ DEGsExtraction <- function(expressionMatrix, labels, pvalue=0.05, lfc = 1.0, cov
       if(!is.numeric(number)){stop("The class of number parameter must be numeric.")}
 
       if(is.character(labels)){ labels <- as.factor(labels) }
+    
+      cvDatasets <- list()
+      cvDEGsResults <- list()
+      cvDEGsList <- list()
+        
+      if (CV){
+        
+        cat("Applying DEGs extraction CV.\n")
+        
+        lengthValFold <- dim(expressionMatrix)[2]/numFolds
+          
+        for(i in seq_len(numFolds)){
+          
+          valFold <- seq(round((i-1)*lengthValFold + 1 ), round(i*lengthValFold))
+          foldData<- expressionMatrix[,valFold]
+          foldLabels <- labels[valFold]
+          cvDatasets[[i]] <- list(foldData,foldLabels)
+      
+        }
 
+      } else{
+          cvDatasets[[1]] <- list(expressionMatrix,labels)
+          numFolds = 1
+      }
+  
       if(length(levels(labels)) == 2){
 
-          cat("Two classes detected, applying limma biclass\n")
-
-          condition <- labels
+        cat("Two classes detected, applying limma biclass\n")
+          
+        for(i in seq_len(numFolds)){
+          
+          condition <- cvDatasets[[i]][[2]]
           DE.design <- model.matrix(~condition)
-          fit <- lmFit(expressionMatrix,DE.design)
+          fit <- lmFit(cvDatasets[[i]][[1]],DE.design)
           fit <- eBayes(fit)
           table <- topTable(fit, number = number, coef = 2, sort.by = "logFC", p.value = pvalue, adjust = "fdr", lfc = lfc)
-          DEGsMatrix <- expressionMatrix[rownames(table),]
+          DEGsMatrix <- cvDatasets[[i]][[1]][rownames(table),]
           DEGsMatrix <- DEGsMatrix[unique(rownames(DEGsMatrix)),]
+          
+          cvDEGsResults[[i]] <- list(table,DEGsMatrix)
+          cvDEGsList[[i]] <- rownames(table)
+          
+          names(cvDEGsResults[[i]]) <- c("DEGs_Table","DEGs_Matrix")
+        }
 
-          results <- list(table,DEGsMatrix)
-          names(results) <- c("Table","DEGsMatrix")
+        names(cvDEGsResults) <- rep(paste("Fold_",seq_len(numFolds),sep = ""),1)
+        
+        if (CV){
+          commonDEGs <- Reduce(intersect,cvDEGsList)
+          cat(paste("A total of ",length(commonDEGs)," common genes has been found\n", sep = ""))
+          results <- list(cvDEGsResults, commonDEGs, expressionMatrix[commonDEGs,])
+          names(results) <- c("CV_Results", "Common_DEGs", "Exprs_Matrix")
+        }else{
+          results <- list(cvDEGsResults[[1]])
+          names(results) <- c("DEG_Results")  
+        }
+        
 
       }else if(length(levels(labels)) > 2){
 

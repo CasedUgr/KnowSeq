@@ -31,7 +31,7 @@
 knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels="",outdir="knowSeq-report", qualityAnalysis = TRUE, batchEffectTreatment =  TRUE,
                           geneOntology = TRUE, getPathways = TRUE, getDiseases = TRUE,
                           lfc=2.0, pvalue=0.01, cov=2, 
-                          featureSelectionMode = 'nofs', disease = '',subdiseases=c(''), maxGenes = Inf, clasifAlgs=c('knn','rf','svm'),
+                          featureSelectionMode = 'nofs', disease = '',subdiseases=c(''), maxGenes = 150, clasifAlgs=c('knn','rf','svm'),
                           metrics=c('accuracy','specificity','sensitivity')){
   
   removeEmptyColumns <- function(data){
@@ -84,7 +84,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   expressionMatrix <- data
   if (geneOntology || getPathways)
 
-    myAnnotation <- getGenesAnnotation(rownames(expressionMatrix),attributes=c("ensembl_gene_id","external_gene_name","entrezgene_id"),filter="external_gene_name",notHSapiens = FALSE)
+    myAnnotation <- getGenesAnnotation(rownames(expressionMatrix), filter="external_gene_name",notHSapiens = FALSE)
   
 
   table.format <- 'html'
@@ -154,19 +154,13 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
 
     markobj <- c(markobj,'## Individual array quality. \n',
                  "\nFinally, MA-plot is performed for each sample and Hoeffding's statistic, 
-                 $ D_a $, is calculated on the joint distribution of A and M for each sample.",
-                 "In the following plot, MA-plot of the 3 samples with lowest and higest $D_a$ is shown.",
-                 paste('![**here.**](',outdir,'RNAseqQA/MA-plot.png)',sep=''),
-                 paste('\nOutlier detection. In this experiment, a sample, $S_a$, will be considerated an outlier 
-                 if $D_a < ',round(found.outliers$`MA-D`$limit,3),'$.',sep=''),
-                 'The bar chart containing this information for each sample can be seen ',
-                 paste('[**here.**](file://',getwd(),'/',outdir,'RNAseqQA/MA-outlier-plot.pdf)\n',sep=''))
+                 $ D_a $, is calculated on the joint distribution of A and M for each sample.")
     
-    if (length(found.outliers$`MA-D`$outliers)==0)
+    if (length(found.outliers$MAD$outliers)==0)
       markobj <- c(markobj,'There were not any found outlier using this criterion.\n')
     else{
-      outliers <- paste(names(found.outliers$`MA-D`$outliers),collapse=', ')
-      markobj <- c(markobj,paste('There were',length(found.outliers$`MA-D`),
+      outliers <- paste(names(found.outliers$MAD$outliers),collapse=', ')
+      markobj <- c(markobj,paste('There were',length(found.outliers$MAD),
                                  'found outlier using this criterion:',outliers,'\n'))
     }
 
@@ -181,13 +175,11 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
                  'Batch effect is produced due to intrinsic deviations inside the data due to its origin, sequencing design, lab, technician, etc... Therefore, it is crucial to perform a correct treatment of 
                  it in this type of analysis.','Taking into account that the different Batches are unknown, the effect will be treated by using surrogate variable analysis or sva algorithm.\n')
     
-    svaMod <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
+    expressionMatrix <- batchEffectRemoval(expressionMatrix, labels, method = "sva")
     
-    DEGsInformation <- DEGsExtraction(expressionMatrix, labels, lfc = lfc, pvalue = pvalue, cov = cov, number = Inf, svaCorrection = TRUE, svaMod = svaMod)
-  }else{
-    
-    DEGsInformation <- DEGsExtraction(expressionMatrix, labels, lfc = lfc, pvalue = pvalue, cov = cov, number = Inf)
   }
+    
+  DEGsInformation <- DEGsExtraction(expressionMatrix, labels, lfc = lfc, pvalue = pvalue, cov = cov, number = Inf)
   
   topTable <- DEGsInformation$Table
   
@@ -749,7 +741,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
         
         r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",gsub(" ","-",disease),"&size=1&filter=disease",sep = ""))
         respon <- content(r_Ensembl)
-        
+  
         if ( 'size' %in% names(respon) && respon$size == 0){
           markobj  <-  c(markobj,'\nDisease not found.')
         }else{

@@ -19,9 +19,14 @@ Changes in version 0.99.55 (2019-10-09)
   
 Changes in version 1.1.15 (2019-11-11)
   + Novel Biological Based Feature Selection method named as Disease Association Feature Selection (DA-FS) added
+    
+Changes in version 1.4.5 (2021-04-13)
+  + SVA batch effect correction improved
+  
+  + MAD outliers detection fixed
+  
+  + KnowSeq report updated to include the changes of SVA and MAD modifications
   
 Further versions
-  + MAC_OS alignment tools support
- 
   + Incorporation of RUV to batch effect methods
 

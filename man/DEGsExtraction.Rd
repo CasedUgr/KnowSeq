@@ -12,7 +12,9 @@ DEGsExtraction(
   cov = 1,
   nmax = 1,
   multiDegsMethod = "cov",
-  number = Inf
+  number = Inf,
+  CV = FALSE,
+  numFolds = 5
 )
 }
 \arguments{
@@ -31,6 +33,10 @@ DEGsExtraction(
 \item{multiDegsMethod}{Select the multiclass extraction method for the process: cov or nmax}
 
 \item{number}{The maximum number of desired genes as output of limma. As default, the function returns all the extracted DEGs with the selected parameters.}
+
+\item{CV}{A boolean value that has to be setted to TRUE if the user would to run a Cross-Validation DEGs extraction process.}
+
+\item{numFolds}{This parameter indicates the number of folds for the Cross-Validation process.}
 }
 \value{
 A list that contains two objects. The table with statistics of the different DEGs and a reduced expression matrix which contains the DEGs and the samples.

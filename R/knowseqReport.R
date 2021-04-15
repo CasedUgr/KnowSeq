@@ -181,7 +181,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     
   DEGsInformation <- DEGsExtraction(expressionMatrix, labels, lfc = lfc, pvalue = pvalue, cov = cov, number = Inf)
   
-  topTable <- DEGsInformation$Table
+  topTable <- DEGsInformation$DEG_Results$DEGs_Table
   
   if(dim(topTable)[1] == 0){
     stop("There is no any DEGs for this combination of LFC and P-value. Please, impose less restrictive thressholds.")
@@ -190,7 +190,7 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
   
   if(length(levels(as.factor(labels))) == 2){
     
-    DEGsMatrix <- DEGsInformation$DEGsMatrix
+    DEGsMatrix <- DEGsInformation$DEG_Result$DEGs_Matrix
     
     topTable.dataframe <- data.frame(GeneSymbol=rownames(topTable),logFC=topTable$logFC,AveExpr=topTable$AveExpr,t=topTable$t,
                                      P.Value=formatC(topTable$P.Value, format = "e", digits = 2),
@@ -211,10 +211,10 @@ knowseqReport <- function(data, labels, MLTest = FALSE, testData="", testLabels=
     
   }else if(length(levels(as.factor(labels))) > 2){
     
-    DEGsMatrix <- DEGsInformation$DEGsMatrix
-    genes.selected <- rownames(DEGsInformation$MulticlassLFC)
+    DEGsMatrix <- DEGsInformation$DEG_Results$DEGs_Matrix
+    genes.selected <- rownames(DEGsInformation$DEG_Results$MulticlassLFC)
     
-    topTable.dataframe <- data.frame(GeneSymbol=genes.selected,logFC=rowMeans(abs(DEGsInformation$MulticlassLFC)),
+    topTable.dataframe <- data.frame(GeneSymbol=genes.selected,logFC=rowMeans(abs(DEGsInformation$DEG_Results$MulticlassLFC)),
                                      t=rowMeans(topTable[genes.selected,]$t),
                                      P.Value=formatC(rowMeans(topTable[genes.selected,]$p.value), format = "e", digits = 2),
                                      F=topTable[genes.selected,]$F,B=rowMeans(topTable[genes.selected,]$lods))

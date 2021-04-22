@@ -1,0 +1,21 @@
+citHeader("Please cite the paper below for the complete KnowSeq software itself as well as for part of the implemented pipeline")
+
+citEntry(entry="article",
+	author = c(person("Castillo-Secilla", "Daniel"),
+	           person("Galvez","Juan Manuel"),
+	           person("Carrillo-Perez","Francisco"),
+	           person("Verona-Almeida","Marta"),
+	           person("Redondo-Sanchez","Daniel"),
+	           person("Ortuno","Francisco Manuel"),
+	           person("Herrera","Luis Javier"),
+	           person("Rojas","Ignacio")),
+	title = "{KnowSeq} R-Bioc package: The automatic smart gene expression tool for retrieving relevant biological knowledge",
+	journal = "Computers in Biology and Medicine",
+	year = 2021,
+	volume = 133,
+	pages = "104387",
+	doi = "10.1016/j.compbiomed.2021.104387",
+
+	textVersion = 
+	"Castillo-Secilla, D., Galvez, J. M., Carrillo-Perez, F., Verona-Almeida, M., Redondo-Sanchez, D., Ortuno, F. M., ... and Rojas, I. (2021). KnowSeq R-Bioc Package: The Automatic Smart Gene Expression Tool For Retrieving Relevant Biological Knowledge. Computers in Biology and Medicine, 104387."
+)

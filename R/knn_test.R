@@ -91,6 +91,7 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   # Firstly with one variable
   cat(paste("Testing with ", 1," variables...\n",sep=""))
   knn_mod = knn3(x = train[, 1, drop=FALSE], y = labelsTrain, k = bestK)
+  predictScores <- predict(knn_mod, test[, 1, drop=FALSE], type = "prob")
   predicts <- predict(knn_mod, test[, 1, drop=FALSE], type = "class")
   
   cfMat<-confusionMatrix(predicts,labelsTest)
@@ -109,15 +110,16 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   sensVector[1] <- sens
   specVector[1] <- spec
   f1Vector[1] <- f1
-  predictsVector[[1]] <- predicts
+  predictsVector[[1]] <- predictScores
   if(is.na(f1Vector[1])) f1Vector[i] <- 0
   
   for(i in c(2:dim(test)[2])){
 
     cat(paste("Testing with ", i," variables...\n",sep=""))
     knn_mod = knn3(x = train[,seq(i)], y = labelsTrain, k = bestK)
+    predictScores <- predict(knn_mod, test[,seq(i)], type = "prob")
     predicts <- predict(knn_mod, test[,seq(i)], type = "class")
-
+    
     cfMat<-confusionMatrix(predicts,labelsTest)
     
     if (length(levels(labelsTrain))==2){
@@ -135,7 +137,7 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
     sensVector[i] <- sens
     specVector[i] <- spec
     f1Vector[i] <- f1
-    predictsVector[[i]] <- predicts
+    predictsVector[[i]] <- predictScores
     if(is.na(f1Vector[i])) f1Vector[i] <- 0
   }
 

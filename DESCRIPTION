@@ -12,7 +12,6 @@ Authors@R: c(person("Daniel", "Castillo-Secilla", role = c("aut","cre"),
         person("Luis Javier", "Herrera", role=c("ctb")),
         person("Ignacio", "Rojas", role=c("ctb")))
 Description: KnowSeq proposes a novel methodology that comprises the most relevant steps in the Transcriptomic gene expression analysis. KnowSeq expects to serve as an integrative tool that allows to process and extract relevant biomarkers, as well as to assess them through a Machine Learning approaches. Finally, the last objective of KnowSeq is the biological knowledge extraction from the biomarkers (Gene Ontology enrichment, Pathway listing and Visualization and Evidences related to the addressed disease). Although the package allows analyzing all the data manually, the main strenght of KnowSeq is the possibilty of carrying out an automatic and intelligent HTML report that collect all the involved steps in one document. It is important to highligh that the pipeline is totally modular and flexible, hence it can be started from whichever of the different steps. KnowSeq expects to serve as a novel tool to help to the experts in the field to acquire robust knowledge and conclusions for the data and diseases to study.
-VignetteBuilder: knitr
 License: GPL (>=2)
 Depends: R (>= 4.0), cqn (>= 1.28.1)
 Encoding: UTF-8
@@ -20,5 +19,6 @@ LazyData: false
 RoxygenNote: 7.1.1
 biocViews: GeneExpression, DifferentialExpression, GeneSetEnrichment, DataImport, Classification, FeatureExtraction, Sequencing, RNASeq, BatchEffect, Normalization, Preprocessing, QualityControl, Genetics, Transcriptomics, Microarray, Alignment, Pathways, SystemsBiology, GO, ImmunoOncology
 Imports: stringr, methods, ggplot2 (>= 3.3.0), jsonlite, kernlab, rlist, rmarkdown, reshape2, e1071, randomForest, caret, XML, praznik, R.utils, httr, sva (>= 3.30.1), edgeR (>= 3.24.3), limma (>= 3.38.3), grDevices, graphics, stats, utils, Hmisc (>= 4.4.0), gridExtra
+VignetteBuilder: knitr
 Suggests: knitr
 git_url: https://github.com/CasedUgr/KnowSeq

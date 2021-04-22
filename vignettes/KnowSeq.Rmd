@@ -5,9 +5,6 @@ author: Daniel Castillo-Secilla, Juan Manuel Galvez, Marta Verona-Almeida, Franc
   <br> Carrillo-Perez, Francisco Manuel Ortuno, Luis Javier Herrera and Ignacio Rojas
 date: "march, 29 of 2020"
 output:
-  pdf_document:
-    toc: yes
-    toc_depth: '3'
   html_document:
     number_sections: yes
     toc: yes
@@ -15,6 +12,9 @@ output:
     toc_float: yes
     highlight: tango
     css: vignette_style.css
+  pdf_document:
+    toc: yes
+    toc_depth: '3'
 subtitle: 'KnowSeq: R/Bioconductor package'
 header-includes:
 - \pdfminorversion=5
@@ -22,13 +22,20 @@ header-includes:
 - \pdfobjcompresslevel=2
 BiocStyle::html_vignette:
   md_extensions: -autolink_bare_uris
-vignette: |
-  %\VignetteIndexEntry{The KnowSeq users guide}  \usepackage[UTF-8]{inputenc}  %\VignetteEngine{knitr::rmarkdown}
+vignette: >
+  %\VignetteIndexEntry{The KnowSeq users guide}
+  %\VignetteEncoding{UTF-8}  
+  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r setup, cache = F, echo = FALSE}
 knitr::opts_chunk$set(error = TRUE,warning = FALSE)
 ```
+# Citation
+Please, use the following cite to reference KnowSeq R package within your own manuscripts or researches:
+
+*Castillo-Secilla, D., Galvez, J. M., Carrillo-Perez, F., Verona-Almeida, M., Redondo-Sanchez, D., Ortuno, F. M., ... and Rojas, I. (2021). KnowSeq R-Bioc Package: The Automatic Smart Gene Expression Tool For Retrieving Relevant Biological Knowledge. Computers in Biology and Medicine, 104387.*
+
 # Installation
 To install and load KnowSeq package in R, it is necessary the previous installation of BiocManager from Bioconductor. The next code shows how this installation can be performed:
 
@@ -49,7 +56,7 @@ Docker run -it casedugr/knowseq
 
 # Introduction
 
-KnowSeq proposes a novel methodology that comprises the most relevant steps in the Transcriptomic gene expression analysis. KnowSeq expects to serve as an integrative tool that allows to process and extract relevant biomarkers, as well as to assess them through a Machine Learning approaches. Finally, the last objective of KnowSeq is the biological knowledge extraction from the biomarkers (Gene Ontology enrichment, Pathway listing and Visualization and Evidences related to the addressed disease). Although the package allows analyzing all the data manually, the main strenght of KnowSeq is the possibilty of carrying out an automatic and intelligent HTML report that collect all the involved steps in one document. Nowadays, there is no package that only from the information of the samples to align -included in a text file-, automatically performs the download and alignment of all of the samples. Furthermore, KnowSeq is the only package that allows applying both a machine learning and biomarkers enrichment processes just after the biomarkers extraction. It is important to highligh that the pipeline is totally modular and flexible, hence it can be started from whichever of the different steps. This pipeline has been used in our previous publications for processing raw RNA-seq data and to perform the biomarkers extraction along with the machine learning classifier design steps, also for their integration with microarray data [1,2,3,4].
+KnowSeq proposes a novel methodology that comprises the most relevant steps in the Transcriptomic gene expression analysis. KnowSeq expects to serve as an integrative tool that allows to process and extract relevant biomarkers, as well as to assess them through a Machine Learning approaches. Finally, the last objective of KnowSeq is the biological knowledge extraction from the biomarkers (Gene Ontology enrichment, Pathway listing and Evidences related to the addressed disease). Although the package allows analyzing all the data manually, the main strength of KnowSeq is the possibility of carrying out an automatic and intelligent HTML report that collect all the involved steps in one document. Nowadays, there is no package that only from the information of the samples to align -included in a text file-, automatically performs the download and alignment of all of the samples. Furthermore, KnowSeq is the only package that allows applying both a machine learning and biomarkers enrichment processes just after the biomarkers extraction. It is important to highlight that the pipeline is totally modular and flexible, hence it can be started from whichever of the different steps. This pipeline has been used in our previous publications for processing raw RNA-seq data and to perform the biomarkers extraction along with the machine learning classifier design steps, also for their integration with microarray data [1,2,3,4].
 
 ![](KnowSeqPipeline.png)
 
@@ -184,6 +191,7 @@ dir <- system.file("script", package="KnowSeq")
 # Code to execute the example script
 source(paste(dir,"/KnowSeqExample.R",sep=""))
 
+
 # Code to edit the example script
 file.edit(paste(dir,"/KnowSeqExample.R",sep=""))
 
@@ -282,15 +290,15 @@ There is a long way between the raw data and the DEGs extraction, for that in th
 
 The function *DEGsExtraction* receives an expression matrix, the labels of the samples and the restriction imposed for considering a gene as differential expressed gene. The function returns a list containing the table with statistical values of each DEGs and the expression matrix of the DEGs instead all of the genes. The call to the function is listed below:
 
-```{r, eval=FALSE}
+```{r, DEGs without batch}
 # Extracting DEGs that pass the imposed restrictions
 
 DEGsInformation <- DEGsExtraction(expressionMatrixCorrected, labels,
 lfc = 1.0, pvalue = 0.01, number = 100, cov = 1)
 
-topTable <- DEGsInformation$Table
+topTable <- DEGsInformation$DEG_Results$DEGs_Table
 
-DEGsMatrix <- DEGsInformation$DEGsMatrix
+DEGsMatrix <- DEGsInformation$DEG_Results$DEGs_Matrix
 ```
 
 DEGs are genes that have a truly different expression among the studied classes, for that it is important to try to see graphically if those DEGs comply with this requirement. In order to provide a tool to perform this task, the function dataPlot encapsulate a set of graphs that allows plotting in different ways the expression of the DEGs.
@@ -352,7 +360,7 @@ results_cv_rf <- rf_trn(DEGsMatrixML,labels,names(daRanking)[1:10],5)
 
 ```
 
-It is important to show graphically the results of the classifiers and for that purpose, the function *dataPlot* implements some methods. Concretely, to plot the accuracy, the sensitivity or the specificity reached by the classifiers, the function *dataPlot* has to be run with the parameter method equal to *classResults*. This method generated as many random colours as folds or simulations in the rows of the matrix passed to the function but, through the parameter colours a vector of desired colours can be specified. For the legend, the function uses the rownames of the input matrix but these names can be changed with the parameter legend. An example of this method is showed below:
+It is important to show graphically the results of the classifiers and for that purpose, the function *dataPlot* implements some methods. Concretely, to plot the accuracy, the sensitivity or the specificity reached by the classifiers, the function *dataPlot* has to be run with the parameter method equal to *classResults*. This method generated as many random colors as folds or simulations in the rows of the matrix passed to the function but, through the parameter colors a vector of desired colors can be specified. For the legend, the function uses the rownames of the input matrix but these names can be changed with the parameter legend. An example of this method is showed below:
 
 ```{r Plotting_ML_acc}
 # Plotting the accuracy of all the folds evaluated in the CV process
@@ -373,6 +381,12 @@ main = "Mean Sensitivity with k-NN", xlab = "Genes", ylab = "Sensitivity")
 
 dataPlot(rbind(results_cv_knn$specificity$meanSpecificity,results_cv_knn$specificity$standardDeviation),mode = "classResults", legend = c("Mean Spec","Standard Deviation"),
 main = "Mean Specificity with k-NN", xlab = "Genes", ylab = "Specificity")
+```
+
+```{r Plotting_ML_Heatmap}
+# Plotting all the metrics depending on the number of used DEGs in the CV process
+
+dataPlot(results_cv_knn,labels,mode = "heatmapResults")
 ```
 
 Furthermore, the function *dataPlot* counts with another similar mode to the previous but this time to represents confusion matrices. This mode is called *confusionMatrix* and allows creating graphically a confusion matrix with the most important statistical measures. The following code allows doing this:
@@ -436,8 +450,8 @@ For example, in this example, the top 10 GOs from the BP ontology for the extrac
 
 ![](GOExample.png)
 
-## Pathways visualization
-Another important step in the enrichment methodology in this pipeline is the related pathway information. The function uses the DEGs to retrieve pathways with any relation with DEGs. For that, DEGsToPathways makes use of the information gathered from KEGG along with reactome databases in order to supply as more details as possible .
+## Pathway Information
+Another important step in the enrichment methodology in this pipeline is the related pathway information. The function uses the DEGs to retrieve pathways with any relation with DEGs. For that, DEGsToPathways makes use of the information gathered from KEGG database in order to supply as more details as possible .
 
 ```{r Downloading_pathways eval} 
 # Retrieving the pathways related to the DEGs
@@ -454,6 +468,8 @@ Finally, the last enrichment method implemented is the related diseases enrichme
 # Downloading the information about the DEGs related diseases
 
 diseasesTargetValidation <- DEGsToDiseases(rownames(DEGsMatrix)[1:5], getEvidences = FALSE)
+
+diseasesTargetValidation
 
 ``` 
 

@@ -7,6 +7,7 @@
 #' @param genesNames A boolean variable which indicates if the rownames of the expression matrix are the genes Names (Symbols) or the ensembl IDs.
 #' @param notHuman A boolean variable which indicates if the gene length file is the default gene length human file or another file indicated by parameter.
 #' @param notHumanGeneLengthCSV Path to the CSV file that contains the gene length of the specie to use.
+#' @param Ensembl_ID A boolean variable which indicate if the counts matrix contains Ensembl_ID(TRUE) or genes names(FALSE).
 #' @return A matrix that contains the gene expression values. The rownames are the genes names or the Ensembl IDs and the colnames are the samples.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
@@ -14,7 +15,7 @@
 #'
 #' expressionMatrix <- calculateGeneExpressionValues(countsMatrix,myAnnotation, genesNames = TRUE)
 
-calculateGeneExpressionValues <- function(countsMatrix,annotation,genesNames=TRUE,notHuman = FALSE, notHumanGeneLengthCSV = ""){
+calculateGeneExpressionValues <- function(countsMatrix,annotation,genesNames=TRUE,notHuman = FALSE, notHumanGeneLengthCSV = "",Ensembl_ID=TRUE){
 
   if(!is.logical(genesNames)){stop("genesNames parameter can only takes the values TRUE or FALSE.")}
   if(!is.matrix(countsMatrix)){stop("The class of countsMatrix parameter must be matrix.")}
@@ -36,39 +37,64 @@ calculateGeneExpressionValues <- function(countsMatrix,annotation,genesNames=TRU
 
   cat("Calculating gene expression values...\n")
 
-  myGCannot <- annotation$percentage_gene_gc_content
-  names(myGCannot) <- annotation$ensembl_gene_id
-  myGCannot <- myGCannot[rownames(countsMatrix)]
-  summary(myGCannot)
-
-  mygenes <- intersect(rownames(countsMatrix),annotation$ensembl_gene_id)
-
-  mylength <- setNames(geneLength[match(mygenes,geneLength$Gene_stable_ID), 2], nm = mygenes)
+  if (Ensembl_ID==TRUE){
+    myGCannot <- annotation$percentage_gene_gc_content
+    names(myGCannot) <- annotation$ensembl_gene_id
+    myGCannot <- myGCannot[rownames(countsMatrix)]
+    summary(myGCannot)
+    mygenes <- intersect(rownames(countsMatrix),annotation$ensembl_gene_id)
+    mylength <- setNames(geneLength[match(mygenes,geneLength$Gene_stable_ID), 2], nm = mygenes)
   
-  if(any(is.na(mylength))){
-    NaPos <- which(is.na(mylength) == TRUE)
-    mylength <- mylength[-NaPos]
+    if(any(is.na(mylength))){
+      NaPos <- which(is.na(mylength) == TRUE)
+      mylength <- mylength[-NaPos]
+      mygenes <- mygenes[-NaPos]
+      rownames <- annotation$external_gene_name[match(mygenes, annotation$ensembl_gene_id[-NaPos])]
+    }else{
+      rownames <- annotation$external_gene_name[match(mygenes, annotation$ensembl_gene_id)]
+    }
+    myGCannot <- myGCannot[match(mygenes,names(myGCannot))]
+    mycqn <- cqn(countsMatrix[mygenes,], lengths = mylength, x = myGCannot, sizeFactors = apply(countsMatrix, 2, sum), verbose = TRUE)
+    cqnValues <- mycqn$y + mycqn$offset
+    expressionMatrix <- cqnValues - min(cqnValues) + 1
+    if(genesNames){
+      rownames(expressionMatrix) <- rownames
+      expressionMatrix <- expressionMatrix[!duplicated(rownames(expressionMatrix)),]
+    }
+    return(expressionMatrix)
+  } else {
+    duplicate <- annotation$external_gene_name[which(duplicated(annotation$external_gene_name))]
+    annotation <- annotation[-which(annotation$external_gene_name%in%duplicate),]
+    countsMatrix<-countsMatrix[which(rownames(countsMatrix)%in%annotation$external_gene_name),]
+    for (i in 1:length(rownames(countsMatrix))){
+      rownames(countsMatrix)[i] <- annotation$ensembl_gene_id[which(annotation$external_gene_name==rownames(countsMatrix)[i])] 
+    }
+    myGCannot <- annotation$percentage_gene_gc_content
+    names(myGCannot) <- annotation$ensembl_gene_id
+    myGCannot <- myGCannot[rownames(countsMatrix)]
+    summary(myGCannot)
+    mygenes <- intersect(rownames(countsMatrix),annotation$ensembl_gene_id)
+    mylength <- setNames(geneLength[match(mygenes,geneLength$Gene_stable_ID), 2], nm = mygenes)
+  
+    if(any(is.na(mylength))){
+      NaPos <- which(is.na(mylength) == TRUE)
+      mylength <- mylength[-NaPos]
+      mygenes <- mygenes[-NaPos]
+      rownames <- annotation$external_gene_name[match(mygenes, annotation$ensembl_gene_id)]
+    }else{
+      rownames <- annotation$external_gene_name[match(mygenes, annotation$ensembl_gene_id)]
+    }
 
-    mygenes <- mygenes[-NaPos]
-    rownames <- annotation$external_gene_name[match(mygenes, annotation$ensembl_gene_id[-NaPos])]
-  }else{
-    
-    rownames <- annotation$external_gene_name[match(mygenes, annotation$ensembl_gene_id)]
-    
+    myGCannot <- myGCannot[match(mygenes,names(myGCannot))]
+    mycqn <- cqn(countsMatrix[mygenes,], lengths = mylength, x = myGCannot, sizeFactors = apply(countsMatrix, 2, sum), verbose = TRUE)
+    cqnValues <- mycqn$y + mycqn$offset
+    expressionMatrix <- cqnValues - min(cqnValues) + 1
+    if(genesNames){
+      rownames(expressionMatrix) <- rownames
+      expressionMatrix <- expressionMatrix[!duplicated(rownames(expressionMatrix)),]
+    }
+    return(expressionMatrix)
   }
-  myGCannot <- myGCannot[match(mygenes,names(myGCannot))]
-
-  mycqn <- cqn(countsMatrix[mygenes,], lengths = mylength, x = myGCannot, sizeFactors = apply(countsMatrix, 2, sum), verbose = TRUE)
-
-  cqnValues <- mycqn$y + mycqn$offset
-  expressionMatrix <- cqnValues - min(cqnValues) + 1
-
-  if(genesNames){
-    rownames(expressionMatrix) <- rownames
-    expressionMatrix <- expressionMatrix[unique(rownames(expressionMatrix)),]
-  }
-
-  return(expressionMatrix)
-
 }
+
 

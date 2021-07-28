@@ -17,54 +17,87 @@ DEGsToDiseases <- function(geneList, minCitation = 5, size = 10, getEvidences = 
 
   }
   
+  ensembl_list <- getGenesAnnotation(geneList, attributes = c("ensembl_gene_id","external_gene_name"), filter = "external_gene_name")
     
   cat("Obtaining related diseases with the DEGs from targetValidation platform...\n")
-  base = "https://api.opentargets.io/v3/platform/public/association/filter?target="
   
-  genePeti = character()
-  results <- vector("list", 0)
-  
-  for(j in seq_len(length(unique(geneList)))){
-    r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",geneList[j],"&size=1&filter=target",sep = ""))
-    respon <- content(r_Ensembl)
-    ensembl_id <- respon$data[[1]]$data$ensembl_gene_id
-    
-    if(!is.na(ensembl_id)){
-      
-      genePeti = paste(base, ensembl_id,"&direct=true&fields=association_score&fields=disease.efo_info.label&size=",size,sep = "")
-      r <- GET(genePeti)
-      response = content(r)
-      if(response$size != 0){
-          currentGene = matrix(, nrow = response$size, ncol = 9)
-          if (getEvidences) currentEvidences = vector("list", 0)
-          
-          for(i in seq(response$size)){
-            currentGene[i,1] = response$data[[i]]$disease$efo_info$label
-            currentGene[i,2] = response$data[[i]]$association_score$overall
-            currentGene[i,3] = response$data[[i]]$association_score$datatypes$literature
-            currentGene[i,4] = response$data[[i]]$association_score$datatypes$rna_expression
-            currentGene[i,5] = response$data[[i]]$association_score$datatypes$genetic_association
-            currentGene[i,6] = response$data[[i]]$association_score$datatypes$somatic_mutation
-            currentGene[i,7] = response$data[[i]]$association_score$datatypes$known_drug
-            currentGene[i,8] = response$data[[i]]$association_score$datatypes$animal_model
-            currentGene[i,9] = response$data[[i]]$association_score$datatypes$affected_pathway
-  
-            if (getEvidences) currentEvidences[[currentGene[i,1]]] <- DEGsEvidences(unique(geneList)[j],response$data[[i]]$disease$efo_info$label,verbose=FALSE)[[unique(geneList)[j]]]
+  # Build query string
+  query_string = "
+  query target($ensemblId: String!){
+      target(ensemblId: $ensemblId){
+        id
+        approvedSymbol
+        approvedName
+        bioType
+        associatedDiseases{
+          count
+          rows{
+            score
+            datatypeScores{
+              id
+              score
+            }
+            disease{
+              name
+            }
           }
-          colnames(currentGene) <- c("Disease","Overall Score","Literature","RNA Expr.","Genetic Assoc.","Somatic Mut.","Known Drug","Animal Model","Affected Pathways")
+        }
+      }
+    }
+  "
+  
+  base = "https://api.platform.opentargets.org/api/v4/graphql"
+  
+  categories <- c("literature","rna_expression","genetic_association","somatic_mutation","known_drug","animal_model","affected_pathway")
+  
+  results <- list()
+  
+  for(i in seq_len(length(unique(ensembl_list)))){
+    
+    variables <- list("ensemblId" = ensembl_list$ensembl_gene_id[i])
+    
+    # Construct POST request body object with query string and variables
+    post_body <- list(query = query_string, variables = variables)
+    
+    # Perform POST request
+    r <- POST(url=base, body=post_body, encode='json')
+    
+    # Print data to RStudio console
+    response <- content(r)$data
+    
+    if(!is.na(ensembl_list$ensembl_gene_id[i])){
+      
+        currentGene = matrix(0, nrow = 25, ncol = 9)
+        colnames(currentGene) <- c("Disease","Overall Score","Literature","RNA Expr.","Genetic Assoc.","Somatic Mut.","Known Drug","Animal Model","Affected Pathways")
+        
+        #if (getEvidences) currentEvidences = vector("list", 0)
+        
+        for (j in seq_len(25)){
           
+          currentGene[j,1] <- response$target$associatedDiseases$rows[[j]]$disease$name
+          currentGene[j,2] <- response$target$associatedDiseases$rows[[j]]$score
           
-          if (getEvidences) results[[j]] <- list('summary'=currentGene,'evidences'=currentEvidences)
-          else results[[j]] <- list('summary'=currentGene)
-          names(results)[j] <- unique(geneList)[j]
+          scores <- length(response$target$associatedDiseases$rows[[j]]$datatypeScores)
           
+          for (k in seq_len(scores)){
+            
+            indexCategory <- match(response$target$associatedDiseases$rows[[j]]$datatypeScores[[k]]$id, categories) + 2
+            currentGene[j,indexCategory] <- response$target$associatedDiseases$rows[[j]]$datatypeScores[[k]]$score
+            
+          }
+          #if (getEvidences) currentEvidences[[currentGene[i,1]]] <- DEGsEvidences(unique(geneList)[j],response$data[[i]]$disease$efo_info$label,verbose=FALSE)[[unique(geneList)[j]]]
+    
+        #if (getEvidences) results[[j]] <- list('summary'=currentGene,'evidences'=currentEvidences)
+        #else 
+          results[[i]] <- list('summary'=currentGene)
+          names(results)[i] <- unique(geneList)[i]
+        }    
       }else{
         
-        cat(paste("Removing ", unique(geneList)[j], " from the list, there is no exists associated diseases for this gene.\n",sep = ""))
+        cat(paste("Removing ", unique(geneList)[i], " from the list, there is no exists associated diseases for this gene.\n",sep = ""))
         
       }
     }
-  }
   
   cat("Diseases acquired successfully!\n")
   results <- results[lengths(results) != 0]

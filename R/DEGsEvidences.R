@@ -20,28 +20,79 @@ DEGsEvidences <- function(geneList, disease,size=10, verbose=TRUE){
     stop("Please, indicate a disease name to acquire related evidences.")
     
   }
-  # Get disease id (it's necesary for evidences request)
-  disease_ <- str_replace_all(disease,' ','-')
-  r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",disease_,"&size=1&filter=disease",sep = ""))
-  respon <- content(r_Ensembl)
   
-  if ( 'size' %in% names(respon) && respon$size == 0){
+  ensembl_list <- getGenesAnnotation(geneList, attributes = c("ensembl_gene_id","external_gene_name"), filter = "external_gene_name")
+  
+  # Get disease id (it's necesary for evidences request)
+  query_string_disease = "
+  query target($disease: String!) {
+	search(queryString: $disease){
+    hits{
+      id
+      name
+    }
+  	total
+	}
+  }
+  "
+  base = "https://api.platform.opentargets.org/api/v4/graphql"
+
+  variables <- list("disease" = disease)
+  
+  # Construct POST request body object with query string and variables
+  post_body <- list(query = query_string_disease, variables = variables)
+  
+  # Perform POST request
+  r <- POST(url=base, body=post_body, encode='json')
+  
+  # Print data to RStudio console
+  response <- content(r)$data
+    
+  if (response$search$total == 0){
     stop("Disease not found")
   }
-  disease.id <- respon$data[[1]]$id
+  
+  disease.id <- response$search$hits[[1]]$id
 
   if (verbose) cat("Obtaining related diseases with the DEGs from targetValidation platform...\n")
-  base = "https://api.opentargets.io/v3/platform/public/evidence/filter?target="
-  
-  # Create empty output
+
+    # Create empty output
   info <- list()
   
   # Iter in genes from geneList
-  for(j in seq(length(unique(geneList)))){
-    # Get gene id (it's necesary for evidences request)
-    r_Ensembl <- GET(paste("https://api.opentargets.io/v3/platform/public/search?q=",geneList[j],"&size=1&filter=target",sep = ""))
-    respon <- content(r_Ensembl)
-    if( length(respon$data) > 0 )ensembl_id <- respon$data[[1]]$data$ensembl_gene_id
+  for(gene in unique(ensembl_list$ensembl_gene_id)){
+    
+    query_string_evidences = paste("
+      query target($diseaseId: String=\"",disease.id,"\", $ensemblId: [String!]=\"",gene,"\",) {
+    	disease(efoId: $diseaseId){
+        name
+        evidences(ensemblIds: $ensemblId){
+          rows{
+            literature
+                  pathways{
+                    id
+                    name
+                  }
+                  drug{
+                    id
+                    name
+                  }
+          }
+        }
+      }
+      }
+    ",sep ="")
+    
+    # Construct POST request body object with query string and variables
+    post_body <- list(query = query_string_evidences)
+    
+    # Perform POST request
+    r <- POST(url=base, body=post_body, encode='json')
+    
+    # Print data to RStudio console
+    response <- content(r)$data
+    
+    if( length(response) > 0 )ensembl_id <- gene
     else ensembl_id <- NULL
     
     # If gene is found

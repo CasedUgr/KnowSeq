@@ -4,7 +4,7 @@
 \alias{knn_trn}
 \title{knn_trn allows assessing the final DEGs through a machine learning step by using k-NN in a cross validation process.}
 \usage{
-knn_trn(data, labels, vars_selected, numFold = 10)
+knn_trn(data, labels, vars_selected, numFold = 10, LOOCV = FALSE)
 }
 \arguments{
 \item{data}{The data parameter is an expression matrix or data.frame that contains the genes in the columns and the samples in the rows.}
@@ -14,6 +14,8 @@ knn_trn(data, labels, vars_selected, numFold = 10)
 \item{vars_selected}{The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.}
 
 \item{numFold}{The number of folds to carry out in the cross validation process.}
+
+\item{LOOCV}{Logical parameter to choose between Loo-CV and KFold-CV.}
 }
 \value{
 A list that contains four objects. The confusion matrix for each fold, the accuracy, the sensitibity and the specificity for each fold and each genes, and the best k found for the knn algorithm after tuning.

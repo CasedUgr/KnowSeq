@@ -4,14 +4,14 @@
 \alias{DEGsToDiseases}
 \title{DEGsToDiseases obtains the information about what diseases are related to the DEGs indicated by parameter.}
 \usage{
-DEGsToDiseases(geneList, minCitation = 5, size = 10, getEvidences = FALSE)
+DEGsToDiseases(geneList, size = 10, disease = "", getEvidences = FALSE)
 }
 \arguments{
 \item{geneList}{A list that contains the gene symbols or gene names of the DEGs.}
 
-\item{minCitation}{Minimum number of citations of each genes in a disease to consider the genes related with the disease.}
-
 \item{size}{The number of diseases to retrieve from targetValidation}
+
+\item{disease}{Query a specific disease instead of retrieving the whole list of related diseases.}
 
 \item{getEvidences}{Boolean. If true, for each gene, a list of found evidences for each disease will be returned.}
 }
@@ -22,5 +22,5 @@ A list which contains the information about the diseases associated to each gene
 The function obtains the information about what diseases are related to the DEGs indicated by parameter. For that, the function makes use of the web platforms gene2Diseases and targetValidation.
 }
 \examples{
-diseases <- DEGsToDiseases(c("KRT19","BRCA1"),getEvidences = FALSE)
+diseases <- DEGsToDiseases(c("KRT19","BRCA1"), getEvidences = FALSE)
 }

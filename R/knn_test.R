@@ -8,7 +8,7 @@
 #' @param labelsTest A vector or factor that contains the test labels for each of the samples in the test object.
 #' @param vars_selected The genes selected to classify by using them. It can be the final DEGs extracted with the function \code{\link{DEGsExtraction}} or a custom vector of genes. Furthermore, the ranking achieved by \code{\link{featureSelection}} function can be used as input of this parameter.
 #' @param bestK Best K selected during the training phase.
-#' @return A list that contains four objects. The confusion matrix, the accuracy, the sensitibity and the specificity for each genes.
+#' @return A list that contains six objects. The confusion matrix for each fold, the accuracy, the sensitivity, the specificity and the F1-Scores for each gene, and the predictions made.
 #' @examples
 #' dir <- system.file("extdata", package="KnowSeq")
 #' load(paste(dir,"/expressionExample.RData",sep = ""))

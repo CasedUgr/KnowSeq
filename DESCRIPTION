@@ -1,7 +1,7 @@
 Package: KnowSeq
 Type: Package
 Title: KnowSeq R/Bioc package: The Smart Transcriptomic Pipeline
-Version: 1.4.1
+Version: 1.6.1
 Authors@R: c(person("Daniel", "Castillo-Secilla", role = c("aut","cre"), 
             email = "cased@ugr.es"), 
         person("Juan Manuel", "Galvez", role="ctb"),

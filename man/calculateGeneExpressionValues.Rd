@@ -9,7 +9,8 @@ calculateGeneExpressionValues(
   annotation,
   genesNames = TRUE,
   notHuman = FALSE,
-  notHumanGeneLengthCSV = ""
+  notHumanGeneLengthCSV = "",
+  Ensembl_ID = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ calculateGeneExpressionValues(
 \item{notHuman}{A boolean variable which indicates if the gene length file is the default gene length human file or another file indicated by parameter.}
 
 \item{notHumanGeneLengthCSV}{Path to the CSV file that contains the gene length of the specie to use.}
+
+\item{Ensembl_ID}{A boolean variable which indicate if the counts matrix contains Ensembl_ID(TRUE) or genes names(FALSE).}
 }
 \value{
 A matrix that contains the gene expression values. The rownames are the genes names or the Ensembl IDs and the colnames are the samples.

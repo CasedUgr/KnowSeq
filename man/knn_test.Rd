@@ -20,7 +20,7 @@ knn_test(train, labelsTrain, test, labelsTest, vars_selected, bestK)
 \item{bestK}{Best K selected during the training phase.}
 }
 \value{
-A list that contains four objects. The confusion matrix, the accuracy, the sensitibity and the specificity for each genes.
+A list that contains six objects. The confusion matrix for each fold, the accuracy, the sensitivity, the specificity and the F1-Scores for each gene, and the predictions made.
 }
 \description{
 knn_test allows assessing the final DEGs through a machine learning step by using k-NN with a test dataset. An optimization of the k neighbours is done at the start of the process.

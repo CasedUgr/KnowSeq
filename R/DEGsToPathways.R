@@ -61,8 +61,9 @@ DEGsToPathways <- function(geneList){
       
     }
   }
-  KEGG.data <- KEGG.data[-1,]
+  
   KEGG.data <- as.data.frame(KEGG.data,stringsAsFactors=FALSE)
+  KEGG.data <- KEGG.data[-1,]
   names(KEGG.data) <- c("KEGG_Path","Name","Description","Class","Genes")
   naPos <- which(is.na(KEGG.data) == TRUE)
   

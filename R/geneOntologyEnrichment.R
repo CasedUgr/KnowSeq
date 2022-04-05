@@ -84,6 +84,8 @@ geneOntologyEnrichment <- function(geneList, geneType="ENTREZ_GENE_ID", ontologi
       act.gos[['GO.ID']] <- ontology.term[,1]
       act.gos[['Term']] <- ontology.term[,2] 
 
+      # Remove NAs
+      genes.annotations <- genes.annotations[!is.na(genes.annotations$entrezgene_id),]
       
       # Add column with gene symbols
       gene.names <- act.gos$Genes

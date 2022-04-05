@@ -20,8 +20,8 @@
 #' bestK <- 3 # the one that has been selected
 #' results_test_knn <- knn_test(trainingMatrix, trainingLabels, testMatrix, testLabels, rownames(DEGsMatrix)[1:10], bestK)
 
-knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
-
+knn_test <- function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
+  
   if(!is.data.frame(train) && !is.matrix(train)){
     
     stop("The train argument must be a dataframe or a matrix.")
@@ -53,9 +53,9 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   }
   
   train <- as.data.frame(apply(train,2,as.double))
-  train <- train[,vars_selected]
+  train <- train[,vars_selected, drop = FALSE]
   test <- as.data.frame(apply(test,2,as.double))
-  test <- test[,vars_selected]
+  test <- test[,vars_selected, drop = FALSE]
   
   train = vapply(train, function(x){ 
     max <- max(x)
@@ -80,7 +80,7 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
     }}, double(nrow(test)))
   
   test <- as.data.frame(test)
-
+  
   accVector <- double()
   sensVector <- double()
   specVector <- double()
@@ -104,7 +104,7 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
     spec <- mean(cfMat$byClass[,2])
     f1 <- mean(cfMat$byClass[,7])
   }
-
+  
   cfMatList[[1]] <- cfMat
   accVector[1] <- cfMat$overall[[1]]
   sensVector[1] <- sens
@@ -113,42 +113,44 @@ knn_test <-function(train,labelsTrain,test,labelsTest,vars_selected, bestK){
   predictsVector[[1]] <- predictScores
   if(is.na(f1Vector[1])) f1Vector[i] <- 0
   
-  for(i in c(2:dim(test)[2])){
-
-    cat(paste("Testing with ", i," variables...\n",sep=""))
-    knn_mod = knn3(x = train[,seq(i)], y = labelsTrain, k = bestK)
-    predictScores <- predict(knn_mod, test[,seq(i)], type = "prob")
-    predicts <- predict(knn_mod, test[,seq(i)], type = "class")
+  if(dim(test)[2] > 1){
+    for(i in c(2:dim(test)[2])){
     
-    cfMat<-confusionMatrix(predicts,labelsTest)
-    
-    if (length(levels(labelsTrain))==2){
-      sens <- cfMat$byClass[[1]]
-      spec <- cfMat$byClass[[2]]
-      f1 <- cfMat$byClass[[7]]
-    } else{
-      sens <- mean(cfMat$byClass[,1])
-      spec <- mean(cfMat$byClass[,2])
-      f1 <- mean(cfMat$byClass[,7])
+      cat(paste("Testing with ", i," variables...\n",sep=""))
+      knn_mod = knn3(x = train[,seq(i)], y = labelsTrain, k = bestK)
+      predictScores <- predict(knn_mod, test[,seq(i)], type = "prob")
+      predicts <- predict(knn_mod, test[,seq(i)], type = "class")
+      
+      cfMat<-confusionMatrix(predicts,labelsTest)
+      
+      if (length(levels(labelsTrain))==2){
+        sens <- cfMat$byClass[[1]]
+        spec <- cfMat$byClass[[2]]
+        f1 <- cfMat$byClass[[7]]
+      } else{
+        sens <- mean(cfMat$byClass[,1])
+        spec <- mean(cfMat$byClass[,2])
+        f1 <- mean(cfMat$byClass[,7])
+      }
+      
+      cfMatList[[i]] <- cfMat
+      accVector[i] <- cfMat$overall[[1]]
+      sensVector[i] <- sens
+      specVector[i] <- spec
+      f1Vector[i] <- f1
+      predictsVector[[i]] <- predictScores
+      if(is.na(f1Vector[i])) f1Vector[i] <- 0
     }
-    
-    cfMatList[[i]] <- cfMat
-    accVector[i] <- cfMat$overall[[1]]
-    sensVector[i] <- sens
-    specVector[i] <- spec
-    f1Vector[i] <- f1
-    predictsVector[[i]] <- predictScores
-    if(is.na(f1Vector[i])) f1Vector[i] <- 0
   }
-
+  
   cat("Classification done successfully!\n")
   names(accVector) <- vars_selected
   names(sensVector) <- vars_selected
   names(specVector) <- vars_selected
   names(f1Vector) <- vars_selected
-
+  
   results <- list(cfMatList,accVector,sensVector,specVector,f1Vector,predictsVector)
   names(results) <- c("cfMats","accVector","sensVector","specVector","f1Vector","predictions")
   invisible(results)
-
+  
 }

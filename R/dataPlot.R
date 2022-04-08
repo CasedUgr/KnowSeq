@@ -179,10 +179,11 @@ dataPlot <- function(data, labels, colours = c("red", "green"), main = "", ylab 
     meltMatrix <- t(data)
     rownames(meltMatrix) <- labels
     
-    if(ncol(meltMatrix) < 24){
+    # Limit the number of genes for genesBoxplot mode
+    if(ncol(meltMatrix) <= 50){
       col = ncol(meltMatrix)
     }else{
-      col = 24
+      col = 50
     }
     
     xx <- melt(meltMatrix[,seq_len(col)])

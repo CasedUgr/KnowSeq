@@ -19,7 +19,7 @@ calculateGeneExpressionValues <- function(countsMatrix,annotation,genesNames=TRU
   
   if(!is.logical(genesNames)){stop("genesNames parameter can only takes the values TRUE or FALSE.")}
   if(!is.matrix(countsMatrix)){stop("The class of countsMatrix parameter must be matrix.")}
-  if(!is.data.frame(annotation)){stop("The class of countsMatrix parameter must be data.frame.")}
+  if(!is.data.frame(annotation)){stop("The class of annotation parameter must be data.frame.")}
   if(!is.logical(notHuman)){stop("notHuman parameter can only takes the values TRUE or FALSE.")}
   
   if(!notHuman){

@@ -39,7 +39,7 @@ KnowSeq expects to serve as a novel tool to help experts to acquire robust knowl
 # Installation
 To install and load KnowSeq package in R, it is necessary the previous installation of BiocManager from Bioconductor. The next code shows how this install can be performed:
 
-```{r, eval=FALSE}
+```r
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
   
@@ -50,9 +50,11 @@ library(KnowSeq)
 
 KnowSeq is now available on Docker by running the next command and opening the URL localhost:8787 at your browser. The user to Login in is rstudio.
 
-```
+```r
 Docker run -e PASSWORD=<your_password> -p 8787:8787 casedugr/knowseq
 ```
+
+In addition, KnowSeq counts with a recent shiny-based web application that allows users with no previous knowledge of programming to analyze transcriptomics data using all the functionalities available at KnowSeq. You can find more information in the following GitHub repository: <https://github.com/CasedUgr/KnowSeq-ShiVer/>
 
 # Contributors
 
